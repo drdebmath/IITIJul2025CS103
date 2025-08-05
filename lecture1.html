@@ -4,274 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lecture 1: Introduction to Programming</title>
+    <!-- External CSS Libraries -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <style>
-        :root {
-            --light-bg: #f4f4f4;
-            --light-text: #333;
-            --light-container-bg: #fff;
-            --light-primary-color: #0056b3;
-            --light-code-bg: #f8f9fa;
-            --light-code-border: #e9ecef;
-
-            --dark-bg: #282c34;
-            --dark-text: #abb2bf;
-            --dark-container-bg: #3a404a;
-            --dark-primary-color: #61afef;
-            --dark-code-bg: #21252b;
-            --dark-code-border: #4b5263;
-        }
-
-        body {
-            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--light-text);
-            background-color: var(--light-bg);
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .container {
-            max-width: 960px;
-            margin: 20px auto;
-            padding: 20px;
-            background: var(--light-container-bg);
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            transition: background-color 0.3s, box-shadow 0.3s;
-        }
-        h1, h2, h3 {
-            color: var(--light-primary-color);
-            transition: color 0.3s;
-        }
-        .code-block {
-            background-color: var(--light-code-bg);
-            border: 1px solid var(--light-code-border);
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            overflow-x: auto;
-            transition: background-color 0.3s, border-color 0.3s;
-        }
-        .code-block pre {
-            margin: 0;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-
-        /* C++ Syntax Highlighting (Light Mode) */
-        .cpp-keyword { color: #0000FF; font-weight: bold; }
-        .cpp-comment { color: #008000; }
-        .cpp-string { color: #A31515; }
-        .cpp-function { color: #795E26; }
-        .cpp-namespace { color: #800080; }
-        .cpp-operator { color: #000000; }
-        .cpp-number { color: #098677; }
-        .cpp-variable { color: #001080; }
-        .cpp-command { color: #000000; font-weight: bold; }
-        .cpp-filename, .cpp-option, .cpp-executable { color: #000000; }
-        .cpp-url { color: #0000FF; text-decoration: underline; }
-
-        /* Dark Mode Styles */
-        body.dark-mode {
-            color: var(--dark-text);
-            background-color: var(--dark-bg);
-        }
-        body.dark-mode .container {
-            background: var(--dark-container-bg);
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 { color: var(--dark-primary-color); }
-        body.dark-mode .code-block {
-            background-color: var(--dark-code-bg);
-            border-color: var(--dark-code-border);
-        }
-        body.dark-mode .cpp-keyword { color: #c678dd; }
-        body.dark-mode .cpp-comment { color: #5c6370; }
-        body.dark-mode .cpp-string { color: #98c379; }
-        body.dark-mode .cpp-function { color: #e6c07b; }
-        body.dark-mode .cpp-namespace { color: #e06c75; }
-        body.dark-mode .cpp-operator { color: #abb2bf; }
-        body.dark-mode .cpp-number { color: #d19a66; }
-        body.dark-mode .cpp-variable { color: #61afef; }
-        body.dark-mode .cpp-command, body.dark-mode .cpp-filename, body.dark-mode .cpp-option, body.dark-mode .cpp-executable { color: #abb2bf; }
-        body.dark-mode .cpp-url { color: #61afef; }
-
-        /* --- BEAUTIFUL FULLSCREEN MODE --- */
-        body.fullscreen-mode {
-            background: #1c1e22;
-            color: #e0e0e0;
-            margin: 0;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        body.fullscreen-mode .container {
-            max-width: 100%;
-            width: 100%;
-            height: 100%;
-            background: none;
-            box-shadow: none;
-            padding: 0;
-            margin: 0;
-            border-radius: 0;
-        }
-
-        body.fullscreen-mode .slide {
-            display: none;
-            width: 100%;
-            height: 100%;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            padding: 4vw;
-            box-sizing: border-box;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        body.fullscreen-mode .slide.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        /* This is the main content box for the outline */
-        body.fullscreen-mode .slide-summary {
-            display: block;
-            width: 100%;
-            max-width: 1200px;
-            max-height: 85vh;
-            overflow-y: auto;
-            padding: 40px;
-            /* The requested "outline" for the slide */
-            border: 2px solid var(--dark-primary-color);
-            border-radius: 15px;
-            background-color: rgba(40, 44, 52, 0.9);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            text-align: left;
-        }
-
-        /* Styling the outline content */
-        body.fullscreen-mode .slide-summary h3 {
-            font-size: 3rem;
-            color: var(--dark-primary-color);
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--dark-code-border);
-            text-align: center;
-        }
-
-        body.fullscreen-mode .slide-summary p {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-        }
-        body.fullscreen-mode .slide-summary ul {
-            list-style-type: '✓  ';
-            padding-left: 30px;
-        }
-        body.fullscreen-mode .slide-summary li {
-            padding-left: 15px;
-            margin-bottom: 15px;
-            font-size: 1.6rem;
-        }
-
-        body.fullscreen-mode .slide-summary .code-block {
-            font-size: 1.2rem;
-            margin-top: 20px;
-        }
-
-        /* Hide detailed content in fullscreen */
-        body.fullscreen-mode .slide-details { display: none; }
-        /* Hide summary content in normal mode */
-        body:not(.fullscreen-mode) .slide-summary { display: none; }
-
-        /* Hide non-essential content in fullscreen */
-        body.fullscreen-mode h1,
-        body.fullscreen-mode .slide > h2, /* Hide original h2 */
-        body.fullscreen-mode form,
-        body.fullscreen-mode .alert,
-        body.fullscreen-mode a:not(.slide-nav-btn) {
-            display: none;
-        }
-
-        /* Slide Navigation Buttons */
-        .slide-navigation {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1050;
-            display: none;
-            gap: 20px;
-        }
-
-        body.fullscreen-mode .slide-navigation {
-            display: flex;
-        }
-
-        .slide-nav-btn {
-            background-color: rgba(60, 66, 78, 0.8);
-            border: 1px solid var(--dark-primary-color);
-            color: #e0e0e0;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            font-size: 2em;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.2s ease-in-out;
-        }
-        .slide-nav-btn:hover:not(:disabled) {
-            background-color: var(--dark-primary-color);
-            color: var(--dark-bg);
-            transform: scale(1.1);
-        }
-        .slide-nav-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        /* Button positioning */
-        #fullscreenBtn, #darkModeToggle {
-            position: fixed;
-            bottom: 20px;
-            z-index: 1000;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5em;
-            padding: 0;
-        }
-        #fullscreenBtn { right: 20px; }
-        #darkModeToggle { right: 80px; }
-        
-        /* Ensure control buttons are always visible, even in fullscreen */
-        body.fullscreen-mode #fullscreenBtn,
-        body.fullscreen-mode #darkModeToggle {
-            display: flex !important;
-        }
-
-    </style>
+    <!-- Your Custom Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <h1 class="mt-4">Lecture 1: Introduction to Programming</h1>
-        <p>Welcome to CS103! This lecture will introduce you to the fundamental concepts of programming and set the stage for our journey into C++.</p>
-        <p><strong>Instructor: <a href="https://drdebmath.github.io">Dr. Debasish Pattanayak</a></strong></p>
+        <p class="intro-text">Welcome to CS103! This lecture will introduce you to the fundamental concepts of programming and set the stage for our journey into C++.</p>
+        <p class="intro-text"><strong>Instructor: <a href="https://drdebmath.github.io">Dr. Debasish Pattanayak</a></strong></p>
         <button id="darkModeToggle" class="btn btn-secondary mb-4"><i class="fas fa-moon"></i></button>
         <button id="fullscreenBtn" class="btn btn-info mb-4"><i class="fas fa-expand"></i></button>
 
         <div class="slide">
-            <h2 class="mt-4">1. What is Programming?</h2>
-            <div class="slide-summary">
-                <h3>1. What is Programming?</h3>
+            <h2 id="slide-what-is-programming" class="mt-4">What is Programming?</h2>
+            <div class="slide-summary" data-slide-number="1 / 10">
+                <h3>What is Programming?</h3>
                 <p>Programming is giving computers instructions to solve problems. It involves algorithms (step-by-step solutions), syntax (language rules), logic (reasoning), and debugging (fixing errors).</p>
+                <ul>
+                    <li><strong>Algorithms:</strong> Step-by-step solutions to problems</li>
+                    <li><strong>Syntax:</strong> Rules of the programming language</li>
+                    <li><strong>Logic:</strong> The reasoning behind your code</li>
+                    <li><strong>Debugging:</strong> Finding and fixing errors</li>
+                </ul>
             </div>
             <div class="slide-details">
                 <p>Programming is the process of creating a set of instructions that tell a computer how to perform a task. These instructions are written in a specific language that the computer can understand. Essentially, you are giving a computer a recipe to follow, a precise sequence of steps to achieve a desired outcome. Without programming, computers are just inert machines; it's the code that brings them to life and enables them to perform countless tasks, from simple calculations to complex simulations.</p>
@@ -286,10 +43,50 @@
         </div>
 
         <div class="slide">
-            <h2 class="mt-4">2. Brief History of Programming Languages</h2>
-            <div class="slide-summary">
-                <h3>2. History of Languages</h3>
-                <p>Programming languages evolved from machine code (0s and 1s) to human-readable high-level languages. Generations include Machine, Assembly, High-Level (C++, Python), Domain-Specific (SQL), and AI-focused languages.</p>
+            <h2 id="slide-how-computers-work" class="mt-4">How Do Computers Work?</h2>
+            <div class="slide-summary" data-slide-number="2 / 10">
+                <h3>How Do Computers Work?</h3>
+                <p>Computers are <strong>deterministic machines</strong> that follow instructions precisely and predictably.</p>
+                <ul>
+                    <li><strong>Binary System:</strong> Everything is 0s and 1s (electricity on/off)</li>
+                    <li><strong>CPU (Processor):</strong> Executes instructions one by one</li>
+                    <li><strong>Memory (RAM):</strong> Temporarily stores data and instructions</li>
+                    <li><strong>Storage:</strong> Permanent data storage (hard drive, SSD)</li>
+                    <li><strong>Deterministic:</strong> Same input → Same output, every time</li>
+                </ul>
+                <div class="code-block">
+                    <pre><code><span class="cpp-comment">// Deterministic example:</span>
+<span class="cpp-keyword">int</span> <span class="cpp-variable">result</span> <span class="cpp-operator">=</span> <span class="cpp-number">5</span> <span class="cpp-operator">+</span> <span class="cpp-number">3</span>; <span class="cpp-comment">// Always equals 8</span></code></pre>
+                </div>
+            </div>
+            <div class="slide-details">
+                <p>Understanding how computers work is essential for effective programming. At their core, computers are deterministic machines that process information through a series of predictable, logical operations.</p>
+                <h3>The Deterministic Nature of Computing</h3>
+                <p>Programming is fundamentally a <strong>deterministic process</strong>. This means that given the same input and conditions, a computer program will always produce the same output. There's no randomness or unpredictability in how computers execute instructions - they follow your code exactly as written, every single time.</p>
+                <h3>Basic Computer Architecture</h3>
+                <ul>
+                    <li><strong>Binary System:</strong> All data is represented as combinations of 0s and 1s, corresponding to electrical states (off/on).</li>
+                    <li><strong>CPU (Central Processing Unit):</strong> The "brain" that executes instructions sequentially.</li>
+                    <li><strong>Memory (RAM):</strong> Temporary storage for data and programs currently in use.</li>
+                    <li><strong>Storage:</strong> Permanent storage for programs and data (hard drives, SSDs).</li>
+                    <li><strong>Input/Output Devices:</strong> Keyboard, mouse, screen, etc.</li>
+                </ul>
+                <p>This deterministic nature is both a strength and a responsibility - your programs will do exactly what you tell them to do, so precision in your instructions is crucial.</p>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 id="slide-history" class="mt-4">Brief History of Programming Languages</h2>
+            <div class="slide-summary" data-slide-number="3 / 10">
+                <h3>History of Languages</h3>
+                <p>Programming languages evolved from machine code (0s and 1s) to human-readable high-level languages.</p>
+                <ul>
+                    <li><strong>1GL:</strong> Machine Language (binary)</li>
+                    <li><strong>2GL:</strong> Assembly Language</li>
+                    <li><strong>3GL:</strong> High-Level Languages (C++, Python)</li>
+                    <li><strong>4GL:</strong> Domain-Specific (SQL)</li>
+                    <li><strong>5GL:</strong> AI-focused languages</li>
+                </ul>
             </div>
             <div class="slide-details">
                 <p>From early, cumbersome machine code to the sophisticated, human-friendly languages of today, programming has undergone a remarkable evolution, driven by the need for greater abstraction, efficiency, and problem-solving capabilities.</p>
@@ -304,13 +101,13 @@
         </div>
 
         <div class="slide">
-            <h2 class="mt-4">3. High-Level vs. Low-Level Languages</h2>
-            <div class="slide-summary">
-                <h3>3. High-Level vs. Low-Level</h3>
+            <h2 id="slide-high-low-level" class="mt-4">High-Level vs. Low-Level Languages</h2>
+            <div class="slide-summary" data-slide-number="4 / 10">
+                <h3>High-Level vs. Low-Level</h3>
                 <p>A look at the trade-offs between performance and abstraction.</p>
                 <ul>
-                    <li><b>Low-Level (e.g., Assembly):</b> Fast, direct hardware control. Complex & platform-dependent.</li>
-                    <li><b>High-Level (e.g., C++):</b> Human-friendly, portable. Easier & faster to develop.</li>
+                    <li><strong>Low-Level (e.g., Assembly):</strong> Fast, direct hardware control. Complex & platform-dependent.</li>
+                    <li><strong>High-Level (e.g., C++):</strong> Human-friendly, portable. Easier & faster to develop.</li>
                 </ul>
                 <div class="code-block">
                     <pre><code><span class="cpp-comment">// High-Level (C++)</span>
@@ -345,23 +142,29 @@
         </div>
 
         <div class="slide">
-            <h2 class="mt-4">4. Your First C++ Program: "Hello, World!"</h2>
-            <div class="slide-summary">
-                <h3>4. Your First C++ Program</h3>
+            <h2 id="slide-hello-world" class="mt-4">Your First C++ Program: "Hello, World!"</h2>
+            <div class="slide-summary" data-slide-number="5 / 10">
+                <h3>Your First C++ Program</h3>
                 <p>The classic "Hello, World!" demonstrates the basic structure of a C++ program.</p>
                 <div class="code-block">
-                    <pre><code><span class="cpp-keyword">#include</span> <span class="cpp-string"><iostream></span>
+                    <pre><code><span class="cpp-keyword">#include</span> <span class="cpp-operator"><</span><span class="cpp-string">iostream</span><span class="cpp-operator">></span>
 
 <span class="cpp-keyword">int</span> <span class="cpp-function">main</span>() {
     <span class="cpp-namespace">std::cout</span> <span class="cpp-operator"><<</span> <span class="cpp-string">"Hello, World!"</span> <span class="cpp-operator"><<</span> <span class="cpp-namespace">std::endl</span>;
     <span class="cpp-keyword">return</span> <span class="cpp-number">0</span>;
 }</code></pre>
                 </div>
+                <ul>
+                    <li><strong>#include:</strong> Brings in external functionality</li>
+                    <li><strong>main():</strong> The entry point of every C++ program</li>
+                    <li><strong>std::cout:</strong> Outputs text to the console</li>
+                    <li><strong>return 0:</strong> Indicates successful execution</li>
+                </ul>
             </div>
             <div class="slide-details">
                 <p>Let's start with the classic "Hello, World!" program in C++. This simple program is traditionally the first program learned in any language, as it demonstrates the basic structure and how to produce output. It will print the text "Hello, World!" to the console.</p>
                 <div class="code-block">
-                    <pre><code><span class="cpp-keyword">#include</span> <span class="cpp-string"><iostream></span> <span class="cpp-comment">// Allows input and output operations.</span>
+                    <pre><code><span class="cpp-keyword">#include</span> <span class="cpp-operator"><</span><span class="cpp-string">iostream</span><span class="cpp-operator">></span> <span class="cpp-comment">// Allows input and output operations.</span>
 
 <span class="cpp-keyword">int</span> <span class="cpp-function">main</span>() { <span class="cpp-comment">// The entry point of the program.</span>
     <span class="cpp-namespace">std::cout</span> <span class="cpp-operator"><<</span> <span class="cpp-string">"Hello, World!"</span> <span class="cpp-operator"><<</span> <span class="cpp-namespace">std::endl</span>; <span class="cpp-comment">// Prints to the console.</span>
@@ -373,16 +176,16 @@
         </div>
 
         <div class="slide">
-            <h2 class="mt-4">5. Setting Up Your Development Environment</h2>
-            <div class="slide-summary">
-                <h3>5. Setting Up Your Environment</h3>
+            <h2 id="slide-dev-setup" class="mt-4">Setting Up Your Development Environment</h2>
+            <div class="slide-summary" data-slide-number="6 / 10">
+                <h3>Setting Up Your Environment</h3>
                 <p>You need a compiler (like G++) to turn your <code>.cpp</code> code into an executable program.</p>
                 <ul>
-                    <li><b>Windows:</b> Install MinGW-w64</li>
-                    <li><b>macOS:</b> Install Xcode Command Line Tools</li>
-                    <li><b>Linux:</b> Install `build-essential`</li>
+                    <li><strong>Windows:</strong> Install MinGW-w64</li>
+                    <li><strong>macOS:</strong> Install Xcode Command Line Tools</li>
+                    <li><strong>Linux:</strong> Install `build-essential`</li>
                 </ul>
-                <p><b>Example Compilation:</b></p>
+                <p><strong>Example Compilation:</strong></p>
                 <div class="code-block">
                     <pre><code><span class="cpp-comment"># Compile the code</span>
 <span class="cpp-command">g++</span> <span class="cpp-filename">hello.cpp</span> <span class="cpp-option">-o</span> <span class="cpp-executable">hello</span>
@@ -393,35 +196,37 @@
             </div>
             <div class="slide-details">
                 <p>To write, compile, and run C++ programs, you'll need a C++ compiler and a text editor or Integrated Development Environment (IDE). The compiler translates your human-readable C++ code into machine code that your computer can execute.</p>
-                <h3>5.1. Installing a C++ Compiler (GCC/G++)</h3>
+                <h3>Installing a C++ Compiler (GCC/G++)</h3>
                 <ul>
                     <li><strong>Windows:</strong> Install MinGW-w64.</li>
                     <li><strong>macOS:</strong> Install Xcode Command Line Tools.</li>
                     <li><strong>Linux (Debian/Ubuntu):</strong> Install `build-essential`.</li>
                 </ul>
-                <h3>5.2. Compiling and Running C++ Programs</h3>
+                <h3>Compiling and Running C++ Programs</h3>
                 <ol>
                     <li>Save your code as <code>hello.cpp</code>.</li>
                     <li>Open Terminal/Command Prompt.</li>
                     <li>Compile: <code>g++ hello.cpp -o hello</code></li>
                     <li>Run: <code>./hello</code> (on macOS/Linux) or <code>hello.exe</code> (on Windows).</li>
                 </ol>
-                <h3>5.3. Setting Up GitHub (Basic)</h3>
+                <h3>Setting Up GitHub (Basic)</h3>
                 <p>GitHub is a web-based platform for version control using Git. It's essential for managing your code.</p>
             </div>
         </div>
 
         <div class="slide">
-            <h2 class="mt-4">6. C++ vs. Python: Why C++ in the Age of Python?</h2>
-            <div class="slide-summary">
-                <h3>6. Why Learn C++?</h3>
+            <h2 id="slide-why-cpp" class="mt-4">C++ vs. Python: Why C++ in the Age of Python?</h2>
+            <div class="slide-summary" data-slide-number="7 / 10">
+                <h3>Why Learn C++?</h3>
                 <p>C++ offers superior performance, system-level control, and resource efficiency. This makes it vital for:</p>
                 <ul>
-                    <li>Game Engines & High-Performance Graphics</li>
-                    <li>Operating Systems & Embedded Systems</li>
-                    <li>High-Frequency Trading & Scientific Computing</li>
+                    <li><strong>Game Engines:</strong> Real-time graphics and performance</li>
+                    <li><strong>Operating Systems:</strong> Low-level system programming</li>
+                    <li><strong>Embedded Systems:</strong> Resource-constrained devices</li>
+                    <li><strong>High-Frequency Trading:</strong> Microsecond-level performance</li>
+                    <li><strong>Scientific Computing:</strong> Computationally intensive tasks</li>
                 </ul>
-                <p>It also provides a deep understanding of computer architecture.</p>
+                <p>It also provides a deep understanding of computer architecture and memory management.</p>
             </div>
             <div class="slide-details">
                 <p>Python is incredibly popular, but C++ is still a fundamental language to learn, especially in a course like CS103. The answer lies in C++'s unique strengths and its role in foundational computing.</p>
@@ -436,10 +241,48 @@
         </div>
 
         <div class="slide">
-            <h2 class="mt-4">7. Fun Programming Expert Bar</h2>
-            <div class="slide-summary">
-                <h3>7. Fun Programming Expert Bar</h3>
+            <h2 id="slide-problem-solving" class="mt-4">Problem-Solving Methodology</h2>
+            <div class="slide-summary" data-slide-number="8 / 10">
+                <h3>Problem-Solving Methodology</h3>
+                <p>A systematic approach to tackling programming challenges:</p>
+                <ul>
+                    <li><strong>1. Understand:</strong> Read the problem carefully, identify inputs/outputs</li>
+                    <li><strong>2. Plan:</strong> Break down into smaller steps, create pseudocode</li>
+                    <li><strong>3. Code:</strong> Implement your solution step by step</li>
+                    <li><strong>4. Test:</strong> Try different inputs, edge cases</li>
+                    <li><strong>5. Debug:</strong> Fix any errors or unexpected behavior</li>
+                    <li><strong>6. Optimize:</strong> Improve efficiency and readability</li>
+                </ul>
+                <div class="code-block">
+                    <pre><code><span class="cpp-comment">// Example: Find the larger of two numbers</span>
+<span class="cpp-comment">// 1. Understand: Compare two integers, return the larger one</span>
+<span class="cpp-comment">// 2. Plan: Use if-else statement for comparison</span>
+<span class="cpp-keyword">int</span> <span class="cpp-function">findMax</span>(<span class="cpp-keyword">int</span> <span class="cpp-variable">a</span>, <span class="cpp-keyword">int</span> <span class="cpp-variable">b</span>) {
+    <span class="cpp-keyword">return</span> (<span class="cpp-variable">a</span> <span class="cpp-operator">></span> <span class="cpp-variable">b</span>) <span class="cpp-operator">?</span> <span class="cpp-variable">a</span> <span class="cpp-operator">:</span> <span class="cpp-variable">b</span>;
+}</code></pre>
+                </div>
+            </div>
+            <div class="slide-details">
+                <p>Effective programming isn't just about knowing syntax - it's about developing a systematic approach to problem-solving. This methodology will serve you throughout your programming journey.</p>
+                <h3>The Six-Step Process</h3>
+                <ol>
+                    <li><strong>Understand the Problem:</strong> Read carefully, identify what you're given and what you need to produce.</li>
+                    <li><strong>Plan Your Approach:</strong> Break the problem into smaller, manageable pieces. Write pseudocode.</li>
+                    <li><strong>Implement Your Solution:</strong> Write the actual code, focusing on one piece at a time.</li>
+                    <li><strong>Test Thoroughly:</strong> Try various inputs, including edge cases and invalid data.</li>
+                    <li><strong>Debug and Fix:</strong> When things don't work as expected, systematically find and fix issues.</li>
+                    <li><strong>Optimize and Refactor:</strong> Make your code more efficient, readable, and maintainable.</li>
+                </ol>
+                <p>This process becomes second nature with practice and will make you a more effective programmer.</p>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 id="slide-expert-bar" class="mt-4">Fun Programming Expert Bar</h2>
+            <div class="slide-summary" data-slide-number="9 / 10">
+                <h3>Fun Programming Expert Bar</h3>
                 <p>An interactive tool to estimate your programming expertise. This slide is best viewed in normal mode!</p>
+                <p>Switch back to normal view to try the interactive calculator that measures your programming skills based on languages known, algorithms implemented, and data structures understood.</p>
             </div>
             <div class="slide-details">
                 <p>How do you measure up as a programming expert? Enter your stats below!</p>
@@ -464,11 +307,11 @@
         </div>
 
         <div class="slide">
-            <h2 class="mt-4">8. C++ Comments and Variables</h2>
-            <div class="slide-summary">
-                <h3>8. Comments and Variables</h3>
+            <h2 id="slide-comments-variables" class="mt-4">C++ Comments and Variables</h2>
+            <div class="slide-summary" data-slide-number="10 / 10">
+                <h3>Comments and Variables</h3>
                 <p>Comments (<code>//</code> or <code>/*...*/</code>) explain code. Variables are named containers for storing data.</p>
-                <p>You must declare a variable's <b>type</b> before using it:</p>
+                <p>You must declare a variable's <strong>type</strong> before using it:</p>
                 <div class="code-block">
                     <pre><code><span class="cpp-comment">// dataType variableName = value;</span>
 <span class="cpp-keyword">int</span> <span class="cpp-variable">score</span> <span class="cpp-operator">=</span> <span class="cpp-number">100</span>;
@@ -476,15 +319,21 @@
 <span class="cpp-namespace">std::string</span> <span class="cpp-variable">playerName</span> <span class="cpp-operator">=</span> <span class="cpp-string">"Alex"</span>;
 <span class="cpp-keyword">bool</span> <span class="cpp-variable">isActive</span> <span class="cpp-operator">=</span> <span class="cpp-keyword">true</span>;</code></pre>
                 </div>
+                <ul>
+                    <li><strong>Comments:</strong> Documentation for your code</li>
+                    <li><strong>Variables:</strong> Named storage for data</li>
+                    <li><strong>Data Types:</strong> int, double, string, bool, char</li>
+                    <li><strong>Static Typing:</strong> Must declare type before use</li>
+                </ul>
             </div>
             <div class="slide-details">
                 <p>As you begin writing your own C++ programs, two fundamental concepts you'll encounter immediately are comments and variables.</p>
-                <h3>8.1. C++ Comments</h3>
+                <h3>C++ Comments</h3>
                 <ul>
                     <li><strong>Single-line comments:</strong> Start with <code>//</code>.</li>
                     <li><strong>Multi-line comments:</strong> Start with <code>/*</code> and end with <code>*/</code>.</li>
                 </ul>
-                <h3>8.2. C++ Variables</h3>
+                <h3>C++ Variables</h3>
                 <p>Variables are named storage locations that hold data. You must declare them with a data type:</p>
                 <ul>
                     <li><code><span class="cpp-keyword">int</span></code>: for whole numbers (e.g., <code>100</code>).</li>
@@ -495,134 +344,24 @@
                 </ul>
             </div>
         </div>
-
     </div>
 
-    <script>
-        let currentSlideIndex = 0;
-        let slides = [];
-        const body = document.body;
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const darkModeIcon = darkModeToggle.querySelector('i');
+    <!-- Slide Outline Navigation (now on the left) -->
+    <div class="slide-outline">
+        <button id="outline-toggle" class="outline-toggle-btn" title="Toggle Outline"><i class="fas fa-chevron-left"></i></button>
+        <h4><i class="fas fa-list"></i> Slides</h4>
+        <a href="#slide-what-is-programming" class="slide-outline-item" data-slide="0">What is Programming?</a>
+        <a href="#slide-how-computers-work" class="slide-outline-item" data-slide="1">How Computers Work</a>
+        <a href="#slide-history" class="slide-outline-item" data-slide="2">History of Languages</a>
+        <a href="#slide-high-low-level" class="slide-outline-item" data-slide="3">High vs Low Level</a>
+        <a href="#slide-hello-world" class="slide-outline-item" data-slide="4">Hello World</a>
+        <a href="#slide-dev-setup" class="slide-outline-item" data-slide="5">Development Setup</a>
+        <a href="#slide-why-cpp" class="slide-outline-item" data-slide="6">Why C++?</a>
+        <a href="#slide-problem-solving" class="slide-outline-item" data-slide="7">Problem Solving</a>
+        <a href="#slide-expert-bar" class="slide-outline-item" data-slide="8">Expert Bar</a>
+        <a href="#slide-comments-variables" class="slide-outline-item" data-slide="9">Comments & Variables</a>
+    </div>
 
-        function showSlide(index) {
-            if (index >= 0 && index < slides.length) {
-                slides.forEach((slide, i) => {
-                    slide.classList.toggle('active', i === index);
-                });
-                currentSlideIndex = index;
-                updateNavigationButtons();
-            }
-        }
-
-        function nextSlide() {
-            if (currentSlideIndex < slides.length - 1) {
-                showSlide(currentSlideIndex + 1);
-            }
-        }
-
-        function prevSlide() {
-            if (currentSlideIndex > 0) {
-                showSlide(currentSlideIndex - 1);
-            }
-        }
-
-        function updateNavigationButtons() {
-            const prevBtn = document.getElementById('prevSlideBtn');
-            const nextBtn = document.getElementById('nextSlideBtn');
-            if (prevBtn) prevBtn.disabled = currentSlideIndex === 0;
-            if (nextBtn) nextBtn.disabled = currentSlideIndex === slides.length - 1;
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // Load dark mode preference
-            if (localStorage.getItem('darkMode') === 'enabled') {
-                body.classList.add('dark-mode');
-                darkModeIcon.classList.replace('fa-moon', 'fa-sun');
-            }
-
-            // Create and append navigation buttons
-            const navDiv = document.createElement('div');
-            navDiv.className = 'slide-navigation';
-            navDiv.innerHTML = `
-                <button id="prevSlideBtn" class="btn btn-secondary slide-nav-btn"><i class="fas fa-chevron-left"></i></button>
-                <button id="nextSlideBtn" class="btn btn-secondary slide-nav-btn"><i class="fas fa-chevron-right"></i></button>
-            `;
-            body.appendChild(navDiv);
-
-            slides = Array.from(document.querySelectorAll('.slide'));
-            document.getElementById('prevSlideBtn').addEventListener('click', prevSlide);
-            document.getElementById('nextSlideBtn').addEventListener('click', nextSlide);
-        });
-
-        // Fullscreen Toggle
-        fullscreenBtn.addEventListener('click', () => {
-            const isFullscreen = body.classList.contains('fullscreen-mode');
-            if (!isFullscreen) {
-                body.classList.add('fullscreen-mode');
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-                });
-                showSlide(0);
-            } else {
-                body.classList.remove('fullscreen-mode');
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                }
-            }
-        });
-
-        // Sync with browser's native fullscreen exit (e.g., Esc key)
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                body.classList.remove('fullscreen-mode');
-            }
-        });
-
-        // Dark Mode Toggle
-        darkModeToggle.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-            if (body.classList.contains('dark-mode')) {
-                localStorage.setItem('darkMode', 'enabled');
-                darkModeIcon.classList.replace('fa-moon', 'fa-sun');
-            } else {
-                localStorage.setItem('darkMode', 'disabled');
-                darkModeIcon.classList.replace('fa-sun', 'fa-moon');
-            }
-        });
-
-        // Keyboard navigation for presentation mode
-        document.addEventListener('keydown', (e) => {
-            if (body.classList.contains('fullscreen-mode')) {
-                if (e.key === 'ArrowRight' || e.key === ' ') {
-                    e.preventDefault(); // Prevent space from scrolling page
-                    nextSlide();
-                } else if (e.key === 'ArrowLeft') {
-                    prevSlide();
-                }
-            }
-            // Toggle fullscreen with 'f' key (but not when typing in an input)
-            if (e.key.toLowerCase() === 'f' && e.target.tagName.toLowerCase() !== 'input') {
-                fullscreenBtn.click();
-            }
-        });
-
-        // Expert Level Calculator
-        window.calculateExpertLevel = function() {
-            const languages = parseInt(document.getElementById('languages').value) || 0;
-            const algorithms = parseInt(document.getElementById('algorithms').value) || 0;
-            const dataStructures = parseInt(document.getElementById('dataStructures').value) || 0;
-            let score = (languages * 10) + (algorithms * 5) + (dataStructures * 7);
-            let level = "Novice Programmer";
-            if (score >= 200) level = "Programming Guru!";
-            else if (score >= 150) level = "Advanced Engineer";
-            else if (score >= 100) level = "Skilled Developer";
-            else if (score >= 50) level = "Apprentice Coder";
-            const outputDiv = document.getElementById('expertOutput');
-            outputDiv.innerHTML = `Your Programming Expert Score: <strong>${score}</strong><br>Your Expert Level: <strong>${level}</strong>`;
-            outputDiv.style.display = 'block';
-        };
-    </script>
+    <script src="scripts.js" defer></script>
 </body>
 </html>
