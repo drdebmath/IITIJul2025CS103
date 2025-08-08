@@ -1,16 +1,383 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 2: Data types</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 2: C++ Fundamentals - Data Types and Variables</h1>
-        <p>Details about the lecture will be updated here.</p>
-        <a href="index.html">Back to Course Outline</a>
+  <head>
+    <meta charset="utf-8" />
+    <title>In-Depth Lecture: C++ Data Types</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <!-- Reveal.js Core, Theme, and Plugin CSS (v5.1.0) -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/theme/simple.min.css" id="theme">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/highlight/monokai.css"
+    />
+
+    <!-- Custom CSS for a clean, blog-like scroll view -->
+    <style>
+      /* The .reveal.scroll class is added by reveal.js in scroll mode */
+      .reveal.scroll {
+        max-width: 900px;
+        margin: 50px auto; /* Center the content */
+      }
+      .reveal.scroll .slides {
+        text-align: left; /* Align text to the left for readability */
+      }
+      .reveal.scroll .slides section {
+        /* Style each section as a distinct "card" */
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 60px; /* Space between sections */
+        padding: 35px;
+      }
+      /* Ensure code blocks and other elements don't break the layout */
+      .reveal pre {
+        width: 100%;
+        box-shadow: none;
+      }
+      .reveal h1,
+      .reveal h2,
+      .reveal h3 {
+        text-align: left;
+        border-bottom: 2px solid #f2f2f2;
+        padding-bottom: 12px;
+        margin-bottom: 20px;
+      }
+      .reveal blockquote {
+        border-left: 4px solid #3498db;
+        padding-left: 1.5rem;
+        margin-left: 0;
+        font-style: italic;
+        color: #555;
+        background-color: #f9f9f9;
+      }
+      .reveal table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1.5rem;
+      }
+      .reveal th,
+      .reveal td {
+        border: 1px solid #ccc;
+        padding: 10px 14px;
+      }
+      .reveal th {
+        background-color: #f8f8f8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section data-markdown>
+          <textarea data-template>
+# Data Types in C++
+
+Welcome to a focused walkthrough of C++ data types.
+</textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+## What Are Data Types?
+
+A **data type** defines:
+- The kind of data stored.
+- The memory footprint.
+- Permissible operations.
+</textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+## Why Does C++ Enforce Data Types?
+
+- C++ is **statically typed**.
+- All variables must declare type at compile-time.
+- Helps in catching bugs early.
+</textarea
+          >
+        </section>
+
+        <!-- Primitive Types -->
+
+        <section data-markdown>
+          <textarea data-template>
+## Primitive Types
+
+C++ provides built-in types:
+- Integers
+- Floating Points
+- Characters
+- Booleans
+</textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+### Integer Types
+
+Used for whole numbers.
+Default: `int`
+</textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+```cpp
+int score = 95;
+long long population = 7900000000LL;
+std::cout << sizeof(int);
+````
+
+</textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+### Floating Point Types
+
+Used for fractional values. Prefer `double` over `float`. </textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+```cpp
+double pi = 3.1415926535;
+float gravity = 9.8f;
+std::cout << std::fixed << std::setprecision(10) << pi;
+```
+</textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+### Character Type
+
+`char` stores a single character. </textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+```cpp
+char grade = 'A';
+std::cout << static_cast<int>(grade); // ASCII value
+```
+</textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+### Boolean Type
+
+Holds `true` or `false`. </textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+```cpp
+bool is_ready = true;
+if (is_ready) std::cout << "Ready";
+```
+</textarea
+          >
+        </section>
+
+        <!-- Modifiers -->
+
+        <section data-markdown>
+          <textarea data-template>
+## Type Modifiers
+
+Keywords that alter type behavior:
+
+* `signed`, `unsigned`
+* `short`, `long`
+
+  </textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+### Signed vs Unsigned
+
+* `signed` supports negative values.
+* `unsigned` only for positive range.
+
+  </textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+### Short and Long
+
+Defines size preference.
+
+```cpp
+std::cout << sizeof(short);
+std::cout << sizeof(long long);
+```
+
+</textarea
+          >
+        </section>
+
+        <!-- Modern C++ -->
+
+        <section data-markdown>
+          <textarea data-template>
+## Modern C++ Features
+
+* `std::string`
+* `auto`
+
+  </textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+### Handling Text
+
+Use `std::string` for safe and flexible text.
+
+```cpp
+std::string name = "Bjarne";
+std::cout << name.length();
+```
+
+</textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+### Type Inference
+
+Let the compiler infer types with `auto`.
+
+```cpp
+auto n = 42;
+auto text = std::string("auto");
+```
+
+</textarea
+          >
+        </section>
+
+        <!-- Qualifiers -->
+
+        <section data-markdown>
+          <textarea data-template>
+## `const` Qualifier
+
+Makes a variable read-only.
+
+```cpp
+const double PI = 3.14159;
+```
+
+Attempting to modify it causes a compile-time error. </textarea
+          >
+        </section>
+
+        <!-- Summary -->
+
+        <section data-markdown>
+          <textarea data-template>
+## Summary Table
+
+| Type        | Size | Description        |
+| ----------- | ---- | ------------------ |
+| `bool`      | 1    | Logical values     |
+| `char`      | 1    | Characters         |
+| `int`       | 4    | Whole numbers      |
+| `float`     | 4    | Fractional numbers |
+| `double`    | 8    | Precise fractional |
+| `long long` | 8    | Large integers     |
+
+</textarea>
+        </section>
+
+        <!-- Casting -->
+
+        <section data-markdown>
+          <textarea data-template>
+## Type Casting
+
+Convert between types safely using `static_cast`. </textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+```cpp
+double value = 97.56;
+int i = static_cast<int>(value);
+char c = static_cast<char>(i);
+```
+</textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+> ⚠️ Casting may cause:
+- Data loss (e.g., truncating decimals)
+- Undefined behavior (if misused)
+</textarea
+          >
+        </section>
+
+        <section data-markdown>
+          <textarea data-template>
+            ## What is a Variable?
+A **variable** is a named storage location in memory that holds a value. It has:
+- A type (defines what kind of data it can hold)
+- A name (identifier for accessing it)
+</textarea>
+        </section>
+      </div>
     </div>
-</body>
+
+    <!-- Reveal.js & Plugin Scripts (v5.1.0) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/markdown/markdown.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/highlight/highlight.js"></script>
+
+    <script>
+      // Initialize Reveal.js with a scroll view configuration
+      Reveal.initialize({
+        // Set the view to scroll for an article-like experience
+        view: "scroll",
+
+        // Disable presentation controls in scroll view as they are not needed
+        controls: false,
+        progress: false,
+
+        // Register the necessary plugins
+        plugins: [RevealMarkdown, RevealHighlight],
+      });
+    </script>
+  </body>
 </html>
