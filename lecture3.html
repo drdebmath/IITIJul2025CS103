@@ -1,16 +1,308 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 3: Variables</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <meta charset="utf-8">
+  <title>Lecture 3: C++ Fundamentals</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.css">
+  <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/dracula.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/monokai.css">
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 3: C++ Fundamentals - Variable Scope</h1>
-        <p>Details about the lecture will be updated here.</p>
-        <a href="index.html">Back to Course Outline</a>
+  <button id="theme-toggle" style="position:fixed;top:10px;right:10px;z-index:999;">Change Theme</button>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- Title Section -->
+      <section data-markdown>
+        <textarea data-template>
+          # C++ Fundamentals
+          ### Lecture 3: Structure, Scope, & Storage
+        </textarea>
+      </section>
+
+      <!-- Program Structure -->
+      <section data-markdown>
+        <textarea data-template>
+          ### Basic Program Structure
+
+          ## `hello.cpp`
+          A minimal C++ program:
+
+          ```cpp
+          #include <iostream>
+
+          int main() {
+            std::cout << "Hello, World!" << std::endl;
+            return 0;
+          }
+          ```
+          
+          <!-- **Compile & Run:** `g++ hello.cpp -o hello && ./hello` -->
+
+          ---
+
+          ## `hello.cpp`
+          A minimal C++ program:
+
+          ```cpp
+          #include <iostream>
+          using namespace std;
+
+          int main() {
+            cout << "Hello, World!" << endl;
+            return 0;
+          }
+          ```
+          
+          <!-- **Compile & Run:** `g++ hello.cpp -o hello && ./hello` -->
+
+          ---
+
+          ### Key Parts Explained
+
+          - `#include <iostream>`
+            - A **preprocessor directive** that includes the standard input/output stream library.
+          - `int main()`
+            - The main **function** where program execution begins.
+          - `std::cout`
+            - The standard **output stream** object, used for printing. `std` is the namespace.
+          - `return 0;`
+            - A **return statement** that signals successful program termination.
+        </textarea>
+      </section>
+
+      <!-- Namespaces -->
+      <section data-markdown>
+        <textarea data-template>
+          # Namespaces
+
+          ---
+
+          ## Concept
+
+          - **Purpose:** To group related identifiers (variables, functions, classes) to avoid naming conflicts.
+          - The `std::` prefix tells the compiler to look for an identifier (`cout`, `endl`) in the `std` (standard) namespace.
+          - **Best Practice:** Prefer explicit `std::` usage. Avoid `using namespace std;` in header files or at a global level.
+
+          ---
+
+          ## Example
+
+          ```cpp
+          // Custom namespace for our math functions
+          namespace MyMath {
+            int add(int a, int b) {
+              return a + b;
+            }
+          }
+
+          int main() {
+            // Use the scope resolution operator ::
+            int result = MyMath::add(5, 3);
+            // result is 8
+            return 0;
+          }
+          ```
+        </textarea>
+      </section>
+
+      <!-- Operators -->
+      <section data-markdown>
+        <textarea data-template>
+          # C++ Operators
+
+          ---
+
+          ## Common Operators
+
+          | Category | Operators | Example |
+          | :--- | :--- | :--- |
+          | Arithmetic | `+`, `-`, `*`, `/`, `%` | `5 + 3` |
+          | Assignment | `=`, `+=`, `-=` | `x = 5` |
+          | Comparison | `==`, `!=`, `<`, `>` | `a == b`|
+          | Logical | `&&`, `\|\|`, `!` | `a > 0 && b > 0` |
+          | Increment | `++`, `--` | `i++` |
+          | Scope Resolution | `::` | `std::cout` |
+
+          ---
+
+          ## Operator Precedence
+
+          - Determines the order of operations in an expression.
+          - Just like `*` is evaluated before `+` in math.
+          - **Rule of Thumb:** When in doubt, use parentheses `()` to enforce the order you want. It makes your code safer and easier to read.
+
+          ```cpp
+          // Without parentheses, multiplication is first
+          int x = 5 + 3 * 2; // result is 11
+
+          // With parentheses, addition is first
+          int y = (5 + 3) * 2; // result is 16
+          ```
+        </textarea>
+      </section>
+
+      <!-- Scope -->
+      <section data-markdown>
+        <textarea data-template>
+          # Variable Scope
+
+          ---
+
+          ## What is Scope?
+
+          - **Visibility:** The region of code where a variable can be accessed by its name.
+          - **Lifetime:** The period during which the variable exists in memory.
+          
+          These are related but distinct concepts!
+
+          ---
+
+          ## Types of Scope
+
+          - **Local Scope (Block Scope):**
+            - Declared inside a function or block `{...}`.
+            - Created when the block is entered, destroyed when it's exited.
+          - **Global Scope (File Scope):**
+            - Declared outside of all functions.
+            - Exists for the entire duration of the program.
+            - **Warning:** Use sparingly to avoid bugs.
+
+          ---
+
+          ## Scope Example
+
+          ```cpp
+          #include <iostream>
+
+          int globalVar = 100; // Global scope
+
+          void myFunction() {
+              int localVar = 10; // Local scope to myFunction
+              std::cout << "Local: " << localVar << std::endl;
+              std::cout << "Global: " << globalVar << std::endl;
+          }
+
+          int main() {
+              myFunction();
+              // ERROR! localVar is not in this scope
+              // std::cout << localVar; 
+              std::cout << "Global from main: " << globalVar << std::endl;
+              return 0;
+          }
+          ```
+        </textarea>
+      </section>
+
+      <!-- Storage Classes -->
+      <section data-markdown>
+        <textarea data-template>
+          # Storage Classes
+
+          ---
+
+          ## Concept
+          A specifier that controls a variable's **lifetime** and **linkage** (visibility across files).
+          
+          Main specifiers we care about: `static` and `extern`.
+
+          ---
+
+          ### `static` (inside a function)
+
+          - **Lifetime:** Becomes the entire program duration.
+          - The variable **keeps its value** between function calls.
+          - It is initialized only **once**.
+
+          ```cpp
+          cout << "--- Static Variable Example ---" << endl;
+            {
+                static int count = 0; // persists between block executions
+                count++;
+                cout << "Called " << count << " times." << endl;
+            }
+            {
+                static int count = 0; // persists across runs of program block
+                count++;
+                cout << "Called " << count << " times." << endl;
+            }
+          ```
+
+          ---
+
+          ### `extern`
+
+          - **Declaration**, not a definition.
+          - Tells the compiler: "This global variable is defined in another file, but I want to use it here."
+          - Used to **share a single global variable** across multiple `.cpp` files.
+          
+          ---
+          
+          **file1.cpp**
+          ```cpp
+          // Definition of the variable
+          int sharedData = 42;
+          ```
+
+          **file2.cpp**
+          ```cpp
+          #include <iostream>
+          
+          // Declaration telling compiler it exists elsewhere
+          extern int sharedData;
+          
+          void useSharedData() {
+              std::cout << sharedData; // Accesses 42 from file1.cpp
+          }
+          ```
+          Compile both files by linking them
+          ```
+          g++ file1.cpp file2.cpp -o myprogram
+          ```
+          ---
+
+          ## Summary
+
+          - **Local (default):** Temporary, visible only inside a function/block.
+          - **Global (default):** Permanent, visible everywhere (potentially dangerous).
+          - **`static` (local):** Permanent, but visible only inside a function/block.
+          - **`extern`:** A promise that a global variable exists in another file.
+        </textarea>
+      </section>
+
     </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/markdown/markdown.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/highlight.js"></script>
+  <script>
+    Reveal.initialize({
+      view: "scroll",
+      hash: true,
+      plugins: [ RevealMarkdown, RevealHighlight ],
+      margin: 0.2,
+      minscale: 0.2,
+      maxscale: 1.2,
+    });
+  </script>
+
+  <script>
+    const themes = [
+      'dracula', 'night', 'black', 'white', 'league', 'beige',
+      'serif', 'simple', 'solarized', 'moon', 'sky', 'blood'
+    ];
+    let current = 0;
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      current = (current + 1) % themes.length;
+      const themeName = themes[current];
+      document.getElementById('theme-link').href =
+        `https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/${themeName}.css`;
+    });
+  </script>
+
 </body>
 </html>
