@@ -1,16 +1,589 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 4: Branching</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <meta charset="utf-8">
+  <title>Lecture 4: Conditionals (C++)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Reveal.js Core CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css">
+  <!-- Theme -->
+  <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/dracula.css">
+  <!-- Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css">
+  <!-- KaTeX for Math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 4: Control Flow - Branching</h1>
-        <p>Details about the lecture will be updated here.</p>
-        <a href="index.html">Back to Course Outline</a>
+  <button id="theme-toggle" style="position:fixed;top:10px;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:5px;">Change Theme</button>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- Title Slide -->
+      <section data-markdown>
+        <textarea data-template>
+          # C++ Fundamentals
+          ### Lecture 4: Conditionals
+          ---
+          Making Decisions in Your Code
+        </textarea>
+      </section>
+
+      <!-- Why Conditionals? -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Why Do We Need Conditionals?
+          
+          Programs need to make **decisions** and execute different code based on input or state.
+          
+          <!-- .element: class="fragment" -->
+          **Key Points:**
+          - Execute different paths based on conditions
+          <!-- .element: class="fragment" -->
+          - Make programs interactive and intelligent
+          <!-- .element: class="fragment" -->
+          - Handle different scenarios gracefully
+          <!-- .element: class="fragment" -->
+        </textarea>
+      </section>
+
+      <!-- Tools for Conditionals -->
+      <section data-markdown>
+        <textarea data-template>
+          ## C++ Conditional Tools
+          
+          **Primary constructs:**
+          - `if` statements
+          <!-- .element: class="fragment" -->
+          - `else if` chains  
+          <!-- .element: class="fragment" -->
+          - `else` clauses
+          <!-- .element: class="fragment" -->
+          - `switch` statements
+          <!-- .element: class="fragment" -->
+          
+          **Decision drivers:**
+          <!-- .element: class="fragment" -->
+          - Boolean expressions (`true`/`false`)
+          <!-- .element: class="fragment" -->
+          - In C++: non-zero = `true`, zero = `false`
+          <!-- .element: class="fragment" -->
+        </textarea>
+      </section>
+
+      <!-- Math Example - Function Definition -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Example: Piecewise Function
+          
+          Consider this mathematical function:
+          
+          $$f(x) = \begin{cases} 
+          x^2 & \text{if } x < 0 \\\\
+          \sin(x) & \text{if } 0 \leq x < 2 \\\\
+          \ln(1+x) & \text{if } x \geq 2 
+          \end{cases}$$
+          
+          How do we implement this in C++?
+          <!-- .element: class="fragment" -->
+        </textarea>
+      </section>
+
+      <!-- Math Example - Implementation -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Piecewise Function: Implementation
+          
+          ```cpp
+          #include <iostream>
+          #include <cmath>
+          
+          int main() {
+              double x;
+              std::cout << "Enter x: ";
+              std::cin >> x;
+              
+              if (x < 0) {
+                  std::cout << "f(x) = " << x * x << std::endl;
+              } else if (x < 2) {
+                  std::cout << "f(x) = " << sin(x) << std::endl;
+              } else {
+                  std::cout << "f(x) = " << log1p(x) << std::endl;
+              }
+              
+              return 0;
+          }
+          ```
+        </textarea>
+      </section>
+
+      <!-- EE Example - Theory -->
+      <section data-markdown>
+        <textarea data-template>
+          ## EE Example: Overcurrent Protection
+          
+          **Problem:** Circuit breaker protection system
+          
+          **Physics:** By Ohm's Law, $I = \frac{V}{R}$
+          
+          **Safety Logic:**
+          - **Trip:** $I > 1.2 \times I_{rated}$
+          - **Warning:** $I_{rated} < I \leq 1.2 \times I_{rated}$  
+          - **Safe:** $I \leq I_{rated}$
+        </textarea>
+      </section>
+
+      <!-- EE Example - Code -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Overcurrent Protection: Code
+          
+          ```cpp
+          #include <iostream>
+          
+          int main() {
+              double V, R, I_rated;
+              std::cout << "Enter voltage (V), resistance (R), rated current: ";
+              std::cin >> V >> R >> I_rated;
+              
+              double I = V / R; // Calculate actual current
+              
+              if (I > 1.2 * I_rated) {
+                  std::cout << "TRIP: Overcurrent detected!" << std::endl;
+              } else if (I > I_rated) {
+                  std::cout << "WARNING: Above rated current" << std::endl;
+              } else {
+                  std::cout << "SAFE: Within operating limits" << std::endl;
+              }
+              
+              return 0;
+          }
+          ```
+        </textarea>
+      </section>
+
+      <!-- Aerospace Example - Theory -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Aerospace: Velocity Classification
+          
+          **Problem:** Classify trajectory based on velocity
+          
+          **Physics:** Earth's gravitational influence
+          
+          **Classifications:**
+          - **Sub-orbital:** $v < 7.8 \text{ km/s}$
+          - **Bound Orbit:** $7.8 \leq v < 11.2 \text{ km/s}$
+          - **Escape:** $v \geq 11.2 \text{ km/s}$
+        </textarea>
+      </section>
+
+      <!-- Aerospace Example - Code -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Velocity Classification: Code
+          
+          ```cpp
+          #include <iostream>
+          
+          int main() {
+              double velocity; // in km/s
+              std::cout << "Enter velocity (km/s): ";
+              std::cin >> velocity;
+              
+              if (velocity < 7.8) {
+                  std::cout << "Sub-orbital trajectory" << std::endl;
+              } else if (velocity < 11.2) {
+                  std::cout << "Bound orbital trajectory" << std::endl;
+              } else {
+                  std::cout << "Escape velocity achieved!" << std::endl;
+              }
+              
+              return 0;
+          }
+          ```
+        </textarea>
+      </section>
+
+      <!-- Civil Example - Theory -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Civil Engineering: Stress Analysis
+          
+          **Problem:** Material stress safety check
+          
+          **Applied stress** $\sigma$ vs **Allowable stress** $\sigma_{allow}$
+          
+          **Design Rules:**
+          - **Safe:** $\sigma \leq \sigma_{allow}$
+          - **Reinforce:** $\sigma_{allow} < \sigma \leq 1.1 \times \sigma_{allow}$
+          - **Redesign:** $\sigma > 1.1 \times \sigma_{allow}$
+        </textarea>
+      </section>
+
+      <!-- Civil Example - Code -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Stress Analysis: Code
+          
+          ```cpp
+          #include <iostream>
+          
+          int main() {
+              double sigma, sigma_allow;
+              std::cout << "Enter applied stress and allowable stress: ";
+              std::cin >> sigma >> sigma_allow;
+              
+              if (sigma <= sigma_allow) {
+                  std::cout << "SAFE: Stress within limits" << std::endl;
+              } else if (sigma <= 1.1 * sigma_allow) {
+                  std::cout << "ACTION: Reinforce element" << std::endl;
+              } else {
+                  std::cout << "CRITICAL: Redesign required" << std::endl;
+              }
+              
+              return 0;
+          }
+          ```
+        </textarea>
+      </section>
+
+      <!-- Switch Statement Introduction -->
+      <section data-markdown>
+        <textarea data-template>
+          ## The `switch` Statement
+          
+          **When to use:**
+          - Multiple discrete integer or character values
+          - Cleaner than long `if-else if` chains
+          - Better performance for many conditions
+          
+          **Key feature:**
+          <!-- .element: class="fragment" -->
+          - Tests one variable against many constant values
+          <!-- .element: class="fragment" -->
+        </textarea>
+      </section>
+
+      <!-- Switch Statement Example -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Switch Statement: Example
+          
+          ```cpp
+          #include <iostream>
+          
+          int main() {
+              int material_code;
+              std::cout << "Enter material code (1-3): ";
+              std::cin >> material_code;
+              
+              switch (material_code) {
+                  case 1:
+                      std::cout << "Material: Concrete" << std::endl;
+                      break; // Don't forget break!
+                  case 2:
+                      std::cout << "Material: Steel" << std::endl;
+                      break;
+                  case 3:
+                      std::cout << "Material: Timber" << std::endl;
+                      break;
+                  default:
+                      std::cout << "Unknown material code" << std::endl;
+              }
+              
+              return 0;
+          }
+          ```
+        </textarea>
+      </section>
+
+      <!-- Best Practices - Part 1 -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Best Practices: Braces & Structure
+          
+          **Always use braces `{}`:**
+          ```cpp
+          // Good practice
+          if (condition) {
+              doSomething();
+          }
+          
+          // Avoid this (even for single statements)
+          if (condition)
+              doSomething();
+          ```
+          
+          **Why?** Prevents errors when adding more statements later.
+        </textarea>
+      </section>
+
+      <!-- Best Practices - Part 2 -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Best Practices: Floating-Point Comparison
+          
+          **Problem:** Don't use `==` with floating-point numbers!
+          
+          ```cpp
+          // Wrong way
+          if (a == b) { /* unreliable! */ }
+          
+          // Right way
+          const double EPSILON = 1e-9;
+          if (fabs(a - b) < EPSILON) {
+              // a and b are approximately equal
+          }
+          ```
+          
+          **Reason:** Floating-point precision errors make exact equality unreliable.
+        </textarea>
+      </section>
+
+      <!-- Best Practices - Part 3 -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Best Practices: Short-Circuiting
+          
+          **Logical operators stop early:**
+          
+          ```cpp
+          // Safe pointer checking
+          if (ptr != nullptr && ptr->is_valid()) {
+              // Use ptr safely
+          }
+          
+          // Efficient range checking
+          if (x > 0 && x < max_value && expensive_check(x)) {
+              // expensive_check() only runs if x is in range
+          }
+          ```
+          
+          **`&&`** stops at first `false`  
+          **`||`** stops at first `true`
+        </textarea>
+      </section>
+
+      <!-- Common Pitfalls - Part 1 -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Common Pitfall: Assignment vs Comparison
+          
+          **The Classic Mistake:**
+          ```cpp
+          int x = 10;
+          
+          // Wrong: assignment (always true!)
+          if (x = 5) {
+              std::cout << "This always executes!";
+          }
+          
+          // Right: comparison
+          if (x == 5) {
+              std::cout << "This checks equality";
+          }
+          ```
+          
+          **Result:** `x` becomes 5, condition is always true!
+        </textarea>
+      </section>
+
+      <!-- Common Pitfalls - Part 2 -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Common Pitfall: Dangling Else
+          
+          **Confusing code:**
+          ```cpp
+          if (condition1)
+              if (condition2)
+                  action1();
+          else  // Which if does this belong to?
+              action2();
+          ```
+          
+          **Clear code:**
+          ```cpp
+          if (condition1) {
+              if (condition2) {
+                  action1();
+              }
+          } else {
+              action2();
+          }
+          ```
+        </textarea>
+      </section>
+
+      <!-- Common Pitfalls - Part 3 -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Common Pitfall: Missing Break
+          
+          **Dangerous fall-through:**
+          ```cpp
+          switch (grade) {
+              case 'A':
+                  std::cout << "Excellent!";
+                  // Missing break - falls through!
+              case 'B':
+                  std::cout << "Good job!";
+                  break;
+              case 'C':
+                  std::cout << "Average";
+                  break;
+          }
+          ```
+          
+          **Input 'A' outputs:** "Excellent!Good job!"
+        </textarea>
+      </section>
+
+      <!-- History - Early Days -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Historical Perspective: Early Days
+          
+          **FORTRAN (1957):**
+          - "Arithmetic IF" statement
+          - Branched to labels based on negative/zero/positive
+          - Example: `IF (X) 10, 20, 30`
+          
+          **Problems:**
+          <!-- .element: class="fragment" -->
+          - Unstructured jumps everywhere
+          <!-- .element: class="fragment" -->
+          - "Spaghetti code" - hard to follow
+          <!-- .element: class="fragment" -->
+          - Difficult to debug and maintain
+          <!-- .element: class="fragment" -->
+        </textarea>
+      </section>
+
+      <!-- History - Revolution -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Historical Perspective: The Revolution
+          
+          **ALGOL 60 (1960):**
+          - Introduced structured `if-then-else`
+          - Block structure with `begin`/`end`
+          - **Massive leap** for structured programming
+          
+          **Impact:**
+          <!-- .element: class="fragment" -->
+          - Code became more readable
+          <!-- .element: class="fragment" -->
+          - Logic flow was clearer
+          <!-- .element: class="fragment" -->
+          - Foundation for modern programming
+          <!-- .element: class="fragment" -->
+        </textarea>
+      </section>
+
+      <!-- History - Modern Era -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Historical Perspective: C and Beyond
+          
+          **C (1972):**
+          - Inherited `if-else` from ALGOL
+          - Added `switch` with fall-through behavior
+          - Became the template for modern languages
+          
+          **C++17 Additions:**
+          <!-- .element: class="fragment" -->
+          - `if` with initializers: `if (auto v = f(); v.ok())`
+          <!-- .element: class="fragment" -->
+          - `[[fallthrough]]` attribute for explicit fall-through
+          <!-- .element: class="fragment" -->
+        </textarea>
+      </section>
+
+      <!-- Meme Slide -->
+      <section>
+        <h3>When you forget `break` in a `switch` statement...</h3>
+        <img src="memes/domino.png" alt="Domino effect meme" style="width: 60%; border-radius: 10px;">
+        <p><small>One case triggers a chain reaction through all the others!</small></p>
+      </section>
+
+      <!-- Summary -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Summary
+          
+          **Key Concepts:**
+          - Conditionals make programs intelligent and interactive
+          - `if-else` for ranges and complex logic
+          - `switch` for discrete values
+          - Boolean expressions drive all decisions
+          
+          **Remember:**
+          <!-- .element: class="fragment" -->
+          - Always use braces `{}`
+          <!-- .element: class="fragment" -->
+          - Use `EPSILON` for floating-point comparisons
+          <!-- .element: class="fragment" -->
+          - Don't forget `break` in switch statements
+          <!-- .element: class="fragment" -->
+          - Watch out for `=` vs `==`
+          <!-- .element: class="fragment" -->
+        </textarea>
+      </section>
+
+      <!-- Questions -->
+      <section data-markdown>
+        <textarea data-template>
+          ## Questions?
+          
+          **Next time:** Loops and Iteration
+          
+          ---
+          
+          *Practice writing conditionals with the examples from today!*
+        </textarea>
+      </section>
+
     </div>
+  </div>
+
+  <!-- Reveal.js Core -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+  <!-- Plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/math/math.js"></script>
+
+  <script>
+    Reveal.initialize({
+      hash: true,
+      plugins: [ RevealMarkdown, RevealHighlight, RevealMath.KaTeX ],
+      katex: {
+      displayMode: true,  // force block display
+      macros: { "\\cases": "\\begin{cases}#1\\end{cases}" }
+      },
+      margin: 0.1,
+      minScale: 0.2,
+      maxScale: 1.5,
+      width: 1024,
+      height: 768
+    });
+  </script>
+
+  <script>
+    // Theme switcher logic
+    const themes = [
+      'dracula', 'night', 'black', 'white', 'league', 'beige',
+      'serif', 'simple', 'solarized', 'moon', 'sky', 'blood'
+    ];
+    let currentThemeIndex = 0;
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+      document.getElementById('theme-link').href =
+        `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[currentThemeIndex]}.css`;
+    });
+  </script>
 </body>
 </html>
