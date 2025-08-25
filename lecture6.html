@@ -1,16 +1,263 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 6: Arrays</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecture 6: Arrays (C++)</title>
+
+<!-- Reveal.js Core CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css">
+<!-- Theme -->
+<link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/dracula.css">
+<!-- Syntax Highlighting -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css">
+<!-- KaTeX for Math -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 6: Data Structures - Arrays</h1>
-        <p>Details about the lecture will be updated here.</p>
-        <a href="index.html">Back to Course Outline</a>
-    </div>
+
+<button id="theme-toggle" style="position:fixed;top:10px;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:5px;">Change Theme</button>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- Title Slide -->
+    <section data-markdown>
+      <textarea data-template>
+        # Data Structures
+        ### Lecture 6: Arrays
+
+        The Power of Collection
+      </textarea>
+    </section>
+
+    <!-- Library Analogy -->
+    <section data-markdown>
+  <textarea data-template>
+    ## If a Librarian Had a Computer...
+
+    ```cpp
+    #include <iostream>
+    using namespace std;
+
+    int main() {
+        int shelf_101[5] = {1035, 2214, 1879, 4432, 3122};
+        int book_id = shelf_101[2]; // 3rd element → 1879
+        cout << "Found book with ID: " << book_id << endl;
+        return 0;
+    }
+    ```
+  </textarea>
+</section>
+
+
+    <!-- Why Arrays -->
+    <section>
+      <h2>Why Arrays?</h2>
+      <ul>
+        <li class="fragment">Store lists of data (grades, sensor readings).</li>
+        <li class="fragment">Form the base for matrices, strings, vectors.</li>
+        <li class="fragment">Efficient: direct access via index.</li>
+        <li class="fragment">Easily processed using loops.</li>
+      </ul>
+    </section>
+
+    <!-- Declaring & Initializing -->
+    <section>
+      <h2>Declaring & Initializing Arrays</h2>
+      <pre><code class="language-cpp" data-trim data-noescape>
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            // Fixed size declaration
+            int scores[5] = {88, 92, 77, 100, 85};
+
+            // Size inferred automatically
+            char vowels[] = {'a', 'e', 'i', 'o', 'u'};
+
+            // Print first vowel
+            cout << vowels[0] << endl; 
+            return 0;
+        }
+      </code></pre>
+    </section>
+
+    <!-- Accessing Elements -->
+    <section>
+      <h2>Accessing Elements</h2>
+      <pre><code class="language-cpp" data-trim data-noescape>
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            int scores[5] = {88, 92, 77, 100, 85};
+            cout << "First score: " << scores[0] << endl;
+
+            scores[2] = 80; // Change 3rd element
+            cout << "Updated 3rd score: " << scores[2] << endl;
+            return 0;
+        }
+      </code></pre>
+    </section>
+
+    <!-- Physics Example -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Physics Example: Analyzing Sensor Data
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            const int N = 5;
+            double readings[N] = {25.1, 25.3, 25.0, 25.2, 24.9};
+            double sum = 0.0;
+
+            for (int i = 0; i < N; ++i) sum += readings[i];
+
+            double avg = sum / N;
+            cout << "Average reading: " << avg << " °C" << endl;
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Graphics Example -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Graphics Example: A Grayscale Image
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            const int H = 5, W = 5;
+            int image[H][W] = {0};
+
+            for (int i = 0; i < H; i++) image[i][i] = 255;
+
+            for (int r = 0; r < H; r++) {
+                for (int c = 0; c < W; c++)
+                    cout << (image[r][c] ? "*" : ".");
+                cout << endl;
+            }
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Pitfall -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Common Pitfall: Out-of-Bounds Access
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            int numbers[5] = {10, 20, 30, 40, 50};
+            // WRONG: index 5 is invalid
+            // numbers[5] = 60; // corrupts memory!
+
+            // WRONG: loop goes too far
+            for (int i = 0; i <= 5; i++)
+                cout << numbers[i] << endl;
+            return 0;
+        }
+        ```
+        ❌ C++ does not check bounds → dangerous!
+      </textarea>
+    </section>
+
+    <!-- Better Way -->
+    <section>
+      <h2>A Better Way: `std::vector`</h2>
+      <pre><code class="language-cpp" data-trim data-noescape>
+        #include <iostream>
+        #include <vector>
+        using namespace std;
+
+        int main() {
+            vector<int> scores = {88, 92, 77};
+            scores.push_back(100);
+
+            for (int i = 0; i < scores.size(); i++)
+                cout << scores.at(i) << endl; // Safe access
+            return 0;
+        }
+      </code></pre>
+    </section>
+
+    <!-- History -->
+    <section>
+      <h2>Historical Perspective</h2>
+      <p>Early memory (1950s–70s) used **Magnetic Core Memory**: tiny rings storing bits in a physical grid.</p>
+      <img src="https://i.imgur.com/8a332G9.jpeg" style="height:350px;border-radius:10px;">
+      <p>Its [row][col] access directly inspired array indexing.</p>
+    </section>
+
+    <!-- Meme -->
+    <section>
+      <h3>Accessing arr[5] in a 5-element array...</h3>
+      <img src="https://i.imgflip.com/3o1fym.jpg" style="height:500px;border-radius:10px;">
+      <p><small>Undefined behavior: your new superpower.</small></p>
+    </section>
+
+    <!-- Summary -->
+    <section>
+      <h2>Summary</h2>
+      <ul>
+        <li>Arrays store fixed-size collections.</li>
+        <li>Zero-based indexing: arr[0] is first.</li>
+        <li>Loops are natural with arrays.</li>
+        <li>Beware out-of-bounds errors.</li>
+        <li>Prefer `std::vector` in modern C++.</li>
+      </ul>
+    </section>
+
+    <!-- Questions -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Questions?
+
+        **Next Time:** Pointers & Memory
+
+        ---
+        *Practice:* Write a program to find smallest and largest values in an array.
+      </textarea>
+    </section>
+
+  </div>
+</div>
+
+<!-- Reveal.js Core -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<!-- Plugins -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/math/math.js"></script>
+
+<script>
+  Reveal.initialize({
+    hash: true,
+    plugins: [ RevealMarkdown, RevealHighlight, RevealMath.KaTeX ],
+    margin: 0.1,
+    width: 1024,
+    height: 768
+  });
+
+  const themes = ['dracula','night','black','white','league','beige','serif','simple','solarized','moon','sky','blood'];
+  let idx = 0;
+  document.getElementById('theme-toggle').onclick = () => {
+    idx = (idx+1)%themes.length;
+    document.getElementById('theme-link').href = `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[idx]}.css`;
+  };
+</script>
 </body>
 </html>
