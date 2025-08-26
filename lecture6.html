@@ -8,7 +8,7 @@
 <!-- Reveal.js Core CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css">
 <!-- Theme -->
-<link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/dracula.css">
+<link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css">
 <!-- Syntax Highlighting -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css">
 <!-- KaTeX for Math -->
@@ -33,22 +33,22 @@
 
     <!-- Library Analogy -->
     <section data-markdown>
-  <textarea data-template>
-    ## If a Librarian Had a Computer...
+      <textarea data-template>
+        ## If a Librarian Had a Computer...
 
-    ```cpp
-    #include <iostream>
-    using namespace std;
+        ```cpp
+        #include <iostream>
+        using namespace std;
 
-    int main() {
-        int shelf_101[5] = {1035, 2214, 1879, 4432, 3122};
-        int book_id = shelf_101[2]; // 3rd element → 1879
-        cout << "Found book with ID: " << book_id << endl;
-        return 0;
-    }
-    ```
-  </textarea>
-</section>
+        int main() {
+            int shelf_101[5] = {1035, 2214, 1879, 4432, 3122};
+            int book_id = shelf_101[2]; // 3rd element → 1879
+            cout << "Found book with ID: " << book_id << endl;
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
 
 
     <!-- Why Arrays -->
@@ -63,9 +63,10 @@
     </section>
 
     <!-- Declaring & Initializing -->
-    <section>
-      <h2>Declaring & Initializing Arrays</h2>
-      <pre><code class="language-cpp" data-trim data-noescape>
+    <section data-markdown>
+      <textarea data-template>
+        ## Declaring & Initializing Arrays
+        ```cpp
         #include <iostream>
         using namespace std;
 
@@ -77,16 +78,18 @@
             char vowels[] = {'a', 'e', 'i', 'o', 'u'};
 
             // Print first vowel
-            cout << vowels[0] << endl; 
+            cout << vowels[0] << endl;
             return 0;
         }
-      </code></pre>
+        ```
+      </textarea>
     </section>
 
     <!-- Accessing Elements -->
-    <section>
-      <h2>Accessing Elements</h2>
-      <pre><code class="language-cpp" data-trim data-noescape>
+    <section data-markdown>
+      <textarea data-template>
+        ## Accessing Elements
+        ```cpp
         #include <iostream>
         using namespace std;
 
@@ -98,7 +101,8 @@
             cout << "Updated 3rd score: " << scores[2] << endl;
             return 0;
         }
-      </code></pre>
+        ```
+      </textarea>
     </section>
 
     <section>
@@ -181,9 +185,10 @@
     </section>
 
     <!-- Better Way -->
-    <section>
-      <h2>A Better Way: `std::vector`</h2>
-      <pre><code class="language-cpp" data-trim data-noescape>
+    <section data-markdown>
+      <textarea data-template>
+        ## A Better Way: `std::vector`
+        ```cpp
         #include <iostream>
         #include <vector>
         using namespace std;
@@ -196,7 +201,8 @@
                 cout << scores.at(i) << endl; // Safe access
             return 0;
         }
-      </code></pre>
+        ```
+      </textarea>
     </section>
 
     <!-- History -->
@@ -257,7 +263,7 @@
     height: 768
   });
 
-  const themes = ['dracula','night','black','white','league','beige','serif','simple','solarized','moon','sky','blood'];
+  const themes = ['white','league','beige','serif','simple','sky','dracula','night','black','solarized','moon','blood'];
   let idx = 0;
   document.getElementById('theme-toggle').onclick = () => {
     idx = (idx+1)%themes.length;
