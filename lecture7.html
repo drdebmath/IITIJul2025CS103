@@ -1,16 +1,412 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 7: Functions</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lecture 7: Functions (C++)</title>
+
+<!-- Reveal.js Core CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+<!-- Theme -->
+<link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css" />
+<!-- Syntax Highlighting -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+<!-- KaTeX for Math (kept for consistency) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" />
+
+<style>
+  .pill {display:inline-block;padding:.2rem .6rem;border-radius:999px;border:1px solid #ddd;font-size:.8rem}
+  .ok {background:#eaffea;border-color:#b7e3b7}
+  .warn {background:#fff4e6;border-color:#ffd8a8}
+  .bad {background:#ffe3e3;border-color:#ffa8a8}
+  .quiz .result {margin-top:.5rem;font-weight:600}
+  .stack {font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+  .btn {cursor:pointer;padding:6px 10px;border-radius:6px;border:1px solid #ddd;background:#f7f7f7}
+  .btn:active {transform: translateY(1px)}
+  .muted {opacity:.7}
+  .fit {max-height:540px}
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 7: Functions</h1>
-        <p>Details about the lecture will be updated here.</p>
-        <a href="index.html">Back to Course Outline</a>
-    </div>
+
+<button id="theme-toggle" style="position:fixed;top:10px;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;">Change Theme</button>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- Title -->
+    <section data-markdown>
+      <textarea data-template>
+        # Functions and Structures
+        ### Lecture 7: Functions
+
+        Build once. Call often.
+        
+        <span class="pill ok">DRY principle</span>
+        <span class="pill warn">Abstraction</span>
+        <span class="pill bad">Copy–Paste ❌</span>
+      </textarea>
+    </section>
+
+    <!-- Analogy -->
+    <section data-markdown data-auto-animate>
+      <textarea data-template>
+        ## If a Chef Had a Computer…
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        void bake_cake() { cout << "Mix → Bake → Frost → Serve\n"; }
+
+        int main() {
+            bake_cake();      // once defined, endlessly reused
+            bake_cake();
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Why Functions -->
+    <section>
+      <h2>Why Functions?</h2>
+      <ul>
+        <li class="fragment">Name a task; hide its steps.</li>
+        <li class="fragment">Reuse without copy–paste.</li>
+        <li class="fragment">Test in isolation.</li>
+        <li class="fragment">Enable teamwork via clear interfaces.</li>
+      </ul>
+    </section>
+
+        <!-- Anatomy of a Function -->
+        <section data-markdown>
+            <textarea data-template>
+              ## Anatomy of a Function
+      
+              ```cpp
+              int add(int a, int b) {
+                  return a + b;
+              }
+              ```
+      
+              - **Return type**: `int` → what comes back.  
+              - **Name**: `add` → how we call it.  
+              - **Parameters**: `(int a, int b)` → inputs.  
+              - **Body**: `{ return a + b; }` → the work.  
+            </textarea>
+          </section>
+      
+
+    <!-- Function Declaration vs Definition -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Declaration vs Definition
+        ```cpp
+        // math.hpp
+        int square(int);
+
+        // math.cpp
+        #include "math.hpp"
+        int square(int x) { return x*x; }
+
+        // main.cpp
+        #include <iostream>
+        #include "math.hpp"
+        int main(){ std::cout << square(9) << "\n"; }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Parameters & Returns -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Parameters & Return
+        ```cpp
+        double mean(double a, double b, double c) {
+            return (a+b+c)/3.0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Pass by Value vs Reference (interactive preview) -->
+    <section>
+      <h2>Value vs Reference</h2>
+      <div class="r-stack">
+        <pre><code class="language-cpp" id="byval">void inc(int n){ n++; }
+int x=5; inc(x); // x ?</code></pre>
+        <pre><code class="language-cpp" id="byref">void inc(int& n){ n++; }
+int x=5; inc(x); // x ?</code></pre>
+      </div>
+      <p>
+        <button class="btn" onclick="showVal()">Pass by value</button>
+        <button class="btn" onclick="showRef()">Pass by reference</button>
+      </p>
+      <div id="pv-result" class="muted"></div>
+    </section>
+
+    <!-- Const reference best practice -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Const Reference (Large Objects)
+        ```cpp
+        #include <string>
+        std::size_t letters(const std::string& s){ return s.size(); }
+        // avoids copying; s is read‑only
+        ```
+      </textarea>
+    </section>
+<!-- Default args, inline, constexpr 
+    <section data-markdown>
+      <textarea data-template>
+        ## Defaults, Inline, constexpr
+        ```cpp
+        inline int area(int w, int h=1){ return w*h; }
+        constexpr int K = 42; // compile‑time constant
+        ```
+      </textarea>
+    </section> -->
+
+    <!-- Overloading -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Function Overloading
+        ```cpp
+        int add(int a,int b){return a+b;}
+        double add(double a,double b){return a+b;}
+        // picks best match at compile time
+        ```
+      </textarea>
+    </section>
+
+    <!-- Recursion: Factorial with call‑stack visualizer -->
+    <section>
+      <h2>Recursion (Factorial)</h2>
+      <pre><code class="language-cpp">int fact(int n){
+    if(n==0) return 1;
+    return n*fact(n-1);
+}
+</code></pre>
+      <p class="muted">Step through the call stack (n=4):</p>
+      <p>
+        <button class="btn" onclick="stackReset()">Reset</button>
+        <button class="btn" onclick="stackStep()">Step</button>
+      </p>
+      <pre class="stack" id="stackView">[empty]</pre>
+    </section>
+
+    <!-- Recursion vs Iteration (Pros & Cons) -->
+    <section data-markdown>
+        <textarea data-template>
+          ## Recursion vs Iteration
+          
+          - **Recursion**
+            - ✅ Mirrors mathematical definitions (clean, elegant).  
+            - ✅ Simplifies problems that are naturally recursive (trees, divide-and-conquer).  
+            - ❌ Extra memory on call stack.  
+            - ❌ Risk of stack overflow, slower for large inputs.  
+          ---
+
+          ## Recursion vs Iteration
+
+          - **Iteration**
+            - ✅ Efficient in time and memory.  
+            - ✅ No stack overflow risk.  
+            - ❌ May be less intuitive for problems defined recursively.  
+            - ❌ Code can be longer or less elegant.  
+        </textarea>
+      </section>
+
+    <!-- Recurrence idea (equation shown as code block per instruction) 
+    <section data-markdown>
+      <textarea data-template>
+        ## Cost Sketch
+        ```
+        T(n) = T(n-1) + O(1)  →  O(n)
+        ```
+      </textarea>
+    </section> -->
+
+    <!-- Lambdas teaser -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lambdas (Teaser)
+        ```cpp
+        #include <algorithm>
+        #include <vector>
+        #include <iostream>
+        int main(){
+            std::vector<int> v{5,1,4,2,3};
+            std::sort(v.begin(), v.end(), [](int a,int b){return a>b;});
+            for(int x: v) std::cout<<x<<' ';
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Mini‑Quiz -->
+    <section>
+      <h2>Mini‑Quiz (1 minute)</h2>
+      <div class="quiz" data-answer="b">
+        <p><strong>Q1.</strong> What does pass‑by‑value do?</p>
+        <label><input type="radio" name="q1" value="a" /> Modifies the caller's variable.</label><br/>
+        <label><input type="radio" name="q1" value="b" /> Works on a copy of the argument.</label><br/>
+        <label><input type="radio" name="q1" value="c" /> Prevents recursion.</label>
+        <div class="result" id="q1r"></div>
+      </div>
+      <p><button class="btn" onclick="gradeQuiz('q1','q1r')">Check</button></p>
+    </section>
+
+    <!-- Common Pitfalls -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Common Pitfalls
+        - Missing return path in non‑`void` function.
+        - Accidental copies of large objects (use `const&`).
+        - Infinite recursion (no base case).
+        - Mismatched declarations/definitions across files.
+      </textarea>
+    </section>
+
+    <!-- Performance demo (JS timing to keep it fun) -->
+    <section>
+      <h2>Boss Battle: Fibonacci</h2>
+      <pre><code class="language-cpp">long long fib_rec(int n){ return n<2? n : fib_rec(n-1)+fib_rec(n-2); }
+long long fib_it (int n){ long long a=0,b=1; while(n--){ long long t=a+b; a=b; b=t;} return a; }
+</code></pre>
+      <p>
+        <button class="btn" onclick="timeFib(35)">Time n=35</button>
+        <span id="fibTime" class="muted"></span>
+      </p>
+      <p class="muted">(JS simulates timing to contrast exponential vs linear ideas.)</p>
+    </section>
+
+    <!-- Meme placeholder -->
+    <section>
+      <h3>When you replace copy–paste with a function…</h3>
+      <img src="memes/functional_relief.png" alt="function meme" class="fit" style="border-radius:10px;" />
+      <p><small>Abstraction: fewer moving parts to break.</small></p>
+    </section>
+
+    <!-- Summary -->
+    <section>
+      <h2>Summary</h2>
+      <ul>
+        <li>Functions provide names, contracts, and reuse.</li>
+        <li>Prefer `const&` for large inputs; return results, not side‑effects.</li>
+        <li>Overload prudently; keep interfaces minimal.</li>
+        <li>Recursion needs a base case; iterative alternatives often cheaper.</li>
+        <li>Lambdas enable on‑the‑spot behavior.</li>
+      </ul>
+    </section>
+
+    <!-- Practice -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Practice
+        - Write `minmax` returning a pair `(min,max)` for a vector.
+        - Implement `pow_int(x,n)` via exponentiation by squaring.
+        - Write `apply(v,f)` that applies a function to each element.
+      </textarea>
+    </section>
+
+    <!-- Questions -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Questions?
+
+        **Next Time:** Structures
+
+        ---
+        *Bonus:* Refactor any previous program to remove duplication using functions.
+      </textarea>
+    </section>
+
+  </div>
+</div>
+
+<!-- Reveal.js Core -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<!-- Plugins -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/math/math.js"></script>
+
+<script>
+  // Reveal init
+  Reveal.initialize({
+    hash: true,
+    plugins: [ RevealMarkdown, RevealHighlight, RevealMath.KaTeX ],
+    margin: 0.1,
+    width: 1024,
+    height: 768
+  });
+
+  // Theme toggle
+  const themes = ['white','league','beige','serif','simple','sky','dracula','night','black','solarized','moon','blood'];
+  let idx = 0;
+  document.getElementById('theme-toggle').onclick = () => {
+    idx = (idx+1)%themes.length;
+    document.getElementById('theme-link').href = `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[idx]}.css`;
+  };
+
+  // Value vs Reference toggles
+  function showVal(){
+    document.getElementById('byval').parentElement.style.display='block';
+    document.getElementById('byref').parentElement.style.display='none';
+    document.getElementById('pv-result').textContent = 'Output: 5 (a copy was incremented).';
+  }
+  function showRef(){
+    document.getElementById('byval').parentElement.style.display='none';
+    document.getElementById('byref').parentElement.style.display='block';
+    document.getElementById('pv-result').textContent = 'Output: 6 (original was incremented).';
+  }
+  // default state
+  showVal();
+
+  // Quiz grading
+  function gradeQuiz(qName, resultId){
+    const radios = document.querySelectorAll(`input[name="${qName}"]`);
+    let picked = null; radios.forEach(r=>{ if(r.checked) picked = r.value; });
+    const correct = document.querySelector('.quiz').dataset.answer;
+    const el = document.getElementById(resultId);
+    if(!picked){ el.textContent = 'Please choose an option.'; return; }
+    el.textContent = picked===correct? 'Correct ✅' : 'Not quite ❌';
+  }
+
+  // Simple call‑stack visualizer for factorial
+  const frames=[]; let step=0;
+  function buildFrames(n){
+    frames.length=0;
+    const call=(k)=>{
+      frames.push(`call fact(${k})`);
+      if(k===0){ frames.push('return 1'); return 1; }
+      const r = call(k-1);
+      frames.push(`return ${k} * ${r} = ${k*r}`);
+      return k*r;
+    };
+    call(n);
+  }
+  function stackReset(){ step=0; buildFrames(4); render(); }
+  function stackStep(){ if(step<frames.length){ step++; render(); } }
+  function render(){
+    const v = document.getElementById('stackView');
+    if(step===0){ v.textContent='[empty]'; return; }
+    const slice = frames.slice(0, step).map((s,i)=>`${(i+1).toString().padStart(2,'0')}: ${s}`).join('\n');
+    v.textContent = slice;
+  }
+  stackReset();
+
+  // Tiny timing demo for Fibonacci (JS approximation for fun)
+  function timeFib(n){
+    function fib_rec(k){ return k<2? k : fib_rec(k-1)+fib_rec(k-2); }
+    function fib_it (k){ let a=0,b=1; while(k--){ const t=a+b; a=b; b=t; } return a; }
+    const t1=performance.now(); fib_rec(n); const t2=performance.now();
+    fib_it(n); const t3=performance.now();
+    const slow=(t2-t1).toFixed(1), fast=(t3-t2).toFixed(1);
+    document.getElementById('fibTime').textContent = `recursive ≈ ${slow} ms, iterative ≈ ${fast} ms`;
+  }
+</script>
 </body>
 </html>
