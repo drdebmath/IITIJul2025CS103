@@ -1,16 +1,725 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 8: Pointers</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lecture 8: Structures & Pointers — Interactive (C++)</title>
+
+<!-- Reveal.js Core CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+<!-- Theme -->
+<link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css" />
+<!-- Syntax Highlighting -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+
+<style>
+  /* Combined Styles from both files */
+  :root{--gap:10px;--cell:56px;--pad:#f3f4f6;--ink:#0f172a;--accent:#2563eb;--ok:#16a34a;--warn:#d97706;--bad:#dc2626}
+  body{color:var(--ink)}
+  .pill{display:inline-block;padding:.2rem .6rem;border-radius:999px;border:1px solid #ddd;font-size:.8rem}
+  .ok{background:#eaffea;border-color:#b7e3b7}
+  .warn{background:#fff4e6;border-color:#ffd8a8}
+  .bad{background:#ffe3e3;border-color:#ffa8a8}
+  .quiz .result{margin-top:.5rem;font-weight:600}
+  .code-diagram {font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; line-height: 1.4; white-space: pre;}
+  .btn{cursor:pointer;padding:6px 12px;border-radius:8px;border:1px solid #ddd;background:#f7f7f7;margin-right:6px}
+  .btn:active{transform:translateY(1px)}
+  .muted{opacity:.75}
+  .fit{max-height:540px}
+  .r{display:flex;gap:var(--gap);align-items:center}
+  .c{display:flex;flex-direction:column;gap:var(--gap)}
+  .card{border:1px solid #e5e7eb;border-radius:16px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+
+  /* Memory strip */
+  .mem{display:flex;gap:8px;align-items:flex-end}
+  .cell{width:var(--cell);height:var(--cell);border:1px solid #cbd5e1;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#ffffff;position:relative}
+  .cell .idx{position:absolute;top:-18px;font-size:.7rem;color:#64748b}
+  .ptr{height:32px;position:relative;transition:transform .45s ease;will-change:transform}
+  .ptr svg{overflow:visible}
+  .readout{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+  .track{position:relative;height:48px;margin-bottom:8px}
+  .track .ptr{position:absolute;left:0;top:0}
+
+  /* Struct layout viz */
+  .layout{width:100%;max-width:900px;border:1px dashed #cbd5e1;border-radius:12px;padding:10px;background:#fafafa}
+  .bar{position:relative;height:64px;background:#fff;border-radius:10px;border:1px solid #e5e7eb;overflow:hidden}
+  .seg{height:100%;position:absolute;top:0;border-right:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+  .seg.pad{background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 6px,#eef2f7 6px,#eef2f7 12px);color:#64748b}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.9rem}
+  .legend .sw{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:6px;vertical-align:-2px}
+  .sw.int{background:#fde68a}
+  .sw.double{background:#bfdbfe}
+  .sw.char{background:#bbf7d0}
+  .sw.pad{background:#e5e7eb}
+
+  /* Linked list viz */
+  .list-canvas{position:relative;height:180px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#ffffff}
+  .node{position:absolute;width:140px;height:56px;border:1px solid #cbd5e1;border-radius:12px;background:#f8fafc;display:grid;grid-template-columns:1fr 48px}
+  .node .data{display:flex;align-items:center;justify-content:center;border-right:1px dashed #cbd5e1;font-weight:600}
+  .node .next{display:flex;align-items:center;justify-content:center}
+  .arrow{position:absolute;width:60px;height:2px;background:#94a3b8}
+  .arrow:after{content:"";position:absolute;right:-6px;top:-4px;border-left:8px solid #94a3b8;border-top:5px solid transparent;border-bottom:5px solid transparent}
+  .cursor{position:absolute;width:20px;height:20px;border-radius:50%;border:2px solid var(--accent);box-shadow:0 0 0 4px rgba(37,99,235,.15)}
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 8: Memory Management - Pointers</h1>
-        <p>Details about the lecture will be updated here.</p>
-        <a href="index.html">Back to Course Outline</a>
-    </div>
+
+<button id="theme-toggle" style="position:fixed;top:10px;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;">Change Theme</button>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- Title -->
+    <section data-markdown>
+      <textarea data-template>
+        # Structures & Pointers
+        ### Lecture 8
+
+        Compose rich data. Inspect memory. Move with intent.
+        
+        <span class="pill ok">Custom Types</span>
+        <span class="pill warn">Memory Layout</span>
+        <span class="pill bad">Dangling Ptr ❌</span>
+      </textarea>
+    </section>
+
+    <!-- The Problem -->
+    <section data-markdown data-auto-animate>
+        <textarea data-template>
+          ## The Problem: Loose Data
+  
+          How do we represent a player in a game?
+  
+          ```cpp
+          #include <string>
+
+          std::string player1_name = "Hero";
+          int player1_health = 100;
+          int player1_score = 0;
+
+          std::string player2_name = "Villain";
+          int player2_health = 150;
+          int player2_score = 50;
+          ```
+          <p class="fragment muted">This is messy. The data isn't logically connected.</p>
+        </textarea>
+      </section>
+
+    <!-- The Solution: struct -->
+    <section data-markdown data-auto-animate>
+      <textarea data-template>
+        ## The Solution: `struct`
+
+        Bundle related variables into a single new type.
+
+        ```cpp
+        #include <string>
+
+        struct Player {
+            std::string name;
+            int health;
+            int score;
+        };
+
+        Player player1 = {"Hero", 100, 0};
+        Player player2 = {"Villain", 150, 50};
+        ```
+        <p class="fragment ok">Now the data is grouped together!</p>
+      </textarea>
+    </section>
+
+    <!-- Accessing members Content -->
+    <section data-markdown>
+        <textarea data-template>
+          ## Accessing Members: The Dot `.`
+
+          Use the dot operator (`.`) to access the "fields" or "members" of a struct instance.
+        </textarea>
+      </section>
+    <!-- Accessing members Code -->
+    <section data-markdown>
+        <textarea data-template>
+          ## Accessing Members Example
+
+          ```cpp
+          Player player1 = {"Hero", 100, 0};
+
+          player1.score += 20; // Give 20 points
+
+          std::cout << player1.name
+                    << " has " << player1.health << " HP.\n";
+          ```
+        </textarea>
+      </section>
+      
+    <!-- NEW SLIDE: const& Content -->
+    <section data-markdown>
+        <textarea data-template>
+          ## Efficiently Passing Structs: `const&`
+
+          How should we pass a `Player` object to a function?
+
+          - <span class="bad">By Value (`Player p`):</span> Makes a full copy. Slow for large structs.
+          - <span class="warn">By Pointer (`Player* p`):</span> No copy, but requires `->` and allows `nullptr`.
+          - <span class="ok">By **Const Reference** (`const Player& p`):</span> The modern C++ way.
+
+          <p class="muted">Rule of thumb: Pass complex types by `const` reference for read-only access.</p>
+        </textarea>
+    </section>
+    <!-- NEW SLIDE: const& Code -->
+    <section data-markdown>
+        <textarea data-template>
+          ## Code Example: `const&`
+
+          ```cpp
+          // No copy is made, saving time and memory.
+          // 'const' guarantees the function won't change the player.
+          void display_player_stats(const Player& p) {
+              std::cout << "Name: " << p.name << "\n"; // Use '.' syntax!
+              std::cout << "Score: " << p.score << "\n";
+              // p.score = 0; // ERROR! Cannot modify a const reference.
+          }
+
+          int main() {
+              Player player1 = {"Hero", 100, 0};
+              display_player_stats(player1);
+          }
+          ```
+        </textarea>
+    </section>
+
+    <!-- NEW SLIDE: Lambdas Content -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Anonymous Functions: Lambdas
+
+        A lambda is a concise way to create a function right where you need it.
+
+        **Syntax:** `[capture](parameters){ body }`
+
+        They are extremely useful with standard algorithms, like sorting a vector of structs.
+
+        <p class="ok">This is much cleaner than writing a separate named function just for sorting!</p>
+      </textarea>
+    </section>
+    <!-- NEW SLIDE: Lambdas Code -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lambda Example
+
+        ```cpp
+        #include <vector>
+        #include <algorithm> // for std::sort
+
+        std::vector<Player> players = {
+            {"Hero", 100, 50}, {"Sidekick", 80, 75}, {"Boss", 200, 25}
+        };
+
+        // Sort players from highest score to lowest
+        std::sort(players.begin(), players.end(),
+            // This is the lambda function:
+            [](const Player& a, const Player& b) {
+                return a.score > b.score; // Return true if a comes before b
+            }
+        );
+        ```
+      </textarea>
+    </section>
+
+    <!-- INTERACTIVE: Struct layout animation -->
+    <section>
+        <h2>Structure Layout & Padding</h2>
+        <div class="c">
+          <pre><code class="language-cpp">struct S1 { char a; int b; double c; char d; };  // 24 bytes
+struct S2 { double c; int b; char a; char d; }; // 16 bytes
+// Same fields, different layout + padding!
+</code></pre>
+          <div class="r">
+            <button class="btn" onclick="showLayout('S1')">Order 1 </button>
+            <button class="btn" onclick="showLayout('S2')">Order 2 </button>
+          </div>
+          <div class="layout c">
+            <div class="legend">
+              <span><span class="sw char"></span>char</span>
+              <span><span class="sw int"></span>int</span>
+              <span><span class="sw double"></span>double</span>
+              <span><span class="sw pad"></span>padding</span>
+            </div>
+            <div class="bar" id="bar"></div>
+            <div class="readout" id="layoutInfo"></div>
+          </div>
+          <p class="muted">Note: Exact sizes/alignments depend on the system. Order members from largest to smallest to minimize padding.</p>
+        </div>
+      </section>
+
+    <!-- Intro to Pointers -->
+    <section>
+        <h2>What's a Pointer?</h2>
+        <p>Instead of holding a value, it holds a memory address.</p>
+        <div class="code-diagram">
+          <p><strong>Normal Variable:</strong></p>
+          <div style="display: flex; align-items: center; gap: 20px;">
+            <code>int score = 95;</code>
+            <span style="font-size: 2rem;">→</span>
+            <div>
+              Address: <code class="warn">0x7ffc...A0</code><br/>
+              Value: &nbsp;&nbsp;<code class="ok">95</code>
+            </div>
+          </div>
+          <hr/>
+          <p><strong>Pointer Variable:</strong></p>
+          <div style="display: flex; align-items: center; gap: 20px;">
+            <code>int* score_ptr = &score;</code>
+            <span style="font-size: 2rem;">→</span>
+            <div>
+              Address: <code class="warn">0x7ffc...B8</code><br/>
+              Value: &nbsp;&nbsp;<code class="bad">0x7ffc...A0</code>
+            </div>
+          </div>
+        </div>
+        <ul class="muted">
+            <li>`&` is the "address-of" operator.</li>
+            <li>`*` is used to declare a pointer.</li>
+        </ul>
+    </section>
+
+    <!-- INTERACTIVE: Pointer Basics (live overlay) -->
+    <section>
+        <h2>Pointer Arithmetic: Moving the Cursor</h2>
+        <div class="c">
+          <pre><code class="language-cpp">int a[8] {2,4,6,8,10,12,14,16};
+int* p = &a[0];
+// p++ moves to next element, jumping sizeof(int) bytes
+</code></pre>
+          <div class="card">
+            <div class="track">
+              <div id="ptr" class="ptr">
+                <svg width="40" height="32"><g><path d="M20,0 L20,16" stroke="#64748b" stroke-width="2"></path><path d="M14,16 L20,28 L26,16" fill="#64748b"></path></g></svg>
+              </div>
+            </div>
+            <div class="mem" id="mem"></div>
+            <div class="r" style="margin-top:10px;align-items:flex-end">
+              <div>
+                <button class="btn" onclick="step(-1)">◀︎ Prev</button>
+                <button class="btn" onclick="step(1)">Next ▶︎</button>
+                <button class="btn" onclick="play()" id="playBtn">Play ▷</button>
+                <button class="btn" onclick="resetPtr()">Reset</button>
+              </div>
+              <div class="readout" id="ro"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    <!-- Dereferencing Content -->
+    <section data-markdown>
+        <textarea data-template>
+          ## Dereferencing: Following the Address
+
+          Use `*` again to get the value *at the stored address*.
+
+        </textarea>
+      </section>
+    <!-- Dereferencing Code -->
+    <section data-markdown>
+        <textarea data-template>
+          ## Dereferencing Example
+
+          ```cpp
+          int score = 95;
+          int* score_ptr = &score;
+
+          // *score_ptr means "go to the address and read the value"
+          std::cout << *score_ptr; // Prints 95
+
+          // It also means "go to the address and write a value"
+          *score_ptr = 100;
+          std::cout << score; // Prints 100
+          ```
+
+          <p class="muted">A pointer gives you indirect access to a variable.</p>
+        </textarea>
+      </section>
+
+    <!-- INTERACTIVE: Pointer to struct — arrow vs dot -->
+    <section>
+        <h2>Member Access: Dot vs. Arrow</h2>
+        <div class="r">
+          <div class="card" style="min-width:380px">
+            <pre><code class="language-cpp">Player p1 = {"Hero", 100, 0};
+Player* player_ptr = &p1;
+
+p1.score += 10;        // Dot for object
+player_ptr->score += 10; // Arrow for pointer
+</code></pre>
+            <div class="r">
+              <button class="btn" onclick="highlightMember('dot')">Access via Object</button>
+              <button class="btn" onclick="highlightMember('arrow')">Access via Pointer</button>
+            </div>
+          </div>
+          <div class="card" style="flex:1">
+            <svg id="structSvg" viewBox="0 0 560 180" style="width:100%;height:180px">
+              <defs><filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+              <rect x="40" y="40" width="220" height="100" rx="14" fill="#f8fafc" stroke="#cbd5e1"/>
+              <text x="52" y="62" font-size="8" fill="#64748b">Player p1</text>
+              <g id="field-name"><rect x="52" y="70" width="80" height="56" rx="8" fill="#bfdbfe"/><text x="70" y="102" font-size="12">name</text></g>
+              <g id="field-health"><rect x="142" y="70" width="48" height="56" rx="8" fill="#bbf7d0"/><text x="146" y="102" font-size="12">health</text></g>
+              <g id="field-score"><rect x="200" y="70" width="48" height="56" rx="8" fill="#fde68a"/><text x="206" y="102" font-size="12">score</text></g>
+              <g id="ptrGroup" transform="translate(360,90)">
+                <text x="-24" y="-36" font-size="8" fill="#64748b">Player* player_ptr</text>
+                <rect x="-20" y="-22" width="40" height="40" rx="10" fill="#f8fafc" stroke="#94a3b8"/>
+                <path id="ptrArrow" d="M-20 0 L-100 0" stroke="#94a3b8" stroke-width="2"/>
+                <polygon points="-100,0 -90,-6 -90,6" fill="#94a3b8"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+        <p class="muted">`ptr->member` is just convenient shorthand for `(*ptr).member`.</p>
+    </section>
+
+    <!-- INTERACTIVE: Array of structs: pointer stride -->
+    <section>
+      <h2>Array of Structs — Pointer Stride</h2>
+      <div class="c card">
+        <pre><code class="language-cpp">struct Pair { int x; int y; }; // sizeof(Pair) is 8 bytes
+Pair a[5]{{1,2},{3,4},{5,6},{7,8},{9,10}};
+Pair* p = a;   // p++ jumps by 8 bytes
+</code></pre>
+        <div class="r" style="align-items:flex-end">
+          <button class="btn" onclick="strideStep(-1)">◀︎ Prev</button>
+          <button class="btn" onclick="strideStep(1)">Next ▶︎</button>
+          <span class="readout" id="strideInfo"></span>
+        </div>
+        <div class="mem" id="pairRow"></div>
+      </div>
+    </section>
+
+    <!-- Self-Referential Structs & Linked List -->
+    <section>
+        <h2>The True Power: Linked Data Structures</h2>
+        <div class="c">
+          <pre><code class="language-cpp">struct Node { int data; Node* next; };
+// A Node can point to another Node, forming a chain!
+Node* head = ...;   // Walk the chain until next is nullptr
+</code></pre>
+          <div class="list-canvas card" id="listCanvas"></div>
+          <div>
+            <button class="btn" onclick="listReset()">Reset</button>
+            <button class="btn" onclick="listStep()">Step ▶︎</button>
+            <button class="btn" onclick="listAuto()" id="listAutoBtn">Auto ▷</button>
+          </div>
+          <div class="readout" id="listInfo"></div>
+        </div>
+      </section>
+
+    <!-- Mini-Quiz Q1 -->
+    <section>
+      <h2>Mini‑Quiz Q1</h2>
+      <div class="quiz" data-answer="c">
+        <p><strong>Q1.</strong> Given `Player* ptr`, how do you correctly access the player's health?</p>
+        <label><input type="radio" name="q1" value="a" /> <code>ptr.health</code></label><br/>
+        <label><input type="radio" name="q1" value="b" /> <code>*ptr.health</code></label><br/>
+        <label><input type="radio" name="q1" value="c" /> <code>ptr->health</code></label>
+        <div class="result" id="q1r"></div>
+        <p><button class="btn" onclick="gradeQuiz('q1','q1r')">Check</button></p>
+      </div>
+    </section>
+    <!-- Mini-Quiz Q2 -->
+    <section>
+      <h2>Mini‑Quiz Q2</h2>
+      <div class="quiz" data-answer="a">
+        <p><strong>Q2.</strong> To minimize padding for `{char, int, double}`, which order is best on a typical 64-bit system?</p>
+        <label><input type="radio" name="q2" value="a" /> `double`, `int`, `char`</label><br/>
+        <label><input type="radio" name="q2" value="b" /> `char`, `int`, `double`</label><br/>
+        <label><input type="radio" name="q2" value="c" /> `int`, `char`, `double`</label>
+        <div class="result" id="q2r"></div>
+        <p><button class="btn" onclick="gradeQuiz('q2','q2r')">Check</button></p>
+      </div>
+    </section>
+
+    <!-- Safety Checklist Part 1 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Safety Checklist & Pitfalls (Part 1)
+        - **Dereferencing `nullptr`**: Always check if a pointer is `nullptr` before using `*` or `->`.
+        - **Dangling Pointers**: Be careful with pointers to memory that might no longer be valid (e.g., after a `vector` resizes).
+      </textarea>
+    </section>
+    <!-- Safety Checklist Part 2 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Safety Checklist & Pitfalls (Part 2)
+        - **Returning Local Pointers**: Never return a pointer or reference to a local variable from a function. It will be invalid!
+        - **Syntax Confusion**: `.` for objects and references, `->` for pointers.
+      </textarea>
+    </section>
+
+    <!-- Summary Part 1 -->
+    <section>
+      <h2>Summary (Part 1)</h2>
+      <ul>
+        <li>`struct` groups related data into a new, custom type.</li>
+        <li>Pass structs by `const` reference (`const T&`) for efficient, safe, read-only access.</li>
+        <li>Lambdas `[](){}` are convenient inline functions, great for algorithms like `std::sort`.</li>
+      </ul>
+    </section>
+    <!-- Summary Part 2 -->
+    <section>
+      <h2>Summary (Part 2)</h2>
+      <ul>
+        <li>Structure member order affects padding and total size.</li>
+        <li>A pointer stores a memory address; use `->` to access members via a pointer.</li>
+        <li>Pointers enable dynamic data structures like linked lists.</li>
+      </ul>
+    </section>
+
+    <!-- Practice Part 1 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Practice (Part 1)
+        - Define a `struct Rectangle { double width, height; };`.
+        - Write a function `double get_area(const Rectangle& r)`.
+      </textarea>
+    </section>
+    <!-- Practice Part 2 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Practice (Part 2)
+        - Create a `std::vector<Rectangle>` and sort it by area using `std::sort` and a lambda function.
+        - Implement a singly linked list `Node` with `push_front` and `print_list` functions.
+      </textarea>
+    </section>
+
+     <!-- Questions -->
+     <section data-markdown>
+        <textarea data-template>
+          ## Questions?
+  
+          **Next Time:** Dynamic Memory
+  
+          ---
+          *Bonus:* Reorder the fields of a struct you've written to minimize its size, and verify with `sizeof`.
+        </textarea>
+      </section>
+
+  </div>
+</div>
+
+<!-- Reveal.js Core & Plugins -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+
+<script>
+  // Reveal init
+  Reveal.initialize({
+    hash: true,
+    plugins: [ RevealMarkdown, RevealHighlight ],
+    margin: 0.06,
+    width: 1280,
+    height: 720
+  });
+
+  // Theme toggle
+  const themes = ['white','league','beige','serif','simple','sky','dracula','night','black','solarized','moon','blood'];
+  let theme_idx = 0;
+  document.getElementById('theme-toggle').onclick = () => {
+    theme_idx = (theme_idx+1)%themes.length;
+    document.getElementById('theme-link').href = `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[theme_idx]}.css`;
+  };
+
+  // ===== Combined JS for All Visualizations =====
+
+  // ----- Pointer over array -----
+  const values = [2,4,6,8,10,12,14,16];
+  const baseAddr = 0x1000;
+  const elemSize = 4;
+  let i = 0; let timer = null;
+  const mem = document.getElementById('mem');
+  if (mem) {
+    for(let k=0;k<values.length;k++){
+      const d=document.createElement('div');
+      d.className='cell';
+      d.innerHTML=`<div class="idx">${k}</div>${values[k]}`;
+      mem.appendChild(d);
+    }
+  }
+  const ptr = document.getElementById('ptr');
+  const ro = document.getElementById('ro');
+  function updatePtr(){
+    if (!ptr) return;
+    const x = i * (document.querySelector('.cell').offsetWidth + 8);
+    ptr.style.transform = `translateX(${x}px)`;
+    const addr = baseAddr + i*elemSize;
+    ro.textContent = `p = 0x${addr.toString(16)} | *p = ${values[i]}`;
+  }
+  function step(delta){ i = Math.max(0, Math.min(values.length-1, i+delta)); updatePtr(); }
+  function play(){ if(timer){ clearInterval(timer); timer=null; document.getElementById('playBtn').textContent='Play ▷'; return; }
+    document.getElementById('playBtn').textContent='Pause ❚❚';
+    timer = setInterval(()=>{ if(i>=values.length-1){ clearInterval(timer); timer=null; document.getElementById('playBtn').textContent='Play ▷'; return; } step(1); }, 700);
+  }
+  function resetPtr(){ i=0; updatePtr(); }
+  if (ptr) window.addEventListener('load', updatePtr);
+
+  // ----- Struct layout viz -----
+  const sizes = { char:1, int:4, double:8 };
+  const colors = { char:'#bbf7d0', int:'#fde68a', double:'#bfdbfe', pad:'#e5e7eb' };
+  const orders = {
+    S1:[{k:'char',n:'a'},{k:'int',n:'b'},{k:'double',n:'c'}, {k:'char',n:'d'}],
+    S2:[{k:'double',n:'c'},{k:'int',n:'b'},{k:'char',n:'a'}, {k:'char',n:'d'}]
+  };
+  let currentOrder='S1';
+  const bar = document.getElementById('bar');
+  const info = document.getElementById('layoutInfo');
+
+  // Add a variable to hold the maximum size for scaling
+  let maxStructSize = 0;
+
+  function layout(order){
+    let offset=0, segs=[]; const members=orders[order];
+    const align=(k)=>sizes[k];
+    let maxAlign=0;
+    members.forEach(m=>{maxAlign=Math.max(maxAlign, align(m.k));});
+    members.forEach(m=>{
+      const a=align(m.k), s=sizes[m.k];
+      const pad=(a - (offset % a)) % a;
+      if(pad>0){ segs.push({label:'pad', from:offset, to:offset+pad, k:'pad'}); offset+=pad; }
+      segs.push({label:`${m.n}:${m.k}`, from:offset, to:offset+s, k:m.k});
+      offset+=s;
+    });
+    const tail=(maxAlign - (offset % maxAlign)) % maxAlign;
+    if(tail>0){ segs.push({label:'pad', from:offset, to:offset+tail, k:'pad'}); offset+=tail; }
+    return {segs,size:offset,align:maxAlign};
+  }
+
+  function renderLayout(order){
+    if (!bar) return;
+    const L=layout(order);
+    bar.innerHTML='';
+    // The visual total is the max size, ensuring alignment between visualizations
+    const visualTotal = maxStructSize; 
+    L.segs.forEach(seg=>{
+      const left = (seg.from / visualTotal) * 100;
+      const width = ((seg.to - seg.from) / visualTotal) * 100;
+      const div=document.createElement('div');
+      div.className='seg'+(seg.k==='pad'?' pad':'');
+      div.style.left=left+'%';
+      div.style.width=width+'%';
+      div.style.backgroundColor=colors[seg.k];
+      // Show label only if the segment is wide enough
+      div.textContent = width > 5 ? seg.label : '';
+      bar.appendChild(div);
+    });
+    // The text readout shows the *actual* size of the current struct
+    info.textContent = `sizeof(${order}) = ${L.size} bytes, alignment = ${L.align} bytes`;
+  }
+  
+  function showLayout(o){ currentOrder=o; renderLayout(currentOrder); }
+  
+  // Setup function to run on load: calculate max size, then render
+  function setupStructViz() {
+      if (!bar) return;
+      const sizeS1 = layout('S1').size;
+      const sizeS2 = layout('S2').size;
+      maxStructSize = Math.max(sizeS1, sizeS2);
+      renderLayout(currentOrder); // Initial render
+  }
+  
+  // Replace the old onload listener with the new setup function
+  if (bar) window.addEventListener('load', setupStructViz);
+
+  // ----- Member access highlight -----
+  function highlightMember(kind){
+    const score = document.getElementById('field-score');
+    const health = document.getElementById('field-health');
+    const name = document.getElementById('field-name');
+    [score,health,name].forEach(g=>g.setAttribute('filter',''));
+    const ptrArrow = document.getElementById('ptrArrow');
+    if(kind==='dot'){
+      [score,health,name].forEach(g=>g.setAttribute('filter','url(#glow)'));
+      ptrArrow.setAttribute('stroke','#94a3b8');
+      ptrArrow.style.strokeWidth = "2";
+    } else {
+      score.setAttribute('filter','url(#glow)');
+      ptrArrow.setAttribute('stroke','#16a34a');
+      ptrArrow.style.strokeWidth = "3";
+    }
+  }
+
+  // ----- Array of structs stride -----
+  const pairs = [ [1,2],[3,4],[5,6],[7,8],[9,10] ];
+  let si=0; const pairRow = document.getElementById('pairRow');
+  function buildPairs(){
+    if (!pairRow) return;
+    pairRow.innerHTML='';
+    pairs.forEach((pr,idx)=>{
+      const outer=document.createElement('div'); outer.className='cell'; outer.style.width='120px'; outer.style.display='grid'; outer.style.gridTemplateColumns='1fr 1fr';
+      const a=document.createElement('div'); a.textContent=pr[0]; a.style.borderRight='1px dashed #cbd5e1';
+      const b=document.createElement('div'); b.textContent=pr[1];
+      const lab=document.createElement('div'); lab.className='idx'; lab.textContent=idx; outer.appendChild(lab);
+      outer.appendChild(a); outer.appendChild(b); pairRow.appendChild(outer);
+    });
+  }
+  if(pairRow) buildPairs();
+  const strideInfo=document.getElementById('strideInfo');
+  function strideUpdate(){
+    if (!strideInfo) return;
+    [...pairRow.children].forEach((c,j)=>{ c.style.outline = j===si? '3px solid #60a5fa' : 'none'; c.style.outlineOffset='2px'; });
+    const base=0x2000, sz=8;
+    strideInfo.textContent = `p = &a[${si}] (addr 0x${(base+si*sz).toString(16)}) | sizeof(Pair) = ${sz}`;
+  }
+  function strideStep(d){ si=Math.max(0, Math.min(pairs.length-1, si+d)); strideUpdate(); }
+  if (pairRow) window.addEventListener('load', strideUpdate);
+
+  // ----- Linked list traversal -----
+  const canvas = document.getElementById('listCanvas');
+  const list_nodes = [12, 7, 25, 4];
+  let positions=[], cur=0, autoTimer=null; let cursorEl=null;
+  function listLayout(){
+    if (!canvas) return;
+    canvas.innerHTML=''; positions=[];
+    const gap=30, startX=20, y=60;
+    list_nodes.forEach((val,idx)=>{
+      const x = startX + idx*(140+gap);
+      positions.push({x,y});
+      const n=document.createElement('div'); n.className='node'; n.style.left=x+'px'; n.style.top=y+'px';
+      n.innerHTML = `<div class="data">${val}</div><div class="next">${(idx<list_nodes.length-1)?'next':'nullptr'}</div>`;
+      canvas.appendChild(n);
+      if(idx<list_nodes.length-1){
+        const arr=document.createElement('div'); arr.className='arrow'; arr.style.left=(x+140)+'px'; arr.style.top=(y+27)+'px'; arr.style.width='30px'; canvas.appendChild(arr);
+      }
+    });
+    cursorEl=document.createElement('div'); cursorEl.className='cursor'; canvas.appendChild(cursorEl);
+    cur=0;
+    cursorEl.style.left=(positions[0].x+70-10)+'px'; cursorEl.style.top=(positions[0].y-20)+'px';
+  }
+  function listReset(){ if(autoTimer){clearInterval(autoTimer); autoTimer=null; document.getElementById('listAutoBtn').textContent='Auto ▷'; } if(!canvas) return; listLayout(); document.getElementById('listInfo').textContent='current = head'; }
+  function listStep(){
+    if(cur>=positions.length-1){ document.getElementById('listInfo').textContent='current is nullptr. Traversal complete.'; return; }
+    cur++;
+    cursorEl.style.transition='left .5s ease, top .5s ease';
+    cursorEl.style.left=(positions[cur].x+70-10)+'px';
+    cursorEl.style.top=(positions[cur].y-20)+'px';
+    document.getElementById('listInfo').textContent = `current = current->next`;
+  }
+  function listAuto(){
+    if(autoTimer){ clearInterval(autoTimer); autoTimer=null; document.getElementById('listAutoBtn').textContent='Auto ▷'; return; }
+    document.getElementById('listAutoBtn').textContent='Pause ❚❚';
+    autoTimer=setInterval(()=>{ if(cur>=positions.length-1){ clearInterval(autoTimer); autoTimer=null; document.getElementById('listAutoBtn').textContent='Auto ▷'; document.getElementById('listInfo').textContent='current is nullptr. Traversal complete.'; return; } listStep(); }, 900);
+  }
+  if (canvas) window.addEventListener('load', listReset);
+  
+  // ----- Quiz grading -----
+  function gradeQuiz(qName, resultId){
+    const qDiv = document.getElementById(resultId).parentElement;
+    const radios = qDiv.querySelectorAll(`input[name="${qName}"]`);
+    let picked = null; radios.forEach(r=>{ if(r.checked) picked = r.value; });
+    const correct = qDiv.dataset.answer;
+    const el = document.getElementById(resultId);
+    if(!picked){ el.textContent = 'Please choose an option.'; return; }
+    el.textContent = picked===correct? 'Correct ✅' : 'Not quite ❌';
+  }
+
+</script>
 </body>
 </html>
