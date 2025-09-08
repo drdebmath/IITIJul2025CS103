@@ -1,16 +1,543 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 9: Structures</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lecture 9: Pointers, Dynamic Memory & Linked Lists — Interactive (C++)</title>
+
+  <!-- Reveal.js Core CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+  <!-- Theme -->
+  <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css" />
+  <!-- Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+
+  <style>
+    /* Combined Styles from lecture8 */
+    :root{--gap:10px;--cell:56px;--pad:#f3f4f6;--ink:#0f172a;--accent:#2563eb;--ok:#16a34a;--warn:#d97706;--bad:#dc2626}
+    body{color:var(--ink)}
+    .pill{display:inline-block;padding:.2rem .6rem;border-radius:999px;border:1px solid #ddd;font-size:.8rem}
+    .ok{background:#eaffea;border-color:#b7e3b7}
+    .warn{background:#fff4e6;border-color:#ffd8a8}
+    .bad{background:#ffe3e3;border-color:#ffa8a8}
+    .quiz .result{margin-top:.5rem;font-weight:600}
+    .quiz .result small { display: block; font-weight: 400; margin-top: 4px; opacity: 0.8; }
+    .code-diagram {font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; line-height: 1.4; white-space: pre;}
+    .btn{cursor:pointer;padding:6px 12px;border-radius:8px;border:1px solid #ddd;background:#f7f7f7;margin-right:6px;transition: background .2s, border-color .2s;}
+    .btn:hover{background:#eee;border-color:#ccc}
+    .btn:focus{outline:2px solid var(--accent);outline-offset:2px}
+    .btn:active{transform:translateY(1px)}
+    .muted{opacity:.75}
+    .fit{max-height:540px}
+    .r{display:flex;gap:var(--gap);align-items:center}
+    .c{display:flex;flex-direction:column;gap:var(--gap)}
+    .card{border:1px solid #e5e7eb;border-radius:16px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+
+    /* Heap visualization */
+    .heap{display:flex;flex-direction:column;gap:8px;max-width:600px}
+    .block{background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;padding:8px;display:flex;align-items:center;justify-content:space-between;transition:background-color .4s ease, opacity .4s ease, transform .4s ease;}
+    .block.allocated{background:#bbf7d0}
+    .block.free{background:#fef3c7}
+    .block.newly-added { animation: fadeInScale .4s ease forwards; }
+    .block.removing { transform: scale(0.9); opacity: 0; }
+
+    /* Linked list viz */
+    .list-canvas{position:relative;height:180px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#ffffff; transition: height 0.3s ease; }
+    .node{position:absolute;width:140px;height:56px;border:1px solid #cbd5e1;border-radius:12px;background:#f8fafc;display:grid;grid-template-columns:1fr 48px;transition:left .45s ease, opacity .45s ease, transform .45s ease;}
+    .node .data{display:flex;align-items:center;justify-content:center;border-right:1px dashed #cbd5e1;font-weight:600}
+    .node .next{display:flex;align-items:center;justify-content:center}
+    .node.newly-added { animation: fadeInScale .4s ease forwards; }
+    .node.removing { transform: scale(0.9) translateY(20px); opacity: 0; }
+    .arrow{position:absolute;height:2px;background:#94a3b8; transition:left .45s ease, width .45s ease, opacity .45s ease; opacity: 1;}
+    .arrow:after{content:"";position:absolute;right:-6px;top:-4px;border-left:8px solid #94a3b8;border-top:5px solid transparent;border-bottom:5px solid transparent}
+    .arrow.removing { opacity: 0; }
+    
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.85); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 9: Data Structures - Structures</h1>
-        <p>Details about the lecture will be updated here.</p>
-        <a href="index.html">Back to Course Outline</a>
-    </div>
+
+<button id="theme-toggle" style="position:fixed;top:10px;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;">Change Theme</button>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- Title -->
+    <section data-markdown>
+      <textarea data-template>
+# Pointers, Dynamic Memory & Linked Lists
+### Lecture 9
+
+Mastering memory. Allocating on demand. Building chains.
+
+- 🟢 Dynamic Allocation
+- 🟠 Memory Management
+- 🔴 Leaks & Dangles ❌
+      </textarea>
+      <aside class="notes">Welcome students. Outline: dynamic memory, safety, and linked lists. Motivate by contrasting static arrays with heap allocation.</aside>
+    </section>
+
+    <!-- Recap Pointers -->
+    <section data-markdown data-auto-animate>
+      <textarea data-template>
+## Recap: Pointers
+
+A pointer holds a memory address. Use `&` to get address, `*` to dereference.
+
+```cpp
+int x = 42;
+int* p = &x;  // p points to x
+*p = 100;     // x is now 100
+```
+
+Pointers enable indirect access and dynamic structures. <!-- .element: class="fragment muted" -->
+      </textarea>
+      <aside class="notes">Briefly remind syntax and semantics. Emphasize that pointers allow indirect access and form basis for dynamic structures.</aside>
+    </section>
+
+    <!-- The Problem: Static Memory -->
+    <section data-markdown data-auto-animate>
+      <textarea data-template>
+## The Problem: Static Memory
+
+Arrays and variables have fixed size at compile time.
+
+```cpp
+int arr[100];      // Always 100 elements
+Player players[10]; // What if we need 11 players?
+```
+
+Wasteful or insufficient! <!-- .element: class="fragment bad" -->
+      </textarea>
+      <aside class="notes">Explain limitations of compile-time sizing. Use concrete examples (arrays, player lists) to illustrate waste vs. shortage.</aside>
+    </section>
+
+    <!-- The Solution: Dynamic Memory -->
+    <section data-markdown data-auto-animate>
+      <textarea data-template>
+## The Solution: Dynamic Memory Allocation
+
+Allocate memory at runtime as needed.
+
+**C Style:** `malloc`, `calloc`, `free`
+
+**C++ Style:** `new`, `delete`
+
+Memory on demand! <!-- .element: class="fragment ok" -->
+      </textarea>
+      <aside class="notes">State that dynamic allocation solves sizing issues but introduces responsibility for deallocation.</aside>
+    </section>
+
+    <!-- C Style Allocation -->
+    <section data-markdown>
+      <textarea data-template>
+## C Style: `malloc` & `free`
+
+```cpp
+#include <cstdlib>  // for malloc, free
+
+int* arr = (int*) malloc(10 * sizeof(int));  // Allocate 10 ints
+if (arr == nullptr) { /* handle error */ }
+
+// Use arr...
+arr[0] = 42;
+
+free(arr);  // Deallocate
+arr = nullptr;  // Avoid dangling pointer
+```
+
+`malloc` returns `void*`, cast to desired type. Always check for `nullptr`. <!-- .element: class="muted" -->
+      </textarea>
+      <aside class="notes">Explain casting requirement and error checking. Contrast with C++ `new` for clarity.</aside>
+    </section>
+
+    <!-- C++ Style: new & delete -->
+    <section data-markdown>
+      <textarea data-template>
+## C++ Style: `new` & `delete`
+
+```cpp
+int* arr = new int[10];  // Allocate array
+// No cast needed, type-safe
+
+arr[0] = 42;
+
+delete[] arr;  // Deallocate array
+arr = nullptr;
+```
+
+`new` throws `std::bad_alloc` on failure. Use `delete[]` for arrays. <!-- .element: class="muted" -->
+      </textarea>
+      <aside class="notes">Highlight type safety and correct use of `delete[]`. Warn about exception behavior on allocation failure.</aside>
+    </section>
+
+    <!-- Memory Leaks -->
+    <section data-markdown>
+      <textarea data-template>
+## Memory Leaks: The Silent Killer
+
+Forgetting to `free`/`delete` allocated memory.
+
+```cpp
+void bad_function() {
+    int* p = new int[100];
+    // Forgot delete[] p;
+}  // Memory leak!
+```
+
+Leaked memory can't be reused until program ends. <!-- .element: class="fragment bad" -->
+      </textarea>
+      <aside class="notes">Define memory leak and explain consequences for long-running programs and systems with limited memory.</aside>
+    </section>
+
+    <!-- Dangling Pointers -->
+    <section data-markdown>
+      <textarea data-template>
+## Dangling Pointers: Pointing to Garbage
+
+Accessing memory after deallocation.
+
+```cpp
+int* p = new int(42);
+delete p;
+*p = 100;  // Undefined behavior! Dangling pointer
+```
+
+Set pointers to `nullptr` after deletion. <!-- .element: class="fragment bad" -->
+      </textarea>
+      <aside class="notes">Explain undefined behavior risks. Advise setting pointers to `nullptr` immediately after deletion.</aside>
+    </section>
+
+    <!-- Safety Checklist -->
+    <section data-markdown>
+      <textarea data-template>
+## Safety Checklist & Best Practices
+
+- **Match allocators and deallocators:** `new`/`delete`, `new[]`/`delete[]`.
+- **Set pointers to `nullptr` after deletion** to avoid dangling pointers.
+- **Check for allocation failure.** How do we do that?
+      </textarea>
+      <aside class="notes">Summarize best practices. Emphasize that following these prevents most common errors.</aside>
+    </section>
+
+    <!-- Handling Allocation Failure -->
+    <section data-markdown>
+      <textarea data-template>
+## Handling Allocation Failure
+
+`new` throws an exception, `std::bad_alloc`, when it fails.
+
+```cpp
+#include <iostream>
+#include <new> // for std::bad_alloc
+
+try {
+    // Try to allocate an impossibly large array
+    int* huge_array = new int[1000000000000];
+} catch (const std::bad_alloc& e) {
+    std::cerr << "Allocation failed: " << e.what() << std::endl;
+    // Handle the error gracefully
+}
+```
+
+Use a `try...catch` block for code that might fail to allocate. <!-- .element: class="muted" -->
+      </textarea>
+      <aside class="notes">Explain when to use exception handling for allocations and practical alternatives for robust programs.</aside>
+    </section>
+
+    <!-- Modern C++ Smart Pointers -->
+    <section data-markdown>
+      <textarea data-template>
+## The Modern C++ Solution: Smart Pointers
+
+Manual `new` and `delete` is error-prone. Modern C++ uses **smart pointers** for automatic memory management (RAII).
+
+```cpp
+#include <memory> // Required header
+
+// No manual 'delete' needed!
+std::unique_ptr<int[]> arr = std::make_unique<int[]>(10);
+arr[0] = 42;
+
+// Memory is automatically freed when 'arr' goes out of scope.
+```
+
+This prevents memory leaks and dangling pointers automatically! **Prefer smart pointers over raw pointers.** <!-- .element: class="ok" -->
+      </textarea>
+      <aside class="notes">Introduce `unique_ptr` and `shared_ptr` briefly. Strongly recommend RAII and modern idioms to students.</aside>
+    </section>
+
+    <!-- INTERACTIVE: Heap Allocation -->
+    <section>
+      <h2>Heap Memory Visualization</h2>
+      <div class="c">
+        <pre><code class="language-cpp">int* p = new int(42);
+// ...
+delete p;
+</code></pre>
+        <div class="r">
+          <button class="btn" onclick="allocHeap()">Allocate Block</button>
+          <button class="btn" onclick="deallocHeap()">Deallocate</button>
+        </div>
+        <div class="heap card" id="heap"></div>
+        <div class="readout" id="heapInfo" aria-live="polite"></div>
+      </div>
+      <aside class="notes">Demonstrate allocation and deallocation. Ask students to predict effect of repeated allocations. Use this to show heap fragmentation conceptually.</aside>
+    </section>
+
+    <!-- INTERACTIVE: Linked List Primer -->
+    <section>
+      <h2>Linked Lists: Building Chains</h2>
+      <div class="c">
+        <pre><code class="language-cpp">struct Node {
+    int data;
+    Node* next;
+};
+
+Node* head = nullptr;  // Empty list
+</code></pre>
+        <div class="r">
+          <button class="btn" onclick="insertFront()">Insert Front</button>
+          <button class="btn" onclick="removeFront()">Remove Front</button>
+          <button class="btn" onclick="clearList()">Clear List</button>
+        </div>
+        <div class="list-canvas card" id="llCanvas"></div>
+        <div class="readout" id="llInfo" aria-live="polite"></div>
+      </div>
+      <aside class="notes">Walk through list operations visually. Emphasize pointer updates when inserting and removing nodes.</aside>
+    </section>
+
+    <!-- Linked List Operations -->
+    <section data-markdown>
+      <textarea data-template>
+## Linked List Operations
+
+**Insert at Front:**
+```cpp
+void insert_front(Node*& head, int val) {
+    Node* new_node = new Node{val, head};
+    head = new_node;
+}
+```
+
+Each node allocated dynamically, linked via pointers. <!-- .element: class="muted" -->
+      </textarea>
+      <aside class="notes">Explain code line-by-line: allocation, initialization, and head update. Mention complexity: O(1) insertion at front.</aside>
+    </section>
+
+    <!-- Mini-Quiz Q1 -->
+    <section>
+      <h2>Mini‑Quiz Q1</h2>
+      <div class="quiz" data-answer="b" data-explanation="`new int[10]` allocates an array of 10 ints on the heap and returns a pointer to the first element.">
+        <p><strong>Q1.</strong> Which is the correct way to allocate an array of 10 integers in C++?</p>
+        <label><input type="radio" name="q1" value="a" /> <code>int arr = new int(10);</code></label><br/>
+        <label><input type="radio" name="q1" value="b" /> <code>int* arr = new int[10];</code></label><br/>
+        <label><input type="radio" name="q1" value="c" /> <code>int arr[10] = new int;</code></label>
+        <div class="result" id="q1r"></div>
+        <p><button class="btn" onclick="gradeQuiz('q1','q1r')">Check</button></p>
+      </div>
+      <aside class="notes">Allow 30–45 seconds for students to answer. After reveal, explain why option B is correct and common pitfalls.</aside>
+    </section>
+
+    <!-- Mini-Quiz Q2 -->
+    <section>
+      <h2>Mini‑Quiz Q2</h2>
+      <div class="quiz" data-answer="c" data-explanation="Forgetting to deallocate memory means the program 'loses' the pointer to it, making it unusable for the rest of the program's lifetime.">
+        <p><strong>Q2.</strong> What happens if you forget to `delete` dynamically allocated memory?</p>
+        <label><input type="radio" name="q2" value="a" /> Program crashes immediately</label><br/>
+        <label><input type="radio" name="q2" value="b" /> Memory becomes read-only</label><br/>
+        <label><input type="radio" name="q2" value="c" /> Memory leak occurs</label>
+        <div class="result" id="q2r"></div>
+        <p><button class="btn" onclick="gradeQuiz('q2','q2r')">Check</button></p>
+      </div>
+      <aside class="notes">Use this question to reinforce real-world impact of leaks. Give examples: services, long-running processes.</aside>
+    </section>
+
+    <!-- Summary -->
+    <section>
+      <h2>Summary</h2>
+      <ul>
+        <li>Dynamic memory (`new`/`delete`) allows flexible sizing at runtime.</li>
+        <li>Forgetting to `delete` causes memory leaks. Accessing memory after `delete` is undefined behavior.</li>
+        <li class="ok"><strong>Modern C++ strongly prefers smart pointers</strong> (`std::unique_ptr`) to automate memory management and prevent these errors.</li>
+        <li>Linked lists are a fundamental dynamic data structure built with nodes and pointers.</li>
+      </ul>
+      <aside class="notes">Recap the key takeaways. Prepare students for the next lecture: advanced dynamic structures and STL containers comparison.</aside>
+    </section>
+
+  </div>
+</div>
+
+<!-- Reveal.js Core & Plugins -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+
+<!-- Custom lecture script -->
+<script>
+// Wait for the DOM to be fully loaded before running scripts
+document.addEventListener('DOMContentLoaded', () => {
+
+  // --- Reveal.js Initialization ---
+  Reveal.initialize({
+    hash: true,
+    plugins: [ RevealMarkdown, RevealHighlight ],
+    margin: 0.06,
+    width: 1280,
+    height: 720
+  });
+
+  // --- Theme Toggler ---
+  const themes = ['white', 'league', 'beige', 'sky', 'night', 'serif', 'simple', 'solarized', 'blood', 'moon', 'dracula', 'black'];
+  let theme_idx = 0;
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const themeLink = document.getElementById('theme-link');
+
+  if (themeToggleBtn) {
+    themeToggleBtn.onclick = () => {
+      theme_idx = (theme_idx + 1) % themes.length;
+      if (themeLink) {
+        themeLink.href = `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[theme_idx]}.css`;
+      }
+    };
+  }
+  
+  // --- Heap Allocation Visualization ---
+  const heapEl = document.getElementById('heap');
+  const heapInfo = document.getElementById('heapInfo');
+  let blockIdCounter = 0;
+
+  window.allocHeap = function() {
+    if (!heapEl) return;
+    const block = document.createElement('div');
+    block.className = 'block allocated newly-added';
+    block.dataset.id = blockIdCounter++;
+    block.textContent = `Block ${block.dataset.id} (Allocated: 4 bytes)`;
+    heapEl.appendChild(block);
+    updateHeapInfo();
+  }
+
+  window.deallocHeap = function() {
+    if (!heapEl) return;
+    const lastBlock = heapEl.querySelector('.block.allocated:last-child');
+    if (lastBlock) {
+      lastBlock.classList.add('removing');
+      // Remove from DOM after animation completes
+      setTimeout(() => {
+        lastBlock.remove();
+        updateHeapInfo();
+      }, 400);
+    }
+  }
+  
+  function updateHeapInfo() {
+    if (!heapInfo) return;
+    const count = heapEl.querySelectorAll('.block.allocated').length;
+    heapInfo.textContent = `Allocated blocks on heap: ${count}`;
+  }
+
+
+  // --- Linked List Visualization ---
+  const llCanvas = document.getElementById('llCanvas');
+  const llInfo = document.getElementById('llInfo');
+  let nodeCounter = 0;
+
+  function updateLLPositions() {
+    if (!llCanvas) return;
+    const nodes = llCanvas.querySelectorAll('.node');
+    const gap = 30, startX = 20, y = 60;
+    
+    nodes.forEach((node, idx) => {
+        const x = startX + idx * (140 + gap);
+        node.style.left = x + 'px';
+        
+        // Update or remove arrow
+        let arrow = document.getElementById(`arrow-${node.dataset.id}`);
+        if (idx < nodes.length - 1) {
+            if (!arrow) { // Create arrow if it doesn't exist
+                arrow = document.createElement('div');
+                arrow.className = 'arrow';
+                arrow.id = `arrow-${node.dataset.id}`;
+                llCanvas.appendChild(arrow);
+            }
+            arrow.style.left = (x + 140) + 'px';
+            arrow.style.top = (y + 27) + 'px';
+            arrow.style.width = `${gap}px`;
+        } else if (arrow) {
+            arrow.remove();
+        }
+    });
+
+    llInfo.textContent = `List size: ${nodes.length}`;
+  }
+
+  window.insertFront = function() {
+    if (!llCanvas) return;
+    const val = Math.floor(Math.random() * 90) + 10; // Random value
+    const id = nodeCounter++;
+
+    const node = document.createElement('div');
+    node.className = 'node newly-added';
+    node.style.left = '20px';
+    node.style.top = '60px';
+    node.dataset.id = id;
+    node.innerHTML = `<div class="data">${val}</div><div class="next">next</div>`;
+    
+    llCanvas.prepend(node);
+    updateLLPositions();
+  }
+
+  window.removeFront = function() {
+    if (!llCanvas) return;
+    const firstNode = llCanvas.querySelector('.node');
+    if (firstNode) {
+        firstNode.classList.add('removing');
+        const arrow = document.getElementById(`arrow-${firstNode.dataset.id}`);
+        if (arrow) arrow.classList.add('removing');
+
+        setTimeout(() => {
+            firstNode.remove();
+            if(arrow) arrow.remove();
+            updateLLPositions();
+        }, 450);
+    }
+  }
+
+  window.clearList = function() {
+    if (!llCanvas) return;
+    llCanvas.querySelectorAll('.node, .arrow').forEach(el => {
+        el.classList.add('removing');
+        setTimeout(() => el.remove(), 450);
+    });
+    llInfo.textContent = `List size: 0`;
+  }
+    
+  // --- Quiz Grading ---
+  window.gradeQuiz = function(qName, resultId) {
+    const resultEl = document.getElementById(resultId);
+    if (!resultEl) return;
+
+    const quizDiv = resultEl.closest('.quiz');
+    const checkedRadio = quizDiv.querySelector(`input[name="${qName}"]:checked`);
+    
+    if (!checkedRadio) {
+      resultEl.textContent = 'Please choose an option.';
+      return;
+    }
+
+    const pickedAnswer = checkedRadio.value;
+    const correctAnswer = quizDiv.dataset.answer;
+    const explanation = quizDiv.dataset.explanation;
+    
+    if (pickedAnswer === correctAnswer) {
+      resultEl.innerHTML = 'Correct ✅';
+    } else {
+      resultEl.innerHTML = `Not quite ❌ <small>${explanation}</small>`;
+    }
+  }
+});</script>
 </body>
 </html>
