@@ -3,14 +3,670 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 10: Dynamic Memory Allocation</title>
+    <title>Lecture 10: Data Structures and Algorithms</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+    <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+    <style>
+        :root{--gap:10px;--cell:56px;--pad:#f3f4f6;--ink:#0f172a;--accent:#2563eb;--ok:#16a34a;--warn:#d97706;--bad:#dc2626}
+        body{color:var(--ink)}
+        .pill{display:inline-block;padding:.2rem .6rem;border-radius:999px;border:1px solid #ddd;font-size:.8rem}
+        .ok{background:#eaffea;border-color:#b7e3b7}
+        .warn{background:#fff4e6;border-color:#ffd8a8}
+        .bad{background:#ffe3e3;border-color:#ffa8a8}
+        .quiz .result{margin-top:.5rem;font-weight:600}
+        .quiz .result small { display: block; font-weight: 400; margin-top: 4px; opacity: 0.8; }
+        .code-diagram {font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; line-height: 1.4; white-space: pre;}
+        .btn{cursor:pointer;padding:6px 12px;border-radius:8px;border:1px solid #ddd;background:#f7f7f7;margin-right:6px;transition: background .2s, border-color .2s;}
+        .btn:hover{background:#eee;border-color:#ccc}
+        .btn:focus{outline:2px solid var(--accent);outline-offset:2px}
+        .btn:active{transform:translateY(1px)}
+        .muted{opacity:.75}
+        .fit{max-height:540px}
+        .r{display:flex;gap:var(--gap);align-items:center}
+        .c{display:flex;flex-direction:column;gap:var(--gap)}
+        .card{border:1px solid #e5e7eb;border-radius:16px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+        .array-viz{display:flex;gap:4px;flex-wrap:wrap;max-width:600px}
+        .array-cell{background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;padding:8px;min-width:40px;text-align:center;font-weight:600}
+        .array-cell.highlight{background:#bbf7d0}
+        .stack-viz{display:flex;flex-direction:column-reverse;gap:4px;max-width:200px;margin:0 auto}
+        .stack-cell{background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:8px;text-align:center;font-weight:600}
+        .queue-canvas{position:relative;min-height:80px;border:1px solid #e5e7eb;border-radius:12px;overflow:visible;background:#ffffff;margin:0 auto;max-width:800px;padding:15px 0;}
+        .queue-node{position:absolute;width:120px;height:56px;border:1px solid #cbd5e1;border-radius:12px;background:#f8fafc;display:grid;grid-template-columns:1fr 60px;transition:left .45s ease, opacity .45s ease, transform .45s ease;}
+        .queue-node .data{display:flex;align-items:center;justify-content:center;border-right:1px dashed #cbd5e1;font-weight:600}
+        .queue-node .next{display:flex;align-items:center;justify-content:center;font-size:0.8rem}
+        .queue-arrow{position:absolute;height:2px;background:#94a3b8;width:40px;transition:left .45s ease, opacity .45s ease;}
+        .queue-arrow:after{content:"";position:absolute;right:-6px;top:-4px;border-left:8px solid #94a3b8;border-top:5px solid transparent;border-bottom:5px solid transparent}
+        .queue-node.newly-added { animation: fadeInScale .4s ease forwards; }
+        .queue-node.removing { transform: scale(0.9) translateX(-20px); opacity: 0; }
+        .queue-arrow.removing { opacity: 0; }
+        @keyframes fadeInScale {
+          from { opacity: 0; transform: scale(0.85); }
+          to { opacity: 1; transform: scale(1); }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 10: Memory Management - Dynamic Allocation</h1>
-        <p>Details about the lecture will be updated here.</p>
-        <a href="index.html">Back to Course Outline</a>
-    </div>
+
+<button id="theme-toggle" style="position:fixed;top:10px;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;">Change Theme</button>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- Title -->
+    <section data-markdown>
+      <textarea data-template>
+# Data Structures and Algorithms
+### Lecture 10
+
+Organizing data. Solving problems efficiently.
+
+- 🟢 Arrays and Searching
+- 🟠 Stacks and Queues
+- 🔴 Sorting Algorithms
+      </textarea>
+      <aside class="notes">Welcome students. Outline: basic data structures and algorithms with examples from previous modules.</aside>
+    </section>
+
+    <!-- Recap Previous Modules -->
+    <section data-markdown>
+      <textarea data-template>
+## Recap: Building Blocks
+
+From previous lectures:
+
+- **Data Types & Variables:** int, float, char, structs
+- **Control Flow:** if-else, loops (for, while)
+- **Arrays:** Fixed-size collections
+- **Functions:** Modular code
+- **Pointers & Dynamic Memory:** Flexible allocation
+- **Structures:** Custom data types
+
+Now: Combine them into data structures and algorithms! <!-- .element: class="fragment ok" -->
+      </textarea>
+      <aside class="notes">Briefly remind key concepts from modules 1-5. Emphasize how they form the foundation for DSA.</aside>
+    </section>
+
+    <!-- What are Data Structures? -->
+    <section data-markdown>
+      <textarea data-template>
+## What are Data Structures?
+
+Ways to organize and store data for efficient access and modification.
+
+**Examples:**
+- Arrays (static)
+- Linked Lists (dynamic)
+- Stacks (LIFO)
+- Queues (FIFO)
+
+Built using pointers, structs, and dynamic memory. <!-- .element: class="muted" -->
+      </textarea>
+      <aside class="notes">Define data structures. Connect to previous topics like structs and pointers.</aside>
+    </section>
+
+    <!-- Arrays as Data Structures -->
+    <section data-markdown>
+      <textarea data-template>
+## Arrays: Foundation of Data Structures
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    int arr[5] = {10, 20, 30, 40, 50};
+    
+    // Access elements
+    cout << "First element: " << arr[0] << endl;
+    cout << "Last element: " << arr[4] << endl;
+    
+    // Modify
+    arr[2] = 100;
+    cout << "Modified third element: " << arr[2] << endl;
+    
+    return 0;
+}
+```
+
+Fixed size, direct access via index. <!-- .element: class="muted" -->
+      </textarea>
+      <aside class="notes">Show basic array operations. Relate to module 4.</aside>
+    </section>
+
+    <!-- Linear Search Algorithm -->
+    <section data-markdown>
+      <textarea data-template>
+## Algorithm: Linear Search
+
+Find an element in an array by checking each element sequentially.
+
+```cpp
+int linearSearch(int arr[], int size, int target) {
+    for(int i = 0; i < size; i++) {
+        if(arr[i] == target) {
+            return i; // Found at index i
+        }
+    }
+    return -1; // Not found
+}
+```
+
+**Time Complexity:** O(n) - Worst case: check all elements. <!-- .element: class="muted" -->
+      </textarea>
+      <aside class="notes">Introduce algorithms. Show how loops from module 3 are used. Explain time complexity basics.</aside>
+    </section>
+
+    <!-- Interactive Array Search -->
+    <section>
+      <h2>Interactive: Linear Search Visualization</h2>
+      <div class="c">
+        <div class="array-viz card" id="searchArray"></div>
+        <div class="r">
+          <input type="number" id="searchTarget" placeholder="Enter number to search" class="form-control" style="width:200px;">
+          <button class="btn" onclick="performSearch()">Search</button>
+          <button class="btn" onclick="resetSearch()">Reset</button>
+        </div>
+        <div id="searchResult"></div>
+      </div>
+      <aside class="notes">Demonstrate linear search visually. Show step-by-step process.</aside>
+    </section>
+
+    <!-- Structures for Complex Data -->
+    <section data-markdown>
+      <textarea data-template>
+## Structures: Building Complex Data Types
+
+```cpp
+struct Student {
+    string name;
+    int rollNumber;
+    float marks;
+};
+
+Student s1 = {"Alice", 101, 95.5};
+cout << s1.name << " has marks: " << s1.marks << endl;
+```
+
+Combine different data types into meaningful units. <!-- .element: class="muted" -->
+      </textarea>
+      <aside class="notes">Relate to module 4. Show how structs enable complex data structures.</aside>
+    </section>
+
+    <!-- Stack Data Structure -->
+    <section data-markdown>
+      <textarea data-template>
+## Stack: LIFO (Last In, First Out)
+
+Like a stack of plates - last added is first removed.
+
+**Operations:**
+- Push: Add element to top
+- Pop: Remove top element
+- Peek: View top element
+
+Implemented using arrays or linked lists. <!-- .element: class="muted" -->
+      </textarea>
+      <aside class="notes">Introduce stack concept. Connect to real-world analogies.</aside>
+    </section>
+
+    <!-- Stack Implementation with Array -->
+    <section data-markdown>
+      <textarea data-template>
+## Stack Implementation (Array-based)
+
+```cpp
+#define MAX_SIZE 100
+
+class Stack {
+private:
+    int arr[MAX_SIZE];
+    int top;
+    
+public:
+    Stack() { top = -1; }
+    
+    void push(int x) {
+        if(top >= MAX_SIZE-1) {
+            cout << "Stack Overflow" << endl;
+            return;
+        }
+        arr[++top] = x;
+    }
+    
+    int pop() {
+        if(top < 0) {
+            cout << "Stack Underflow" << endl;
+            return -1;
+        }
+        return arr[top--];
+    }
+    
+    int peek() {
+        if(top < 0) return -1;
+        return arr[top];
+    }
+};
+```
+
+Uses array and control flow from previous modules. <!-- .element: class="muted" -->
+      </textarea>
+      <aside class="notes">Show implementation using arrays and functions. Highlight use of classes (if introduced).</aside>
+    </section>
+
+    <!-- Interactive Stack -->
+    <section>
+      <h2>Interactive: Stack Operations</h2>
+      <div class="c">
+        <div class="stack-viz card" id="stackViz"></div>
+        <div class="r">
+          <input type="number" id="stackValue" placeholder="Enter value" class="form-control" style="width:150px;">
+          <button class="btn" onclick="pushStack()">Push</button>
+          <button class="btn" onclick="popStack()">Pop</button>
+          <button class="btn" onclick="resetStack()">Reset</button>
+        </div>
+        <div id="stackInfo"></div>
+      </div>
+      <aside class="notes">Visualize stack operations. Show LIFO behavior.</aside>
+    </section>
+
+    <!-- Queue Data Structure -->
+    <section data-markdown>
+      <textarea data-template>
+## Queue: FIFO (First In, First Out)
+
+Like a line at a counter - first in line is served first.
+
+**Operations:**
+- Enqueue: Add to rear
+- Dequeue: Remove from front
+- Front: View front element
+
+Used in scheduling, breadth-first search. <!-- .element: class="muted" -->
+      </textarea>
+      <aside class="notes">Introduce queue. Give practical examples.</aside>
+    </section>
+
+    <!-- Queue Implementation with Linked List -->
+    <section data-markdown>
+      <textarea data-template>
+## Queue Implementation (Linked List)
+
+```cpp
+struct Node {
+    int data;
+    Node* next;
+};
+
+class Queue {
+private:
+    Node* front;
+    Node* rear;
+    
+public:
+    Queue() { front = rear = nullptr; }
+    
+    void enqueue(int x) {
+        Node* newNode = new Node{x, nullptr};
+        if(rear == nullptr) {
+            front = rear = newNode;
+            return;
+        }
+        rear->next = newNode;
+        rear = newNode;
+    }
+    
+    int dequeue() {
+        if(front == nullptr) return -1;
+        int data = front->data;
+        Node* temp = front;
+        front = front->next;
+        if(front == nullptr) rear = nullptr;
+        delete temp;
+        return data;
+    }
+};
+```
+
+Dynamic size, efficient operations. <!-- .element: class="muted" -->
+      </textarea>
+      <aside class="notes">Show linked list implementation. Connect to dynamic memory from module 5.</aside>
+    </section>
+
+    <!-- Interactive Queue -->
+    <section>
+      <h2>Interactive: Queue Operations (Linked List)</h2>
+      <div class="c">
+        <div class="queue-canvas card" id="queueCanvas"></div>
+        <div class="r">
+          <input type="number" id="queueValue" placeholder="Enter value" class="form-control" style="width:150px;">
+          <button class="btn" onclick="enqueueQueue()">Enqueue</button>
+          <button class="btn" onclick="dequeueQueue()">Dequeue</button>
+          <button class="btn" onclick="resetQueue()">Reset</button>
+        </div>
+        <div id="queueInfo"></div>
+      </div>
+      <aside class="notes">Visualize queue operations with linked list. Show FIFO behavior and dynamic allocation.</aside>
+    </section>
+
+    <!-- Sorting Algorithms -->
+    <section data-markdown>
+      <textarea data-template>
+## Sorting Algorithms: Bubble Sort
+
+Simple sorting by repeatedly swapping adjacent elements.
+
+```cpp
+void bubbleSort(int arr[], int n) {
+    for(int i = 0; i < n-1; i++) {
+        for(int j = 0; j < n-i-1; j++) {
+            if(arr[j] > arr[j+1]) {
+                // Swap
+                int temp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
+            }
+        }
+    }
+}
+```
+
+**Time Complexity:** O(n²) - Nested loops from module 3. <!-- .element: class="muted" -->
+      </textarea>
+      <aside class="notes">Show sorting algorithm. Demonstrate nested loops and array manipulation.</aside>
+    </section>
+
+    <!-- Interactive Sorting -->
+    <section>
+      <h2>Interactive: Bubble Sort Visualization</h2>
+      <div class="c">
+        <div class="array-viz card" id="sortArray"></div>
+        <div class="r">
+          <button class="btn" onclick="startSort()">Start Bubble Sort</button>
+          <button class="btn" onclick="resetSort()">Reset Array</button>
+        </div>
+        <div id="sortInfo"></div>
+      </div>
+      <aside class="notes">Animate bubble sort. Show step-by-step comparisons and swaps.</aside>
+    </section>
+
+    <!-- Mini-Quiz Q1 -->
+    <section>
+      <h2>Mini‑Quiz Q1</h2>
+      <div class="quiz" data-answer="b" data-explanation="Linear search checks each element sequentially until finding the target or reaching the end.">
+        <p><strong>Q1.</strong> What is the time complexity of linear search in the worst case?</p>
+        <label><input type="radio" name="q1" value="a" /> O(1)</label><br/>
+        <label><input type="radio" name="q1" value="b" /> O(n)</label><br/>
+        <label><input type="radio" name="q1" value="c" /> O(log n)</label>
+        <div class="result" id="q1r"></div>
+        <p><button class="btn" onclick="gradeQuiz('q1','q1r')">Check</button></p>
+      </div>
+      <aside class="notes">Test understanding of algorithm complexity.</aside>
+    </section>
+
+    <!-- Mini-Quiz Q2 -->
+    <section>
+      <h2>Mini‑Quiz Q2</h2>
+      <div class="quiz" data-answer="a" data-explanation="Stack follows LIFO principle - last element pushed is the first one popped.">
+        <p><strong>Q2.</strong> In a stack, which element is removed first?</p>
+        <label><input type="radio" name="q2" value="a" /> Last element added (LIFO)</label><br/>
+        <label><input type="radio" name="q2" value="b" /> First element added (FIFO)</label><br/>
+        <label><input type="radio" name="q2" value="c" /> Middle element</label>
+        <div class="result" id="q2r"></div>
+        <p><button class="btn" onclick="gradeQuiz('q2','q2r')">Check</button></p>
+      </div>
+      <aside class="notes">Test understanding of stack behavior.</aside>
+    </section>
+
+    <!-- Summary -->
+    <section>
+      <h2>Summary</h2>
+      <ul>
+        <li>Data structures organize data using arrays, pointers, and structs from previous modules.</li>
+        <li>Algorithms like search and sort use control flow and loops.</li>
+        <li>Stacks (LIFO) and queues (FIFO) are fundamental data structures.</li>
+        <li>Understanding time complexity helps evaluate algorithm efficiency.</li>
+      </ul>
+      <aside class="notes">Recap key concepts. Prepare for advanced topics in future lectures.</aside>
+    </section>
+
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  Reveal.initialize({
+    hash: true,
+    plugins: [ RevealMarkdown, RevealHighlight ],
+    margin: 0.1,
+    width: 1280,
+    height: 720
+  });
+
+  // Theme toggler
+  const themes = ['white', 'league', 'beige', 'sky', 'night', 'serif', 'simple', 'solarized', 'blood', 'moon', 'dracula', 'black'];
+  let theme_idx = 0;
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const themeLink = document.getElementById('theme-link');
+
+  themeToggleBtn.onclick = () => {
+    theme_idx = (theme_idx + 1) % themes.length;
+    themeLink.href = `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[theme_idx]}.css`;
+  };
+
+  // Interactive Search
+  const searchArray = document.getElementById('searchArray');
+  const searchResult = document.getElementById('searchResult');
+  let searchData = [12, 45, 23, 67, 89, 34];
+
+  function renderSearchArray(highlightIndex = -1) {
+    searchArray.innerHTML = '';
+    searchData.forEach((val, idx) => {
+      const cell = document.createElement('div');
+      cell.className = 'array-cell' + (idx === highlightIndex ? ' highlight' : '');
+      cell.textContent = val;
+      searchArray.appendChild(cell);
+    });
+  }
+
+  renderSearchArray();
+
+  window.performSearch = function() {
+    const target = parseInt(document.getElementById('searchTarget').value);
+    if(isNaN(target)) return;
+
+    let found = false;
+    let i = 0;
+    const interval = setInterval(() => {
+      renderSearchArray(i);
+      if(searchData[i] === target) {
+        found = true;
+        clearInterval(interval);
+        searchResult.textContent = `Found ${target} at index ${i}`;
+        return;
+      }
+      i++;
+      if(i >= searchData.length) {
+        clearInterval(interval);
+        searchResult.textContent = `${target} not found`;
+      }
+    }, 500);
+  };
+
+  window.resetSearch = function() {
+    renderSearchArray();
+    searchResult.textContent = '';
+    document.getElementById('searchTarget').value = '';
+  };
+
+  // Interactive Stack
+  const stackViz = document.getElementById('stackViz');
+  const stackInfo = document.getElementById('stackInfo');
+  let stackData = [];
+
+  function renderStack() {
+    stackViz.innerHTML = '';
+    stackData.forEach(val => {
+      const cell = document.createElement('div');
+      cell.className = 'stack-cell';
+      cell.textContent = val;
+      stackViz.appendChild(cell);
+    });
+    stackInfo.textContent = `Stack size: ${stackData.length}`;
+  }
+
+  window.pushStack = function() {
+    const val = parseInt(document.getElementById('stackValue').value);
+    if(!isNaN(val)) {
+      stackData.push(val);
+      renderStack();
+    }
+  };
+
+  window.popStack = function() {
+    if(stackData.length > 0) {
+      const popped = stackData.pop();
+      renderStack();
+      stackInfo.textContent += ` | Popped: ${popped}`;
+    }
+  };
+
+  window.resetStack = function() {
+    stackData = [];
+    renderStack();
+  };
+
+  // Interactive Sort
+  const sortArray = document.getElementById('sortArray');
+  const sortInfo = document.getElementById('sortInfo');
+  let sortData = [64, 34, 25, 12, 22, 11, 90];
+
+  function renderSortArray(highlights = []) {
+    sortArray.innerHTML = '';
+    sortData.forEach((val, idx) => {
+      const cell = document.createElement('div');
+      cell.className = 'array-cell' + (highlights.includes(idx) ? ' highlight' : '');
+      cell.textContent = val;
+      sortArray.appendChild(cell);
+    });
+  }
+
+  renderSortArray();
+
+  window.startSort = async function() {
+    for(let i = 0; i < sortData.length - 1; i++) {
+      for(let j = 0; j < sortData.length - i - 1; j++) {
+        renderSortArray([j, j+1]);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        if(sortData[j] > sortData[j+1]) {
+          [sortData[j], sortData[j+1]] = [sortData[j+1], sortData[j]];
+          renderSortArray([j, j+1]);
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+    }
+    renderSortArray();
+    sortInfo.textContent = 'Sorting complete!';
+  };
+
+  window.resetSort = function() {
+    sortData = [64, 34, 25, 12, 22, 11, 90];
+    renderSortArray();
+    sortInfo.textContent = '';
+  };
+
+  // Interactive Queue
+  const queueCanvas = document.getElementById('queueCanvas');
+  const queueInfo = document.getElementById('queueInfo');
+  let queueData = [];
+
+  function renderQueue() {
+    if (!queueCanvas) return;
+
+    queueCanvas.innerHTML = '';
+    const gap = 50, startX = 20, y = 20;
+
+    queueData.forEach((val, idx) => {
+      // Create node
+      const node = document.createElement('div');
+      node.className = 'queue-node';
+      node.style.left = (startX + idx * (120 + gap)) + 'px';
+      node.style.top = y + 'px';
+      node.innerHTML = `<div class="data">${val}</div><div class="next">${idx < queueData.length - 1 ? 'next' : 'null'}</div>`;
+      queueCanvas.appendChild(node);
+
+      // Add arrow if not the last node
+      if(idx < queueData.length - 1) {
+        const arrow = document.createElement('div');
+        arrow.className = 'queue-arrow';
+        arrow.style.left = (startX + idx * (120 + gap) + 120) + 'px';
+        arrow.style.top = (y + 25) + 'px';
+        queueCanvas.appendChild(arrow);
+      }
+    });
+
+    queueInfo.textContent = `Queue size: ${queueData.length}`;
+  }
+
+  // Initialize empty queue display
+  renderQueue();
+
+  window.enqueueQueue = function() {
+    const val = parseInt(document.getElementById('queueValue').value);
+    if(!isNaN(val) && val !== '') {
+      queueData.push(val);
+      renderQueue();
+      // Clear input
+      document.getElementById('queueValue').value = '';
+    }
+  };
+
+  window.dequeueQueue = function() {
+    if(queueData.length > 0) {
+      const dequeued = queueData.shift();
+      renderQueue();
+      queueInfo.textContent += ` | Dequeued: ${dequeued}`;
+    } else {
+      queueInfo.textContent = 'Queue is empty!';
+    }
+  };
+
+  window.resetQueue = function() {
+    queueData = [];
+    renderQueue();
+    document.getElementById('queueValue').value = '';
+  };
+
+  // Quiz grading
+  window.gradeQuiz = function(qName, resultId) {
+    const resultEl = document.getElementById(resultId);
+    const quizDiv = resultEl.closest('.quiz');
+    const checkedRadio = quizDiv.querySelector(`input[name="${qName}"]:checked`);
+    
+    if (!checkedRadio) {
+      resultEl.textContent = 'Please choose an option.';
+      return;
+    }
+
+    const pickedAnswer = checkedRadio.value;
+    const correctAnswer = quizDiv.dataset.answer;
+    const explanation = quizDiv.dataset.explanation;
+    
+    if (pickedAnswer === correctAnswer) {
+      resultEl.innerHTML = 'Correct ✅';
+    } else {
+      resultEl.innerHTML = `Not quite ❌ <small>${explanation}</small>`;
+    }
+  };
+});
+</script>
+
 </body>
 </html>
