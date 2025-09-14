@@ -3,14 +3,1399 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 11: OOP</title>
+    <title>Lecture 11: Data Structures and Algorithms II</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+    <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+    <style>
+        :root{--gap:10px;--cell:56px;--pad:#f3f4f6;--ink:#0f172a;--accent:#2563eb;--ok:#16a34a;--warn:#d97706;--bad:#dc2626}
+        body{color:var(--ink)}
+        .pill{display:inline-block;padding:.2rem .6rem;border-radius:999px;border:1px solid #ddd;font-size:.8rem}
+        .ok{background:#eaffea;border-color:#b7e3b7}
+        .warn{background:#fff4e6;border-color:#ffd8a8}
+        .bad{background:#ffe3e3;border-color:#ffa8a8}
+        .quiz .result{margin-top:.5rem;font-weight:600}
+        .quiz .result small { display: block; font-weight: 400; margin-top: 4px; opacity: 0.8; }
+        .code-diagram {font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; line-height: 1.4; white-space: pre;}
+        .btn{cursor:pointer;padding:6px 12px;border-radius:8px;border:1px solid #ddd;background:#f7f7f7;margin-right:6px;transition: background .2s, border-color .2s;}
+        .btn:hover{background:#eee;border-color:#ccc}
+        .btn:focus{outline:2px solid var(--accent);outline-offset:2px}
+        .btn:active{transform:translateY(1px)}
+        .muted{opacity:.75}
+        .fit{max-height:540px}
+        .r{display:flex;gap:var(--gap);align-items:center}
+        .c{display:flex;flex-direction:column;gap:var(--gap)}
+        .card{border:1px solid #e5e7eb;border-radius:12px;padding:12px;box-shadow:0 2px 10px rgba(0,0,0,.04);background:white}
+        .array-viz{display:flex;gap:4px;flex-wrap:nowrap;max-width:100%;overflow:auto;padding:8px}
+        .array-cell{background:#f8fafc;border:1px solid #cbd5e1;border-radius:6px;padding:8px 10px;min-width:40px;text-align:center;font-weight:500;font-size:0.9rem}
+        .array-cell.highlight{background:#bbf7d0}
+        .array-cell.searching{background:#fef3c7}
+        .bst-container{width:100%;margin:0;background:white;border:2px solid #e5e7eb;border-radius:12px;padding:20px;position:relative;min-height:300px;overflow:visible}
+        .tree-node{background:#ffffff;border:2px solid #cbd5e1;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-weight:600;position:relative;font-size:0.9rem;z-index:10}
+        .tree-level{display:flex;justify-content:center;gap:30px;margin-bottom:18px}
+        .tree-pointer{position:absolute;background:#94a3b8;width:2px;height:20px;left:50%;transform:translateX(-50%);top:100%;z-index:-1}
+        .heap-viz{display:flex;flex-direction:column;gap:6px;max-width:800px;margin:0 auto}
+        .heap-level{display:flex;justify-content:center;gap:8px}
+        .heap-cell{background:#f8fafc;border:1px solid #cbd5e1;border-radius:6px;padding:8px 12px;min-width:40px;text-align:center;font-weight:500;font-size:0.9rem}
+        .heap-cell.max{background:#dc2626;color:white}
+        .heap-cell.min{background:#2563eb;color:white}
+        .heap-cell.building{background:#fef3c7;border-color:#f59e0b}
+        .heap-cell.comparing{background:#dbeafe;border-color:#3b82f6}
+        .heap-cell.swapping{background:#fee2e2;border-color:#ef4444}
+        .heap-cell.sorted{background:#dcfce7;border-color:#22c55e;color:#16a34a;font-weight:600}
+        .heap-cell.heapifying{background:#f3e8ff;border-color:#8b5cf6;color:#7c3aed}
+        .heap-info{border-left:4px solid #cbd5e1;padding:0.5rem 1rem;background:#f8fafc;border-radius:6px;margin:8px 0}
+        .phase-label{font-weight:600;color:#374151;font-size:0.9rem;margin-bottom:4px;display:block}
+        .phase-lable.phase-build{color:#d97706}
+        .phase-lable.phase-sort{color:#2563eb}
+        .phase-lable.phase-complete{color:#16a34a}
+        /* animations */
+        @keyframes pulse { 0%,100% { transform: scale(1);} 50% { transform: scale(1.06);} }
+        .array-cell.searching { animation: pulse 0.9s ease-in-out; }
+        .quiz { margin: 12px 0; }
+        .quiz input[type="radio"] { margin-right: 8px; }
+        .quiz label { display:block; margin:6px 0; }
+        /* responsive tweaks */
+        @media (max-width:800px) { .tree-level{gap:18px} .array-cell{min-width:44px;padding:8px 10px} }
+        .tree-node.new-node {
+            animation: nodeInsert 0.6s ease-out;
+            border-color: #2563eb;
+            background: #dbeafe;
+        }
+        
+        @keyframes nodeInsert {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .connection-line {
+            position: absolute;
+            background: #64748b;
+            transform-origin: left center;
+            z-index: 1;
+            height: 2px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 11: OOP Concepts - Introduction</h1>
-        <p>Details about the lecture will be updated here.</p>
-        <a href="index.html">Back to Course Outline</a>
-    </div>
+
+<button id="theme-toggle" style="position:fixed;top:10px;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;">Change Theme</button>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- 1 Title -->
+    <section data-markdown>
+      <textarea data-template>
+# Advanced Algorithms II
+### Lecture 11
+
+Efficient searching, trees, and advanced sorting methods.
+
+- 🔍 Binary Search in Sorted Arrays
+- 🌳 Binary Search Trees
+- 📥 Heap-Based Sorting
+- 🔀 Merge Sort with Arrays
+      </textarea>
+      <aside class="notes">Welcome students. Outline: Focus on efficient algorithms with visualizations.</aside>
+    </section>
+
+    <!-- 2 Recap Advanced Search -->
+    <section data-markdown>
+      <textarea data-template>
+## Recap: From Linear to Binary Search
+
+**From Lecture 10:**
+- Linear Search: O(n) - check each element
+- Works on any array
+
+**Today:**
+- Binary Search: O(log n) - divide and conquer
+- Requires sorted array
+- Much faster for large data!
+      </textarea>
+      <aside class="notes">Connect to previous lecture and introduce binary search advantages.</aside>
+    </section>
+
+    <!-- 3 Binary Search Algorithm (code) -->
+    <section data-markdown>
+      <textarea data-template>
+## Algorithm: Binary Search (Iterative)
+
+```cpp
+int binSearch(int arr[], int n, int t) {
+    int l = 0, r = n - 1;
+    while (l <= r) {
+        int m = l + (r - l) / 2;
+        if (arr[m] == t) return m;
+        arr[m] < t ? l = m + 1 : r = m - 1;
+    }
+    return -1;
+}
+```
+
+**Time Complexity:** O(log n) - Array halved each step.
+      </textarea>
+      <aside class="notes">Show iterative binary search implementation. Explain the divide-and-conquer approach.</aside>
+    </section>
+
+    <!-- QUIZ 1 -->
+    <section>
+      <h2>Quick Quiz — Binary Search</h2>
+      <div class="quiz card" data-correct="1">
+        <p class="q">Binary search requires which of the following preconditions?</p>
+        <div class="options">
+          <label><input type="radio" name="quiz-1"> A) Array must be mutable</label>
+          <label><input type="radio" name="quiz-1"> B) Array must be sorted</label>
+          <label><input type="radio" name="quiz-1"> C) Array must contain distinct elements only</label>
+          <label><input type="radio" name="quiz-1"> D) Array length must be even</label>
+        </div>
+        <button class="btn" onclick="checkQuiz(this, 'quiz-1', 1)">Check</button>
+        <div class="result"></div>
+      </div>
+    </section>
+
+    <!-- 4 Interactive Binary Search -->
+    <section>
+      <h2>Interactive: Binary Search Visualization</h2>
+      <div class="c">
+        <div class="array-viz card" id="binaryArray" aria-label="Binary array visualization"></div>
+        <div class="r" style="margin-top:8px;">
+          <input type="number" id="binaryTarget" placeholder="Enter target" class="form-control" style="width:150px;">
+          <button class="btn" onclick="performBinarySearch()">Binary Search</button>
+          <button class="btn" onclick="resetBinarySearch()">Reset</button>
+        </div>
+        <div id="binaryResult" style="margin-top:8px;"></div>
+      </div>
+      <aside class="notes">Demonstrate binary search with step-by-step visualization showing mid calculation and range reduction.</aside>
+    </section>
+
+    <!-- 5 BST Introduction -->
+    <section data-markdown>
+      <textarea data-template>
+## Binary Search Tree (BST)
+
+A binary tree where:
+- Left child < parent
+- Right child > parent
+- Each subtree is also a BST
+
+**Operations:**
+- Insert: Maintain BST property
+- Search: Compare with current node, go left/right
+- Delete: Handle different cases
+
+Efficient for dynamic data.
+      </textarea>
+      <aside class="notes">Introduce BST concept. Show how it builds on binary trees and maintains order.</aside>
+    </section>
+
+    <!-- 6 BST Structure Implementation (node) -->
+    <section data-markdown>
+      <textarea data-template>
+## BST Node (struct-style)
+
+```cpp
+// Tree node structure
+struct TreeNode {
+    int data;
+    TreeNode* left;
+    TreeNode* right;
+    
+    TreeNode(int val) {
+        data = val;
+        left = nullptr;
+        right = nullptr;
+    }
+};
+```
+
+Using simple structs and factory functions keeps the focus on algorithms.
+      </textarea>
+      <aside class="notes">Show BST node structure.</aside>
+    </section>
+
+    <!-- 7 BST Insert Implementation (split) -->
+    <section data-markdown>
+      <textarea data-template>
+## BST Insert (recursive)
+
+```cpp
+// Insert node into BST
+TreeNode* insert(TreeNode* root, int val) {
+    if(root == nullptr) return createNode(val);
+    if(val < root->data) root->left = insert(root->left, val);
+    else root->right = insert(root->right, val);
+    return root;
+}
+```
+
+We split node and insert into separate slides for clarity.
+      </textarea>
+      <aside class="notes">Demonstrate recursive insertion and BST invariants.</aside>
+    </section>
+
+    <!-- QUIZ 2 -->
+    <section>
+      <h2>Quick Quiz — BST</h2>
+      <div class="quiz card" data-correct="2">
+        <p class="q">When inserting a value equal to an existing node, the implementation above places it to which side (as written)?</p>
+        <div class="options">
+          <label><input type="radio" name="quiz-2"> A) Left</label>
+          <label><input type="radio" name="quiz-2"> B) Right</label>
+          <label><input type="radio" name="quiz-2"> C) It replaces the node</label>
+          <label><input type="radio" name="quiz-2"> D) Insertion fails</label>
+        </div>
+        <button class="btn" onclick="checkQuiz(this, 'quiz-2', 1)">Check</button>
+        <div class="result"></div>
+      </div>
+    </section>
+
+    <!-- 8 Interactive BST -->
+    <section>
+      <h2>Interactive: Binary Search Tree</h2>
+      <div class="c">
+        <div class="bst-container" id="bstViz" aria-label="Binary search tree visualization"></div>
+        <div class="r" style="margin-top:8px;">
+          <input type="number" id="bstValue" placeholder="Enter value to insert" class="form-control" style="width:200px;">
+          <button class="btn" onclick="insertBST()">Insert</button>
+          <button class="btn" onclick="resetBST()">Reset Tree</button>
+        </div>
+        <div id="bstInfo" style="margin-top:8px;"></div>
+      </div>
+      <aside class="notes">Visualize BST insertion and structure. Show how elements are arranged to maintain order.</aside>
+    </section>
+
+    <!-- 9 Heap Data Structure -->
+    <section data-markdown>
+      <textarea data-template>
+## Heap: Complete Binary Tree with Order
+
+**Types:**
+- Max Heap: Parent ≥ children
+- Min Heap: Parent ≤ children
+
+**Properties:**
+- Complete binary tree
+- Heap order maintained
+- Efficient insert/delete operations
+
+Fundamental for heap sort!
+      </textarea>
+      <aside class="notes">Introduce heap concept. Explain the difference between max and min heaps.</aside>
+    </section>
+
+    <!-- 10 Heap Operations -->
+    <section data-markdown>
+      <textarea data-template>
+## Heap Operations (Array Implementation)
+
+```cpp
+// Heapify function - maintain heap property
+void heapify(int arr[], int n, int i) {
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+    
+    // Find largest among root, left, right
+    if(left < n && arr[left] > arr[largest])
+        largest = left;
+    if(right < n && arr[right] > arr[largest])
+        largest = right;
+    
+    // Swap and heapify if root is not largest
+    if(largest != i) {
+        swap(arr[i], arr[largest]);
+        heapify(arr, n, largest);
+    }
+}
+```
+      </textarea>
+      <aside class="notes">Show heapify, build heap, and heap sort implementation. Explain the algorithm steps.</aside>
+    </section>
+
+    <!-- QUIZ 3 -->
+    <section>
+      <h2>Quick Quiz — Heap</h2>
+      <div class="quiz card" data-correct="1">
+        <p class="q">In a 0-based array representation of a binary heap, the left child index for node i is:</p>
+        <div class="options">
+          <label><input type="radio" name="quiz-3"> A) 2*i + 1</label>
+          <label><input type="radio" name="quiz-3"> B) 2*i</label>
+          <label><input type="radio" name="quiz-3"> C) i + 1</label>
+          <label><input type="radio" name="quiz-3"> D) floor(i/2)</label>
+        </div>
+        <button class="btn" onclick="checkQuiz(this, 'quiz-3', 0)">Check</button>
+        <div class="result"></div>
+      </div>
+    </section>
+
+    <!-- 11 Interactive Heap Sort -->
+    <section>
+      <h2>Interactive: Heap Sort Visualization</h2>
+      <div class="c">
+        <div class="heap-viz card" id="heapViz" aria-label="Heap visualization"></div>
+        <div class="r" style="margin-top:8px;">
+          <button class="btn" onclick="buildMaxHeap()" id="buildButton" style="background:#fef3c7;border-color:#f59e0b;">📐 Phase 1: Build Heap</button>
+          <button class="btn" onclick="extractAndSort()" id="extractButton" style="background:#dbeafe;border-color:#3b82f6;">🔄 Phase 2: Extract & Sort</button>
+          <button class="btn" onclick="resetHeapSort()">Reset Array</button>
+        </div>
+        <div id="heapInfo" style="margin-top:8px;"></div>
+      </div>
+      <aside class="notes">Animate heap sort. Show heap construction and repeated removal of max element.</aside>
+    </section>
+
+    <!-- 12 Merge Sort Introduction -->
+    <section data-markdown>
+      <textarea data-template>
+## Merge Sort: Divide and Conquer
+
+**Approach:**
+1. Divide array into two halves
+2. Recursively sort each half
+3. Merge the sorted halves
+
+**Advantages:**
+- Stable sort
+- O(n log n) always
+- Works well for linked lists
+      </textarea>
+      <aside class="notes">Introduce merge sort. Explain divide-and-conquer strategy.</aside>
+    </section>
+
+    <!-- 13 Merge Sort Implementation (merge function) -->
+    <section data-markdown>
+      <textarea data-template>
+## Merge Function (helper)
+
+```cpp
+// Merge two sorted subarrays
+void merge(int arr[], int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+    
+    // Create temporary arrays
+    int* leftArr = new int[n1];
+    int* rightArr = new int[n2];
+    
+    // Copy data
+    for(int i = 0; i < n1; i++) leftArr[i] = arr[left + i];
+    for(int j = 0; j < n2; j++) rightArr[j] = arr[mid + 1 + j];
+    
+    // Merge arrays
+    int i = 0, j = 0, k = left;
+    while(i < n1 && j < n2) {
+        if(leftArr[i] <= rightArr[j]) {
+            arr[k] = leftArr[i]; i++;
+        } else {
+            arr[k] = rightArr[j]; j++;
+        }
+        k++;
+    }
+    
+    // Copy remaining elements
+    while(i < n1) { arr[k] = leftArr[i]; i++; k++; }
+    while(j < n2) { arr[k] = rightArr[j]; j++; k++; }
+    
+    delete[] leftArr; delete[] rightArr;
+}
+```
+      </textarea>
+      <aside class="notes">Explain the merge step separately to reduce slide density.</aside>
+    </section>
+
+    <!-- 14 Merge Sort Implementation (main) -->
+    <section data-markdown>
+      <textarea data-template>
+## Merge Sort (main)
+
+```cpp
+void mergeSort(int arr[], int left, int right) {
+    if(left < right) {
+        int mid = left + (right - left) / 2;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
+    }
+}
+```
+      </textarea>
+      <aside class="notes">Show the recursive control flow without overcrowding the slide.</aside>
+    </section>
+
+    <!-- QUIZ 4 -->
+    <section>
+      <h2>Quick Quiz — Merge Sort</h2>
+      <div class="quiz card" data-correct="0">
+        <p class="q">Which property is true for merge sort?</p>
+        <div class="options">
+          <label><input type="radio" name="quiz-4"> A) Stable and O(n log n)</label>
+          <label><input type="radio" name="quiz-4"> B) Unstable and O(n^2)</label>
+          <label><input type="radio" name="quiz-4"> C) In-place and O(log n)</label>
+          <label><input type="radio" name="quiz-4"> D) Stable and O(n^2)</label>
+        </div>
+        <button class="btn" onclick="checkQuiz(this, 'quiz-4', 0)">Check</button>
+        <div class="result"></div>
+      </div>
+    </section>
+
+    <!-- 15 Interactive Merge Sort -->
+    <section>
+      <h2>Interactive: Merge Sort Visualization</h2>
+      <div class="c">
+        <div class="array-viz card" id="mergeArray" aria-label="Merge sort visualization"></div>
+        <div class="r" style="margin-top:8px;">
+          <button class="btn" onclick="startMergeSort()">Start Merge Sort</button>
+          <button class="btn" onclick="resetMergeSort()">Reset Array</button>
+        </div>
+        <div id="mergeInfo" style="margin-top:8px;"></div>
+      </div>
+      <aside class="notes">Animate merge sort. Show division steps and merging of sorted subarrays.</aside>
+    </section>
+
+    <!-- 16 Comparison Table -->
+    <section>
+      <h2>Algorithm Comparison</h2>
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr style="background: #f8fafc;">
+          <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Algorithm</th>
+          <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Time Complexity</th>
+          <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Space Complexity</th>
+          <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Stable</th>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 12px;">Linear Search</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">O(n)</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">O(1)</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">N/A</td>
+        </tr>
+        <tr style="background: #f8fafc;">
+          <td style="border: 1px solid #ddd; padding: 12px;">Binary Search</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">O(log n)</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">O(1)</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">N/A</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 12px;">Heap Sort</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">O(n log n)</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">O(1)</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">No</td>
+        </tr>
+        <tr style="background: #f8fafc;">
+          <td style="border: 1px solid #ddd; padding: 12px;">Merge Sort</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">O(n log n)</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">O(n)</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">Yes</td>
+        </tr>
+      </table>
+      <p style="margin-top: 20px;"><small>Heapsort is in-place, merge sort needs extra space but is stable.</small></p>
+    </section>
+
+    <!-- QUIZ 5 (after comparison / summary) -->
+    <section>
+      <h2>Closing Quiz</h2>
+      <div class="quiz card" data-correct="0">
+        <p class="q">Which algorithm guarantees O(n log n) worst-case time?</p>
+        <div class="options">
+          <label><input type="radio" name="quiz-5"> A) Merge Sort</label>
+          <label><input type="radio" name="quiz-5"> B) Quick Sort</label>
+          <label><input type="radio" name="quiz-5"> C) Bubble Sort</label>
+          <label><input type="radio" name="quiz-5"> D) Selection Sort</label>
+        </div>
+        <button class="btn" onclick="checkQuiz(this, 'quiz-5', 0)">Check</button>
+        <div class="result"></div>
+      </div>
+    </section>
+
+    <!-- 17 Summary -->
+    <section>
+      <h2>Summary</h2>
+      <ul>
+        <li>Binary search provides O(log n) search in sorted arrays</li>
+        <li>Binary search trees maintain sorted order with dynamic operations</li>
+        <li>Heap sort builds on heap data structure for efficient sorting</li>
+        <li>Merge sort uses divide-and-conquer strategy with guaranteed O(n log n)</li>
+        <li>All implementations shown without classes, using functions and structs</li>
+      </ul>
+      <aside class="notes">Recap key algorithms. Highlight implementation choices and trade-offs.</aside>
+    </section>
+
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  Reveal.initialize({
+    hash: true,
+    plugins: [ RevealMarkdown, RevealHighlight ],
+    margin: 0.1,
+    width: 1280,
+    height: 680
+  });
+
+  // Theme toggler
+  const themes = ['white', 'league', 'beige', 'sky', 'night', 'serif', 'simple', 'solarized', 'blood', 'moon', 'dracula', 'black'];
+  let theme_idx = 0;
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const themeLink = document.getElementById('theme-link');
+
+  themeToggleBtn.onclick = () => {
+    theme_idx = (theme_idx + 1) % themes.length;
+    themeLink.href = `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[theme_idx]}.css`;
+  };
+
+  /* ---------------- Binary Search ---------------- */
+  const binaryArray = document.getElementById('binaryArray');
+  const binaryResult = document.getElementById('binaryResult');
+  let binarySearchData = [8, 12, 16, 23, 38, 56, 72];
+
+  function renderBinaryArray(highlightLeft = -1, highlightRight = -1, highlightMid = -1, highlightTarget = -1) {
+    binaryArray.innerHTML = '';
+    binarySearchData.forEach((val, idx) => {
+      const cell = document.createElement('div');
+      cell.className = 'array-cell';
+      cell.textContent = val;
+      if(idx === highlightMid) cell.classList.add('highlight');
+      if(idx === highlightTarget) cell.style.backgroundColor = '#ff6b6b';
+      if(idx >= highlightLeft && idx <= highlightRight) cell.classList.add('searching');
+      binaryArray.appendChild(cell);
+    });
+  }
+
+  renderBinaryArray();
+
+  window.performBinarySearch = function() {
+    const v = document.getElementById('binaryTarget').value;
+    const target = parseInt(v);
+    if(isNaN(target)) return;
+
+    let left = 0;
+    let right = binarySearchData.length - 1;
+    let steps = 0;
+
+    function step() {
+      if(left > right) {
+        binaryResult.textContent = `${target} not found (after ${steps} steps)`;
+        return;
+      }
+      const mid = Math.floor(left + (right - left) / 2);
+      steps++;
+      renderBinaryArray(left, right, mid);
+      setTimeout(() => {
+        if(binarySearchData[mid] === target) {
+          const foundCell = binaryArray.children[mid];
+          foundCell.classList.add('highlight');
+          foundCell.style.animation = 'pulse 0.8s ease-in-out';
+          binaryResult.textContent = `Found ${target} at index ${mid} (in ${steps} steps)`;
+        } else if(binarySearchData[mid] < target) {
+          left = mid + 1;
+          step();
+        } else {
+          right = mid - 1;
+          step();
+        }
+      }, 600);
+    }
+
+    renderBinaryArray(left, right);
+    step();
+  };
+
+  window.resetBinarySearch = function() {
+    renderBinaryArray();
+    binaryResult.textContent = '';
+    document.getElementById('binaryTarget').value = '';
+  };
+
+  /* ---------------- BST (advanced interactive BSTVisualizer) ---------------- */
+  class BSTNode {
+    constructor(value) {
+      this.value = value;
+      this.left = null;
+      this.right = null;
+    }
+  }
+
+  class BSTVisualizer {
+    constructor() {
+      this.root = null;
+      this.container = document.getElementById('bstViz');
+      this.info = document.getElementById('bstInfo');
+      this.nodeCounter = 0;
+    }
+
+    insert(value) {
+      if (this.root === null) {
+        this.root = new BSTNode(value);
+      } else {
+        this.insertNode(this.root, value);
+      }
+      this.render();
+    }
+
+    insertNode(node, value) {
+      if (value < node.value) {
+        if (node.left === null) {
+          node.left = new BSTNode(value);
+        } else {
+          this.insertNode(node.left, value);
+        }
+      } else if (value > node.value) {
+        if (node.right === null) {
+          node.right = new BSTNode(value);
+        } else {
+          this.insertNode(node.right, value);
+        }
+      }
+      // Ignore duplicates
+    }
+
+    reset() {
+      this.root = null;
+      this.nodeCounter = 0;
+      this.render();
+    }
+
+    // Calculate node positions using a proper tree layout
+    calculatePositions() {
+      if (!this.root) return {};
+
+      const positions = {};
+      const levels = {};
+
+      // First pass: assign levels and count nodes per level
+      this.assignLevels(this.root, 0, levels);
+
+      // Second pass: calculate horizontal positions
+      this.calculateHorizontalPositions(this.root, positions, levels);
+
+      return positions;
+    }
+
+    assignLevels(node, level, levels) {
+      if (!node) return;
+
+      if (!levels[level]) levels[level] = [];
+      levels[level].push(node);
+
+      this.assignLevels(node.left, level + 1, levels);
+      this.assignLevels(node.right, level + 1, levels);
+    }
+
+    calculateHorizontalPositions(node, positions, levels, minX = 0, maxX = 800) {
+      if (!node) return minX;
+
+      const level = this.getNodeLevel(node, this.root, 0);
+      const centerX = (minX + maxX) / 2;
+
+      positions[node.value] = {
+        x: centerX,
+        y: level * 80 + 50,
+        level: level
+      };
+
+      // Recursively position children
+      if (node.left || node.right) {
+        const leftMax = centerX - 20;
+        const rightMin = centerX + 20;
+
+        if (node.left) {
+          this.calculateHorizontalPositions(node.left, positions, levels, minX, leftMax);
+        }
+        if (node.right) {
+          this.calculateHorizontalPositions(node.right, positions, levels, rightMin, maxX);
+        }
+      }
+
+      return maxX;
+    }
+
+    getNodeLevel(targetNode, currentNode, currentLevel) {
+      if (!currentNode) return -1;
+      if (currentNode === targetNode) return currentLevel;
+
+      const leftResult = this.getNodeLevel(targetNode, currentNode.left, currentLevel + 1);
+      if (leftResult !== -1) return leftResult;
+
+      return this.getNodeLevel(targetNode, currentNode.right, currentLevel + 1);
+    }
+
+    render() {
+      this.container.innerHTML = '';
+
+      if (!this.root) {
+        this.container.innerHTML = '<div id="emptyMessage" style="text-align: center; color: #64748b; margin-top: 100px;">Empty BST - Insert a value to start</div>';
+        this.info.textContent = 'Ready to build your BST';
+        return;
+      }
+
+      const positions = this.calculatePositions();
+      const nodeCount = Object.keys(positions).length;
+
+      // Center the tree in the container
+      let minX = Infinity, maxX = -Infinity;
+      for (let pos of Object.values(positions)) {
+        minX = Math.min(minX, pos.x);
+        maxX = Math.max(maxX, pos.x);
+      }
+      const treeWidth = maxX - minX + 40;
+      const containerWidth = this.container.clientWidth;
+      const offsetX = (containerWidth - treeWidth) / 2 - minX + 20; // adjust for node center
+
+      // Adjust positions for centering
+      for (let key in positions) {
+        positions[key].x += offsetX;
+      }
+
+      // Create nodes
+      this.createNodes(this.root, positions);
+
+      // Create connections after a brief delay to ensure DOM is ready
+      setTimeout(() => {
+        this.createConnections(this.root, positions);
+      }, 50);
+
+      this.info.textContent = `BST with ${nodeCount} node${nodeCount !== 1 ? 's' : ''}`;
+    }
+
+    createNodes(node, positions) {
+      if (!node) return;
+
+      const pos = positions[node.value];
+      const nodeEl = document.createElement('div');
+      nodeEl.className = 'tree-node';
+      nodeEl.textContent = node.value;
+      nodeEl.style.position = 'absolute';
+      nodeEl.style.left = (pos.x - 20) + 'px';
+      nodeEl.style.top = pos.y + 'px';
+      nodeEl.id = `node-${node.value}`;
+
+      // Add animation for new nodes
+      if (this.nodeCounter < Object.keys(positions).length) {
+        nodeEl.classList.add('new-node');
+      }
+
+      this.container.appendChild(nodeEl);
+
+      this.createNodes(node.left, positions);
+      this.createNodes(node.right, positions);
+    }
+
+    createConnections(node, positions) {
+      if (!node) return;
+
+      const parentPos = positions[node.value];
+
+      // Create connection to left child
+      if (node.left) {
+        const childPos = positions[node.left.value];
+        this.createConnectionLine(parentPos, childPos);
+      }
+
+      // Create connection to right child
+      if (node.right) {
+        const childPos = positions[node.right.value];
+        this.createConnectionLine(parentPos, childPos);
+      }
+
+      this.createConnections(node.left, positions);
+      this.createConnections(node.right, positions);
+    }
+
+    createConnectionLine(fromPos, toPos) {
+      const line = document.createElement('div');
+      line.className = 'connection-line';
+
+      const deltaX = toPos.x - fromPos.x;
+      const deltaY = toPos.y - fromPos.y;
+      const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+
+      line.style.position = 'absolute';
+      line.style.left = fromPos.x + 'px';
+      line.style.top = (fromPos.y + 20) + 'px'; // Start from bottom of parent node
+      line.style.width = length + 'px';
+      line.style.transform = `rotate(${angle}deg)`;
+
+      this.container.appendChild(line);
+    }
+  }
+
+  // Initialize the visualizer
+  const bst = new BSTVisualizer();
+
+  // Add event listener for Enter key
+  document.getElementById('bstValue').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      insertBST();
+    }
+  });
+
+  window.insertBST = function() {
+    const input = document.getElementById('bstValue');
+    const value = parseInt(input.value);
+
+    if (isNaN(value) || value < 1) {
+      alert('Please enter a valid positive number');
+      return;
+    }
+
+    bst.insert(value);
+    input.value = '';
+    input.focus();
+  };
+
+  window.resetBST = function() {
+    bst.reset();
+    document.getElementById('bstValue').focus();
+  };
+
+  /* ---------------- Enhanced Heap with Phased Visualization & Separate Phase Buttons ---------------- */
+  const heapViz = document.getElementById('heapViz');
+  const heapInfo = document.getElementById('heapInfo');
+  const buildButton = document.getElementById('buildButton');
+  const extractButton = document.getElementById('extractButton');
+
+  let heapData = [64, 34, 25, 12, 22, 11, 90, 5, 77, 30];
+  let heapEndIndex = heapData.length - 1; // Initially all elements are unsorted
+  let heapBuilt = false; // Track if Phase 1 has been completed
+  let isRunning = false;
+
+  function renderHeap(highlightIndices = [], heapEnd = heapEndIndex, comparingIndices = [], swappingIndices = [], activePhase = 'idle') {
+    heapViz.innerHTML = '';
+
+    // Clear previous animations and add active phase class
+    heapViz.classList.remove('building', 'sorting', 'complete');
+    if (activePhase !== 'idle') {
+      heapViz.classList.add(activePhase);
+    }
+
+    const levels = [];
+    heapData.forEach((val, idx) => {
+      const level = Math.floor(Math.log2(idx + 1));
+      if(!levels[level]) levels[level] = [];
+      levels[level].push({val, idx});
+    });
+
+    levels.forEach(levelData => {
+      const levelDiv = document.createElement('div');
+      levelDiv.className = 'heap-level';
+      levelData.forEach(({val, idx}) => {
+        const cell = document.createElement('div');
+        cell.className = 'heap-cell';
+        cell.textContent = val;
+
+        // Color coding based on phase and position
+        if (idx > heapEnd) {
+          // Already sorted portion
+          cell.classList.add('sorted');
+        } else if (idx === 0 && heapEnd >= 0) {
+          // Root of heap (max element when active)
+          cell.classList.add('max');
+        } else if (swappingIndices.includes(idx)) {
+          // Elements being swapped
+          cell.classList.add('swapping');
+        } else if (comparingIndices.includes(idx)) {
+          // Elements being compared in heapify
+          cell.classList.add('comparing');
+        } else if (highlightIndices.includes(idx)) {
+          // Elements being heapified
+          cell.classList.add('heapifying');
+        } else if (idx <= heapEnd) {
+          // Active heap portion (being sorted)
+          cell.classList.add('building');
+        }
+
+        if(highlightIndices.includes(idx)) {
+          cell.style.animation = 'pulse 0.8s ease-in-out';
+        }
+
+        levelDiv.appendChild(cell);
+      });
+      heapViz.appendChild(levelDiv);
+    });
+  }
+
+  function updateHeapInfo(phase = 'idle', iteration = 0, heapSize = heapData.length) {
+    let infoText = '';
+
+    switch(phase) {
+      case 'building':
+        infoText = `<span class="phase-label" style="color:#d97706">📐 Phase 1:</span> Building Max Heap`;
+        break;
+      case 'sorting':
+        infoText = `<span class="phase-label" style="color:#2563eb">🔄 Phase 2:</span> Extraction & Heap Restoration (Iteration ${iteration})`;
+        break;
+      case 'building_complete':
+        infoText = `<span class="phase-label" style="color:#16a34a">✅ Phase 1 Complete:</span> Max Heap Ready for Extraction`;
+        break;
+      case 'sorting_complete':
+        infoText = `<span class="phase-label" style="color:#16a34a">✅ COMPLETE:</span> Array Fully Sorted!`;
+        break;
+      case 'ready_phase1':
+        infoText = `<span class="phase-label">🎯 Ready:</span> Click "Phase 1: Build Heap" to start`;
+        break;
+      case 'ready_phase2':
+        infoText = `<span class="phase-label">🎯 Ready:</span> Click "Phase 2: Extract & Sort" to continue`;
+        break;
+      default:
+        infoText = `Heap size: ${heapSize} | Max: ${heapData[0]}`;
+    }
+
+    heapInfo.innerHTML = infoText;
+  }
+
+  function updateButtonStates(phase) {
+    switch(phase) {
+      case 'initial':
+        buildButton.disabled = false;
+        buildButton.textContent = '📐 Phase 1: Build Heap';
+        extractButton.disabled = true;
+        extractButton.textContent = '🔄 Phase 2: Extract & Sort';
+        break;
+      case 'building':
+        buildButton.disabled = true;
+        buildButton.textContent = '🔧 Building...';
+        extractButton.disabled = true;
+        extractButton.textContent = '🔄 Phase 2: Extract & Sort';
+        break;
+      case 'heap_ready':
+        buildButton.disabled = false;
+        buildButton.textContent = '📐 Phase 1 Complete';
+        extractButton.disabled = false;
+        extractButton.textContent = '🔄 Phase 2: Extract & Sort';
+        break;
+      case 'sorting':
+        buildButton.disabled = false;
+        buildButton.textContent = '📐 Phase 1 Complete';
+        extractButton.disabled = true;
+        extractButton.textContent = '🔄 Sorting...';
+        break;
+      case 'complete':
+        buildButton.disabled = false;
+        buildButton.textContent = '📐 Phase 1 Complete';
+        extractButton.disabled = false;
+        extractButton.textContent = '🎉 Complete!';
+        break;
+    }
+  }
+
+  renderHeap();
+  updateHeapInfo('ready_phase1');
+  updateButtonStates('initial');
+
+  async function enhancedHeapify(array, n, i, showComparisons = true) {
+    let largest = i;
+    const left = 2 * i + 1;
+    const right = 2 * i + 2;
+
+    // Show comparisons if requested
+    if (showComparisons) {
+      let comparingIndices = [i];
+      if (left < n) comparingIndices.push(left);
+      if (right < n) comparingIndices.push(right);
+
+      renderHeap([], heapEndIndex, comparingIndices, [], 'building');
+      updateHeapInfo('building');
+      await new Promise(r => setTimeout(r, 600));
+    }
+
+    if(left < n && array[left] > array[largest]) largest = left;
+    if(right < n && array[right] > array[largest]) largest = right;
+
+    if(largest !== i) {
+      // Show swap
+      renderHeap([], heapEndIndex, [], [i, largest], 'building');
+      updateHeapInfo('building');
+      await new Promise(r => setTimeout(r, 500));
+
+      [array[i], array[largest]] = [array[largest], array[i]];
+
+      // Recursively heapify with delayed visualization
+      await enhancedHeapify(array, n, largest, showComparisons);
+    }
+  }
+
+  window.buildMaxHeap = async function() {
+    if (isRunning) return;
+
+    isRunning = true;
+    updateButtonStates('building');
+    updateHeapInfo('building');
+
+    const originalLength = heapData.length;
+
+    // Phase 1: Build Max Heap with detailed visualization
+    for(let i = Math.floor(originalLength / 2) - 1; i >= 0; i--) {
+      await enhancedHeapify(heapData, originalLength, i, true);
+    }
+
+    renderHeap([], heapEndIndex, [], [], 'building');
+    updateHeapInfo('building_complete');
+    updateButtonStates('heap_ready');
+    heapBuilt = true;
+
+    // Small delay before allowing next phase
+    await new Promise(r => setTimeout(r, 500));
+    updateHeapInfo('ready_phase2');
+
+    isRunning = false;
+  };
+
+  window.extractAndSort = async function() {
+    if (isRunning || !heapBuilt) return;
+
+    isRunning = true;
+    updateButtonStates('sorting');
+    updateHeapInfo('sorting', 1);
+
+    const originalLength = heapData.length;
+
+    // Phase 2: Extract and sort
+    for(let i = originalLength - 1; i > 0; i--) {
+      updateHeapInfo('sorting', originalLength - i);
+
+      // Extract root to sorted position - show the swap
+      renderHeap([], i, [], [0, i], 'sorting');
+      await new Promise(r => setTimeout(r, 700));
+
+      [heapData[0], heapData[i]] = [heapData[i], heapData[0]];
+      heapEndIndex = i - 1; // Update the boundary between heap and sorted portions
+
+      // Show the result of the extraction (sorted element in place)
+      renderHeap([], heapEndIndex, [], [], 'sorting');
+      await new Promise(r => setTimeout(r, 500));
+
+      // Restore heap property with detailed comparisons
+      if (i > 1) {
+        await enhancedHeapify(heapData, i, 0, true);
+        renderHeap([], heapEndIndex, [], [], 'sorting');
+        await new Promise(r => setTimeout(r, 600));
+      }
+    }
+
+    // Final completion
+    heapViz.classList.remove('building', 'sorting');
+    heapViz.classList.add('complete');
+    heapEndIndex = -1; // All sorted
+    renderHeap([], -1, [], [], 'complete');
+    updateHeapInfo('sorting_complete');
+    updateButtonStates('complete');
+
+    isRunning = false;
+  };
+
+  window.resetHeapSort = function() {
+    heapData = [64, 34, 25, 12, 22, 11, 90, 5, 77, 30];
+    heapEndIndex = heapData.length - 1;
+    heapViz.className = 'heap-viz';
+    renderHeap([], heapEndIndex, [], [], 'idle');
+    updateHeapInfo('ready_phase1');
+    updateButtonStates('initial');
+
+    // Reset phase state
+    heapBuilt = false;
+    isRunning = false;
+  };
+
+  /* ---------------- Enhanced Merge Sort with Temporary Array Visualization ---------------- */
+  const mergeArray = document.getElementById('mergeArray');
+  const mergeInfo = document.getElementById('mergeInfo');
+  let mergeData = [64, 34, 25, 12, 22, 11, 90];
+  let isRunningMergeSort = false;
+
+  function renderMergeArray(highlightRanges = [], tempArrays = [], phase = '', pointerIndex = -1) {
+    mergeArray.innerHTML = '';
+
+    // Main array row
+    const mainRow = document.createElement('div');
+    mainRow.className = 'array-viz';
+    mainRow.style.marginBottom = '10px';
+    mainRow.style.position = 'relative';
+
+    // Add pointer arrow if pointerIndex is specified
+    if (pointerIndex >= 0 && pointerIndex < mergeData.length) {
+      const pointerArrow = document.createElement('div');
+      pointerArrow.style.position = 'absolute';
+      pointerArrow.style.top = '-30px';
+      pointerArrow.style.left = `calc(${pointerIndex * (40 + 4)}px + 20px)`; // Center on cell
+      pointerArrow.style.fontSize = '1.5rem';
+      pointerArrow.style.color = '#2563eb';
+      pointerArrow.style.zIndex = '10';
+      pointerArrow.textContent = '⬇️';
+      pointerArrow.style.animation = 'pulse 0.8s ease-in-out';
+      mainRow.appendChild(pointerArrow);
+    }
+
+    mergeData.forEach((val, idx) => {
+      const cell = document.createElement('div');
+      cell.className = 'array-cell';
+      cell.textContent = val;
+
+      // Highlight current pointer position
+      if(idx === pointerIndex) {
+        cell.style.backgroundColor = '#fbbf24';
+        cell.style.borderColor = '#f59e0b';
+        cell.style.fontWeight = '700';
+        cell.style.transform = 'scale(1.1)';
+        cell.style.boxShadow = '0 0 10px rgba(245, 158, 11, 0.5)';
+      }
+
+      // Apply highlighting based on ranges
+      highlightRanges.forEach(range => {
+        if(idx >= range.start && idx <= range.end) {
+          cell.classList.add(range.class || 'highlight');
+        }
+      });
+
+      mainRow.appendChild(cell);
+    });
+
+    // Add label for main array
+    const mainLabel = document.createElement('div');
+    mainLabel.style.fontSize = '0.8rem';
+    mainLabel.style.color = '#64748b';
+    mainLabel.style.marginBottom = '4px';
+    mainLabel.textContent = 'Main Array:';
+
+    mergeArray.appendChild(mainLabel);
+    mergeArray.appendChild(mainRow);
+
+    // Add temporary arrays if provided
+    if (tempArrays.length > 0) {
+      tempArrays.forEach((tempArray, arrayIndex) => {
+        const tempLabel = document.createElement('div');
+        tempLabel.style.fontSize = '0.8rem';
+        tempLabel.style.color = '#64748b';
+        tempLabel.style.marginTop = '8px';
+        tempLabel.style.marginBottom = '4px';
+        tempLabel.textContent = tempArray.label || `Temp Array ${arrayIndex + 1}:`;
+
+        const tempRow = document.createElement('div');
+        tempRow.className = 'array-viz';
+        tempRow.style.backgroundColor = tempArray.bgColor || '#f8fafc';
+        tempRow.style.border = '1px dashed #cbd5e1';
+        tempRow.style.borderRadius = '6px';
+        tempRow.style.padding = '4px';
+
+        tempArray.data.forEach((val, idx) => {
+          const cell = document.createElement('div');
+          cell.className = 'array-cell';
+          cell.textContent = val;
+          cell.style.backgroundColor = tempArray.cellColor || '#e2e8f0';
+          cell.style.borderColor = tempArray.borderColor || '#94a3b8';
+
+          if (tempArray.highlightIndices && tempArray.highlightIndices.includes(idx)) {
+            cell.style.backgroundColor = '#fef3c7';
+            cell.style.borderColor = '#f59e0b';
+            cell.style.animation = 'pulse 0.6s ease-in-out';
+          }
+
+          tempRow.appendChild(cell);
+        });
+
+        mergeArray.appendChild(tempLabel);
+        mergeArray.appendChild(tempRow);
+      });
+    }
+  }
+
+  renderMergeArray();
+
+  async function enhancedMerge(arr, left, mid, right, depth = 0) {
+    const leftArr = arr.slice(left, mid + 1);
+    const rightArr = arr.slice(mid + 1, right + 1);
+
+    // Show the splitting phase
+    renderMergeArray([
+      {start: left, end: mid, class: 'searching'},
+      {start: mid + 1, end: right, class: 'highlight'}
+    ], [
+      {
+        label: `Left Subarray (${left} to ${mid}):`,
+        data: leftArr,
+        bgColor: '#fef3c7',
+        cellColor: '#fef3c7',
+        borderColor: '#f59e0b'
+      },
+      {
+        label: `Right Subarray (${mid + 1} to ${right}):`,
+        data: rightArr,
+        bgColor: '#dbeafe',
+        cellColor: '#dbeafe',
+        borderColor: '#3b82f6'
+      }
+    ]);
+
+    await new Promise(r => setTimeout(r, 1000));
+
+    // Now show the merging process step by step
+    let i = 0, j = 0, k = left;
+    const mergedResult = [];
+
+    while(i < leftArr.length && j < rightArr.length) {
+      let chosenFrom = '';
+      if(leftArr[i] <= rightArr[j]) {
+        arr[k] = leftArr[i];
+        mergedResult.push(leftArr[i]);
+        chosenFrom = 'left';
+        i++;
+      } else {
+        arr[k] = rightArr[j];
+        mergedResult.push(rightArr[j]);
+        chosenFrom = 'right';
+        j++;
+      }
+
+      // Show the comparison and selection
+      renderMergeArray([
+        {start: left, end: right, class: 'highlight'}
+      ], [
+        {
+          label: `Left: comparing ${leftArr[i-1] || leftArr[i] || 'done'}`,
+          data: leftArr,
+          bgColor: '#fef3c7',
+          cellColor: chosenFrom === 'left' ? '#bbf7d0' : '#fef3c7',
+          borderColor: '#f59e0b',
+          highlightIndices: chosenFrom === 'left' ? [i-1] : []
+        },
+        {
+          label: `Right: comparing ${rightArr[j-1] || rightArr[j] || 'done'}`,
+          data: rightArr,
+          bgColor: '#dbeafe',
+          cellColor: chosenFrom === 'right' ? '#bbf7d0' : '#dbeafe',
+          borderColor: '#3b82f6',
+          highlightIndices: chosenFrom === 'right' ? [j-1] : []
+        },
+        {
+          label: `Merged so far:`,
+          data: mergedResult,
+          bgColor: '#dcfce7',
+          cellColor: '#dcfce7',
+          borderColor: '#22c55e'
+        }
+      ], '', k);
+
+      k++;
+      await new Promise(r => setTimeout(r, 800));
+    }
+
+    // Copy remaining elements from left array
+    while(i < leftArr.length) {
+      arr[k] = leftArr[i];
+      mergedResult.push(leftArr[i]);
+      i++;
+      k++;
+    }
+
+    // Copy remaining elements from right array
+    while(j < rightArr.length) {
+      arr[k] = rightArr[j];
+      mergedResult.push(rightArr[j]);
+      j++;
+      k++;
+    }
+
+    // Show final merged result
+    renderMergeArray([
+      {start: left, end: right, class: 'highlight'}
+    ], [
+      {
+        label: `Final Merged Range (${left} to ${right}):`,
+        data: mergedResult,
+        bgColor: '#dcfce7',
+        cellColor: '#dcfce7',
+        borderColor: '#22c55e'
+      }
+    ]);
+
+    await new Promise(r => setTimeout(r, 600));
+  }
+
+  async function mergeSortHelper(arr, left, right, depth = 0) {
+    if(left < right) {
+      const mid = Math.floor(left + (right - left) / 2);
+      const indent = '  '.repeat(depth);
+
+      // Show division phase
+      mergeInfo.innerHTML = `${indent}Dividing range [${left}, ${right}] at mid=${mid}`;
+      renderMergeArray([{start: left, end: right, class: 'searching'}]);
+      await new Promise(r => setTimeout(r, 1000));
+
+      // Recursively sort left half
+      mergeInfo.innerHTML = `${indent}Sorting left half [${left}, ${mid}]`;
+      await mergeSortHelper(arr, left, mid, depth + 1);
+
+      // Recursively sort right half
+      mergeInfo.innerHTML = `${indent}Sorting right half [${mid + 1}, ${right}]`;
+      await mergeSortHelper(arr, mid + 1, right, depth + 1);
+
+      // Merge the sorted halves with detailed visualization
+      mergeInfo.innerHTML = `${indent}Merging [${left}, ${mid}] and [${mid + 1}, ${right}]`;
+      await enhancedMerge(arr, left, mid, right, depth);
+
+      // Show result after merge
+      renderMergeArray([{start: left, end: right, class: 'highlight'}]);
+      await new Promise(r => setTimeout(r, 800));
+    }
+  }
+
+  window.startMergeSort = async function() {
+    if (isRunningMergeSort) return;
+
+    isRunningMergeSort = true;
+    mergeInfo.innerHTML = 'Starting merge sort - divide and conquer approach...';
+
+    try {
+      await mergeSortHelper(mergeData, 0, mergeData.length - 1, 0);
+      renderMergeArray();
+      mergeInfo.innerHTML = 'Merge Sort Complete! Array is now fully sorted.';
+    } catch (e) {
+      mergeInfo.innerHTML = 'Merge sort interrupted.';
+    }
+
+    isRunningMergeSort = false;
+  };
+
+  window.resetMergeSort = function() {
+    isRunningMergeSort = false;
+    mergeData = [64, 34, 25, 12, 22, 11, 90];
+    renderMergeArray();
+    mergeInfo.innerHTML = 'Click "Start Merge Sort" to see the divide-and-conquer algorithm in action.';
+  };
+
+  /* ---------------- Quiz helper ---------------- */
+  window.checkQuiz = function(button, name, correctIndex) {
+    const container = button.closest('.quiz');
+    const radios = Array.from(container.querySelectorAll(`input[name='${name}']`));
+    let chosen = radios.findIndex(r => r.checked);
+    const result = container.querySelector('.result');
+    const correct = parseInt(container.getAttribute('data-correct')) || correctIndex;
+    if(chosen === -1) { result.innerHTML = '<small>Please select an answer.</small>'; return; }
+    if(chosen === correct) {
+      result.innerHTML = '<span style="color:var(--ok)">Correct.</span>';
+    } else {
+      result.innerHTML = '<span style="color:var(--bad)">Incorrect.</span><small>Review the slide for details.</small>';
+    }
+  };
+
+  // Accessibility: ensure quiz radio groups have unique names on duplicate loads
+  document.querySelectorAll('.quiz').forEach((q, idx) => {
+    q.querySelectorAll('input[type="radio"]').forEach(r => {
+      const base = r.name || `quiz-${idx}`;
+      r.name = q.querySelector('.q') ? `quiz-${idx}-${base}` : `quiz-${idx}`;
+    });
+  });
+
+});
+</script>
+
 </body>
 </html>
