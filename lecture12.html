@@ -1,16 +1,952 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 12: Classes</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <meta charset="utf-8" />
+  <title>Lecture 12: Recap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Reveal.js Core CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+  <!-- Theme -->
+  <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css" />
+  <!-- Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+  <!-- KaTeX for Math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" />
+
+  <style>
+    /* Custom CSS if needed */
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 12: OOP Concepts - Classes and Objects</h1>
-        <p>Details about the lecture will be updated here.</p>
-        <a href="index.html">Back to Course Outline</a>
-    </div>
+
+<button id="theme-toggle" style="position:fixed;top:10px;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;">Change Theme</button>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- Title Slide -->
+    <section data-markdown>
+      <textarea data-template>
+        # Lecture 12: RECAP
+        Review of Lectures 1-11 Foundations
+      </textarea
+      >
+    </section>
+
+    <!-- Lecture 1 Summary -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 1: Introduction to Programming
+
+        ### Key Topics
+        - Programming concepts: algorithms, syntax, logic, debugging
+        - Computer fundamentals: binary system, CPU, memory, storage
+        - High-level vs low-level languages
+        - Hello World program structure
+        - C++ development setup
+        - Problem-solving methodology
+        - Comments and variables: data types, static typing
+      </textarea>
+    </section>
+
+    <!-- Lecture 1 Code -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 1: Code Example
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            cout << "Hello, World!" << endl;  // Output text
+            return 0;  // Indicate success
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Lecture 1 Error -->
+    <section data-markdown>
+      <textarea data-template>
+        ** Error Example:**
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            cout << "Hello, World!" << endl
+            return 0;
+        }
+        ```
+
+
+        ---
+
+        **Error Message:** `expected ';' before 'return'`
+
+        **Error Type:** Syntax Error (compile-time)
+
+        **Resolution:** Add the missing semicolon at the end of the statement.
+
+        ```cpp
+        cout << "Hello, World!" << endl;
+        ```
+      </textarea>
+    </section>
+
+    <!-- Lecture 2 Summary -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 2: C++ Data Types
+
+        ### Key Topics
+        - Data types: memory size, permissible operations
+        - Primitive types: integers, floating-point, characters, booleans
+        - Type modifiers: signed/unsigned, short/long
+        - std::string for text handling
+        - Type inference with auto
+        - const qualifier for read-only variables
+        - Type casting with static_cast
+        - Variables as named memory storage
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 2 Code -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 2: Code Example
+
+        ```cpp
+        #include <iostream>
+        #include <string>
+        using namespace std;
+
+        int main() {
+            int score = 100;           // Integer
+            double price = 19.99;      // Floating-point
+            char grade = 'A';          // Character
+            bool pass = true;          // Boolean
+            string name = "Student";   // String
+            const int maxScore = 100;  // Const
+
+            cout << "Score: " << score << endl;
+            return 0;
+        }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 2 Error (unchanged in first part) -->
+    <section data-markdown>
+      <textarea data-template>
+
+        **Error Example:**
+        ```cpp
+        #include <iostream>
+        #include <string>
+        using namespace std;
+
+        int main() {
+            int score = "A";
+            cout << "Score: " << score << endl;
+            return 0;
+        }
+        ```
+
+        ---
+
+        **Error Message:** `error: cannot convert 'const char [2]' to 'int' in initialization`
+
+        **Error Type:** Type Mismatch / Compile-time error
+
+        **Resolution:** Use a compatible type. If the value is a character use `char`, or use a string for text.
+
+        ```cpp
+        char score = 'A';               // or
+        string scoreStr = "A";
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 3 Summary -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 3: C++ Fundamentals
+
+        ### Key Topics
+        - Basic program structure: #include, namespaces, int main(), return 0
+        - Operators: arithmetic, assignment, comparison, logical, increment, scope resolution
+        - Operator precedence and parentheses
+        - Variable scope: local vs global, lifetime
+        - Storage classes: static, extern
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 3 Code -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 3: Code Example
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        // Global variable
+        int globalVar = 10;
+
+        int main() {
+            int a = 5, b = 3;  // Local variables
+            int sum = a + b;    // Arithmetic operators
+            bool condition = (a > b);  // Comparison
+
+            cout << "Sum: " << sum << endl;
+            return 0;
+        }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 3 Error -->
+    <section data-markdown>
+      <textarea data-template>
+
+        **Error Example:**
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            int a = 5;
+            cout << "Sum: " << a + b << endl;
+            return 0;
+        }
+        ```
+
+        ---
+
+        **Error Message:** `error: 'b' was not declared in this scope`
+
+        **Error Type:** Name Resolution / Compile-time error
+
+        **Resolution:** Declare the variable before using it.
+
+        ```cpp
+        int a = 5;
+        int b = 10;  // Declare first
+        cout << "Sum: " << a + b << endl;  // Now ok
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 4 Summary -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 4: Conditionals
+
+        ### Key Topics
+        - Why conditionals: decision-making in programs
+        - C++ conditional tools: if, else if, else, switch
+        - Boolean expressions: true/false evaluation
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 4 Code -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 4: Code Example
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            int score = 85;
+
+            if (score >= 90) {
+                cout << "Grade: A" << endl;
+            } else if (score >= 80) {
+                cout << "Grade: B" << endl;
+            } else {
+                cout << "Grade: C" << endl;
+            }
+
+            return 0;
+        }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 4 Error -->
+    <section data-markdown>
+      <textarea data-template>
+
+        **Error Example:**
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            int x = 5;
+            if (x = 10) {
+                cout << "x is 10" << endl;
+            }
+            return 0;
+        }
+        ```
+
+        ---
+
+        **Error Message:** None (runs but logic is wrong), always evaluates to true.
+
+        **Error Type:** Logic Error (assignment used instead of comparison)
+
+        **Resolution:** Use `==` for comparison.
+
+        ```cpp
+        if (x == 10) {  // Fixed
+            cout << "x is 10" << endl;
+        }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 5 Summary -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 5: Loops
+
+        ### Key Topics
+        - Why loops: automating repetitive tasks
+        - while loop: condition checked before execution
+        - for loop: counting iterations with initialization, condition, increment
+        - do-while loop: body executed at least once, condition after
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 5 Code -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 5: Code Example
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            for (int i = 1; i <= 5; ++i) {
+                cout << "Count: " << i << endl;
+            }
+
+            int j = 1;
+            while (j <= 3) {
+                cout << "While loop: " << j << endl;
+                ++j;
+            }
+
+            return 0;
+        }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 5 Error -->
+    <section data-markdown>
+      <textarea data-template>
+
+        **Error Example:**
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            while (true) {
+                cout << "This will loop forever!" << endl;
+            }
+            return 0;
+        }
+        ```
+
+        ---
+
+        **Error Message:** Program runs indefinitely (infinite loop).
+
+        **Error Type:** Logic Error / Runtime (infinite loop)
+
+        **Resolution:** Ensure the condition eventually becomes false.
+
+        ```cpp
+        int x = 0;
+        while (x < 5) {  // Fixed - condition becomes false
+            cout << x << endl;
+            x++;
+        }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 6 Summary -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 6: Arrays
+
+        ### Key Topics
+        - Why arrays: store lists of data
+        - Declaration and initialization: fixed size, automatic sizing
+        - Accessing elements: zero-based indexing
+        - Out-of-bounds access danger
+        - std::vector alternative: dynamic sizing, safety
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 6 Code -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 6: Code Example
+
+        ```cpp
+        #include <iostream>
+        #include <vector>
+        using namespace std;
+
+        int main() {
+            int arr[5] = {10, 20, 30, 40, 50};
+            cout << "First element: " << arr[0] << endl;
+
+            vector<int> vec = {1, 2, 3};
+            vec.push_back(4);
+            cout << "Vector size: " << vec.size() << endl;
+
+            return 0;
+        }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 6 Error -->
+    <section data-markdown>
+      <textarea data-template>
+
+        **Error Example:**
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            int arr[5] = {1, 2, 3, 4, 5};
+            cout << arr[5] << endl;
+            return 0;
+        }
+        ```
+
+        ---
+
+        **Error Message:** Undefined behavior (garbage value or crash).
+
+        **Error Type:** Runtime / Undefined Behavior (out-of-bounds access)
+
+        **Resolution:** Check array bounds or use safer containers like `std::vector` and `at()`.
+
+        ```cpp
+        if (5 < 5) {  // Valid index check
+            cout << arr[5] << endl;
+        }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- ===== SECOND PART: Lectures 7-11 (ERROR DETAILS ADDED) ===== -->
+
+    <!-- Lecture 7 Summary -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 7: Functions
+
+        ### Key Topics
+        - Why functions: modularity, reuse, abstraction
+        - Declaration vs definition
+        - Parameters & returns: passing by value, reference, const reference
+        - Function overloading
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 7 Code -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 7: Code Example
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        // Function declaration
+        int add(int a, int b);
+
+        int main() {
+            int result = add(5, 3);
+            cout << "5 + 3 = " << result << endl;
+            return 0;
+        }
+
+        // Function definition
+        int add(int a, int b) {
+            return a + b;
+        }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 7 Error (enhanced) -->
+    <section data-markdown>
+      <textarea data-template>
+
+        **Error Example:**
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            int result = add(5, 3);
+            cout << result << endl;
+            return 0;
+        }
+
+        int add(int a, int b) {
+            return a + b;
+        }
+        ```
+
+        ---
+
+        **Error Message:** `error: 'add' was not declared in this scope`
+
+        **Error Type:** Linker/Declaration error (compile-time)
+
+        **Resolution:** Provide a forward declaration or move the function definition before `main`.
+
+        **Fixed:**
+        ```cpp
+        int add(int a, int b); // Declaration
+        int main() {
+            int result = add(5,3);
+            cout << result << endl;
+            return 0;
+        }
+        int add(int a, int b) { return a + b; }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 8 Summary -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 8: Structures & Pointers
+
+        ### Key Topics
+        - Structs for data grouping
+        - Accessing members: dot (.) for objects, arrow (->) for pointers
+        - Efficient passing: const reference for large structs
+        - Memory layout & padding
+        - Pointers basics: addresses, dereferencing
+        - Self-referential structs, linked lists
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 8 Code -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 8: Code Example
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        struct Person {
+            string name;
+            int age;
+        };
+
+        int main() {
+            Person p = {"Alice", 25};
+            cout << p.name << " is " << p.age << endl;
+
+            Person* ptr = &p;
+            ptr->age = 26;  // Arrow operator
+            cout << "New age: " << p.age << endl;
+
+            return 0;
+        }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 8 Error (enhanced) -->
+    <section data-markdown>
+      <textarea data-template>
+
+        **Error Example:**
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        struct Node {
+            int data;
+            Node* next;
+        };
+
+        int main() {
+            Node* node = nullptr;
+            cout << node->data << endl;
+            return 0;
+        }
+        ```
+
+        ---
+
+        **Error Message:** Segmentation fault or program crash at runtime.
+
+        **Error Type:** Runtime Error (null pointer dereference)
+
+        **Resolution:** Validate pointers before dereferencing; allocate memory when needed.
+
+        **Fixed:**
+        ```cpp
+        Node* node = new Node{10, nullptr};
+        if (node != nullptr) {
+            cout << node->data << endl;
+        }
+        delete node; // cleanup
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 9 Summary -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 9: Dynamic Memory & Linked Lists
+
+        ### Key Topics
+        - Dynamic memory allocation problem: fixed-size limitations
+        - C style: malloc/free
+        - C++ style: new/delete, new[]/delete[]
+        - Memory leaks and dangling pointers
+        - Exception handling in allocation
+        - Smart pointers for automatic memory management
+        - Linked lists implementation
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 9 Code -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 9: Code Example
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            // Dynamic allocation
+            int* arr = new int[5];
+            for(int i = 0; i < 5; ++i) arr[i] = i*10;
+
+            cout << "Dynamic array: ";
+            for(int i = 0; i < 5; ++i) cout << arr[i] << " ";
+            cout << endl;
+
+            // Deallocate
+            delete[] arr;
+
+            return 0;
+        }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 9 Error (enhanced) -->
+    <section data-markdown>
+      <textarea data-template>
+
+        **Error Example (Dangling pointer / Use-after-free):**
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            int* ptr = new int(10);
+            cout << *ptr << endl; // prints 10
+            delete ptr;
+            cout << *ptr << endl; // undefined behavior - use after delete
+            return 0;
+        }
+        ```
+
+        ---
+
+        **Error Message:** Undefined behavior (may crash, print garbage, or appear to work).
+
+        **Error Type:** Runtime Error (dangling pointer / use-after-free)
+
+        **Resolution:** Do not access memory after `delete`. Set pointer to `nullptr` after deletion or avoid raw pointers; use smart pointers.
+
+        **Fixed:**
+        ```cpp
+        int* ptr = new int(10);
+        cout << *ptr << endl;
+        delete ptr;
+        ptr = nullptr;           // avoid dangling pointer
+        // guard before use:
+        if (ptr) cout << *ptr << endl;
+        ```
+
+        **Preferred modern fix (smart pointer):**
+        ```cpp
+        #include <memory>
+        auto sp = std::make_unique<int>(10);
+        cout << *sp << endl; // automatic cleanup
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 10 Summary -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 10: Data Structures & Algorithms
+
+        ### Key Topics
+        - Data structures and algorithms introduction
+        - Linear search and time complexity basics
+        - Stack and Queue data structures
+        - Bubble sort algorithm
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 10 Code -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 10: Code Example
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        // Simple stack using array
+        int stack[10];
+        int top = -1;
+
+        void push(int val) { stack[++top] = val; }
+        int pop() { return top >= 0 ? stack[top--] : -1; }
+
+        int main() {
+            push(10);
+            push(20);
+            cout << "Popped: " << pop() << endl;
+
+            // Bubble sort
+            int arr[] = {5, 3, 8, 1};
+            for(int i = 0; i < 3; ++i) {
+                for(int j = 0; j < 3-i; ++j) {
+                    if(arr[j] > arr[j+1]) {
+                        swap(arr[j], arr[j+1]);
+                    }
+                }
+            }
+            cout << "Sorted: ";
+            for(int x : arr) cout << x << " ";
+
+            return 0;
+        }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 10 Error (enhanced) -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 10: Common Error - Off-by-One Error
+
+        **Error Example:**
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            int arr[5] = {1, 2, 3, 4, 5};
+            for(int i = 0; i <= 5; ++i) {  // <= 5 instead of < 5
+                cout << arr[i] << " ";
+            }
+            return 0;
+        }
+        ```
+
+        ---
+
+        **Error Message:** Accesses arr[5] which is out of bounds — undefined behavior.
+
+        **Error Type:** Logic Error / Runtime (off-by-one)
+
+        **Resolution:** Use correct bounds (`i < size`) or iterate using container size.
+
+        ```cpp
+        for(int i = 0; i < 5; ++i) {  // Fixed
+            cout << arr[i] << " ";
+        }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 11 Summary -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 11: Data Structures and Algorithms II
+
+        ### Key Topics
+        - Binary search in sorted arrays (O(log n))
+        - Binary Search Trees: insert, search operations
+        - Heap data structure: max/min heaps, heap sort
+        - Merge sort: divide and conquer, stable sorting (O(n log n))
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 11 Code -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 11: Code Example
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        // Binary search
+        int binarySearch(int arr[], int n, int target) {
+            int left = 0, right = n-1;
+            while(left <= right) {
+                int mid = left + (right - left)/2;
+                if(arr[mid] == target) return mid;
+                arr[mid] < target ? left = mid+1 : right = mid-1;
+            }
+            return -1;
+        }
+
+        int main() {
+            int sortedArr[] = {1, 3, 5, 7, 9};
+            int pos = binarySearch(sortedArr, 5, 7);
+            cout << "Target found at index: " << pos << endl;
+
+            return 0;
+        }
+        ```
+      </textarea>
+      >
+    </section>
+
+    <!-- Lecture 11 Error (enhanced) -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Lecture 11: Common Error - Binary Search on Unsorted Array
+
+        **Error Example:**
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int binarySearch(int arr[], int n, int target) {
+            int left = 0, right = n-1;
+            while(left <= right) {
+                int mid = left + (right - left)/2;
+                if(arr[mid] == target) return mid;
+                arr[mid] < target ? left = mid+1 : right = mid-1;
+            }
+            return -1;
+        }
+
+        int main() {
+            int unsortedArr[] = {5, 2, 8, 1, 9};  // Not sorted
+            int pos = binarySearch(unsortedArr, 5, 8);
+            cout << "Position: " << pos << endl;
+            return 0;
+        }
+        ```
+
+        ---
+
+        **Error Message:** Binary search returns -1 (not found) even when element exists.
+
+        **Error Type:** Precondition Violation / Logic Error (algorithm used on invalid input)
+
+        **Resolution:** Ensure preconditions are met: sort the array prior to binary search or use a linear search on unsorted data.
+
+        **Fixed (sort first):**
+        ```cpp
+        #include <algorithm>
+        int sortedArr[] = {1, 2, 5, 8, 9};
+        int pos = binarySearch(sortedArr, 5, 8);
+        ```
+      </textarea>
+      >
+    </section>
+
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/math/math.js"></script>
+
+<script>
+  Reveal.initialize({
+    hash: true,
+    plugins: [ RevealMarkdown, RevealHighlight, RevealMath.KaTeX ],
+    katex: {
+      displayMode: true,
+      macros: { "\\cases": "\\begin{cases}#1\\end{cases}" }
+    },
+    margin: 0.1,
+    width: 1280,
+    height: 720
+  });
+
+  // Theme switcher
+  const themes = ['white','league','beige','serif','simple','sky','dracula','night','black','solarized','moon','blood'];
+  let idx = 0;
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.onclick = () => {
+      idx = (idx + 1) % themes.length;
+      document.getElementById('theme-link').href = `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[idx]}.css`;
+    };
+  }
+</script>
 </body>
 </html>

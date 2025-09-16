@@ -240,7 +240,7 @@ We split node and insert into separate slides for clarity.
     <!-- QUIZ 2 -->
     <section>
       <h2>Quick Quiz — BST</h2>
-      <div class="quiz card" data-correct="2">
+      <div class="quiz card" data-correct="1">
         <p class="q">When inserting a value equal to an existing node, the implementation above places it to which side (as written)?</p>
         <div class="options">
           <label><input type="radio" name="quiz-2"> A) Left</label>
@@ -319,7 +319,7 @@ void heapify(int arr[], int n, int i) {
     <!-- QUIZ 3 -->
     <section>
       <h2>Quick Quiz — Heap</h2>
-      <div class="quiz card" data-correct="1">
+      <div class="quiz card" data-correct="0">
         <p class="q">In a 0-based array representation of a binary heap, the left child index for node i is:</p>
         <div class="options">
           <label><input type="radio" name="quiz-3"> A) 2*i + 1</label>
@@ -1386,12 +1386,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Accessibility: ensure quiz radio groups have unique names on duplicate loads
+  // Ensure quiz radio groups have unique names (only if duplicated in Reveal.js)
   document.querySelectorAll('.quiz').forEach((q, idx) => {
-    q.querySelectorAll('input[type="radio"]').forEach(r => {
-      const base = r.name || `quiz-${idx}`;
-      r.name = q.querySelector('.q') ? `quiz-${idx}-${base}` : `quiz-${idx}`;
-    });
+    const duplicateSlides = document.querySelectorAll('.reveal .slides .slides').length > 0;
+    if(duplicateSlides) {
+      q.querySelectorAll('input[type="radio"]').forEach(r => {
+        r.name = `quiz-${idx}`;
+      });
+    }
   });
 
 });
