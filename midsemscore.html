@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card h3 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-container {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .chart-container h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        canvas {
+            max-height: 400px;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Student Performance Dashboard</h1>
+        <p class="subtitle">BTech 2025 - Midsem Examination Analysis (Anonymized Data)</p>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Students</h3>
+                <div class="value" id="totalStudents">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Average Score</h3>
+                <div class="value" id="avgScore">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Highest Score</h3>
+                <div class="value" id="maxScore">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Departments</h3>
+                <div class="value" id="totalDepts">0</div>
+            </div>
+        </div>
+        
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h2>Score Distribution</h2>
+                <canvas id="histogramChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h2>Department-wise Average Scores</h2>
+                <canvas id="deptAvgChart"></canvas>
+            </div>
+
+            <div class="chart-container full-width">
+                <h2>Department-wise Score Distribution</h2>
+                <canvas id="deptBoxChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h2>Performance Categories</h2>
+                <canvas id="performanceChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h2>Department-wise Comparison</h2>
+                <canvas id="sectionChart"></canvas>
+            </div>
+
+            <div class="chart-container full-width">
+                <h2>Cumulative Score Distribution</h2>
+                <canvas id="cdfChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h2>Department Performance Radar</h2>
+                <canvas id="radarChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h2>Score Quartiles Analysis</h2>
+                <canvas id="quartileChart"></canvas>
+            </div>
+
+            <div class="chart-container full-width">
+                <h2>Top 30 Performers by Department</h2>
+                <canvas id="topPerformersChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Parse the CSV data
+        const csvData = `Chemical Engineering,14
+Chemical Engineering,7.5
+Chemical Engineering,9
+Chemical Engineering,6
+Chemical Engineering,14.5
+Chemical Engineering,7.5
+Chemical Engineering,8
+Chemical Engineering,20.5
+Chemical Engineering,5.5
+Chemical Engineering,7.5
+Chemical Engineering,12
+Chemical Engineering,19
+Chemical Engineering,14.5
+Chemical Engineering,6
+Chemical Engineering,10.5
+Chemical Engineering,25.5
+Chemical Engineering,29
+Chemical Engineering,10
+Chemical Engineering,8.5
+Chemical Engineering,17
+Chemical Engineering,12
+Chemical Engineering,13
+Chemical Engineering,15.5
+Chemical Engineering,14
+Chemical Engineering,13.5
+Chemical Engineering,8
+Chemical Engineering,6.5
+Chemical Engineering,16.5
+Chemical Engineering,16
+Chemical Engineering,9.5
+Chemical Engineering,15.5
+Chemical Engineering,18.5
+Chemical Engineering,3
+Chemical Engineering,12
+Chemical Engineering,3
+Chemical Engineering,20
+Chemical Engineering,12
+Chemical Engineering,4
+Chemical Engineering,6
+Civil Engineering,28
+Civil Engineering,29.5
+Civil Engineering,18
+Civil Engineering,16.5
+Civil Engineering,20
+Civil Engineering,14
+Civil Engineering,18
+Civil Engineering,25.5
+Civil Engineering,6
+Civil Engineering,10.5
+Civil Engineering,13
+Civil Engineering,7
+Civil Engineering,8.5
+Civil Engineering,5
+Civil Engineering,4
+Civil Engineering,10
+Civil Engineering,9
+Civil Engineering,10
+Civil Engineering,11.5
+Civil Engineering,4.5
+Civil Engineering,11.5
+Civil Engineering,11.5
+Civil Engineering,17.5
+Civil Engineering,16
+Civil Engineering,23
+Civil Engineering,9
+Civil Engineering,5.5
+Civil Engineering,21.5
+Civil Engineering,11.5
+Civil Engineering,14.5
+Civil Engineering,6
+Civil Engineering,17.5
+Civil Engineering,8
+Civil Engineering,15
+Civil Engineering,17.5
+Civil Engineering,9.5
+Civil Engineering,9
+Civil Engineering,15
+Civil Engineering,22
+Civil Engineering,23
+Civil Engineering,24
+Civil Engineering,7
+Civil Engineering,9
+Civil Engineering,12
+Civil Engineering,4.5
+Civil Engineering,14
+Civil Engineering,11.5
+Civil Engineering,9
+Civil Engineering,7.5
+Civil Engineering,18
+Civil Engineering,14.5
+Civil Engineering,1
+Civil Engineering,9
+Computer Science and Engineering,19.5
+Computer Science and Engineering,17.5
+Computer Science and Engineering,16
+Computer Science and Engineering,16.5
+Computer Science and Engineering,10.5
+Computer Science and Engineering,13
+Computer Science and Engineering,11
+Computer Science and Engineering,32
+Computer Science and Engineering,18.5
+Computer Science and Engineering,14.5
+Computer Science and Engineering,21
+Computer Science and Engineering,29.5
+Computer Science and Engineering,17.5
+Computer Science and Engineering,21.5
+Computer Science and Engineering,20.5
+Computer Science and Engineering,18
+Computer Science and Engineering,20.5
+Computer Science and Engineering,5.5
+Computer Science and Engineering,16.5
+Computer Science and Engineering,25.5
+Computer Science and Engineering,23
+Computer Science and Engineering,24
+Computer Science and Engineering,18.5
+Computer Science and Engineering,27.5
+Computer Science and Engineering,31.5
+Computer Science and Engineering,23
+Computer Science and Engineering,8
+Computer Science and Engineering,16.5
+Computer Science and Engineering,31
+Computer Science and Engineering,9.5
+Computer Science and Engineering,21.5
+Computer Science and Engineering,12.5
+Computer Science and Engineering,23
+Computer Science and Engineering,11
+Computer Science and Engineering,27.5
+Computer Science and Engineering,2.5
+Computer Science and Engineering,18
+Computer Science and Engineering,32.5
+Computer Science and Engineering,16
+Computer Science and Engineering,13.5
+Computer Science and Engineering,15
+Computer Science and Engineering,16
+Computer Science and Engineering,6
+Computer Science and Engineering,16.5
+Computer Science and Engineering,28
+Computer Science and Engineering,27.5
+Computer Science and Engineering,30.5
+Computer Science and Engineering,13.5
+Computer Science and Engineering,1.5
+Computer Science and Engineering,6.5
+Computer Science and Engineering,28
+Computer Science and Engineering,18
+Computer Science and Engineering,18
+Computer Science and Engineering,21
+Computer Science and Engineering,28.5
+Computer Science and Engineering,9.5
+Computer Science and Engineering,21
+Computer Science and Engineering,22.5
+Computer Science and Engineering,17
+Computer Science and Engineering,14
+Computer Science and Engineering,23.5
+Computer Science and Engineering,23.5
+Computer Science and Engineering,21
+Computer Science and Engineering,2.5
+Computer Science and Engineering,15
+Computer Science and Engineering,16.5
+Computer Science and Engineering,15.5
+Computer Science and Engineering,28
+Computer Science and Engineering,30
+Computer Science and Engineering,18
+Computer Science and Engineering,33
+Computer Science and Engineering,16.5
+Computer Science and Engineering,20.5
+Computer Science and Engineering,21
+Computer Science and Engineering,30.5
+Computer Science and Engineering,27.5
+Computer Science and Engineering,22
+Computer Science and Engineering,22.5
+Computer Science and Engineering,5.5
+Computer Science and Engineering,11
+Engineering Physics,27
+Engineering Physics,26
+Engineering Physics,20
+Engineering Physics,22.5
+Engineering Physics,24.5
+Engineering Physics,28.5
+Engineering Physics,19.5
+Engineering Physics,25.5
+Engineering Physics,17.5
+Engineering Physics,28
+Engineering Physics,19.5
+Engineering Physics,3
+Engineering Physics,7.5
+Engineering Physics,11.5
+Engineering Physics,8.5
+Engineering Physics,5.5
+Engineering Physics,21
+Engineering Physics,11
+Engineering Physics,15.5
+Metallurgical Engineering and Materials Science,9.5
+Metallurgical Engineering and Materials Science,16.5
+Metallurgical Engineering and Materials Science,9
+Metallurgical Engineering and Materials Science,4
+Metallurgical Engineering and Materials Science,16.5
+Metallurgical Engineering and Materials Science,10
+Metallurgical Engineering and Materials Science,20.5
+Metallurgical Engineering and Materials Science,5
+Metallurgical Engineering and Materials Science,12.5
+Metallurgical Engineering and Materials Science,10.5
+Metallurgical Engineering and Materials Science,10.5
+Metallurgical Engineering and Materials Science,21.5
+Metallurgical Engineering and Materials Science,13.5
+Metallurgical Engineering and Materials Science,19.5
+Metallurgical Engineering and Materials Science,12
+Metallurgical Engineering and Materials Science,7
+Metallurgical Engineering and Materials Science,5.5
+Metallurgical Engineering and Materials Science,9.5
+Metallurgical Engineering and Materials Science,25
+Metallurgical Engineering and Materials Science,13
+Metallurgical Engineering and Materials Science,10.5
+Metallurgical Engineering and Materials Science,15
+Metallurgical Engineering and Materials Science,21
+Metallurgical Engineering and Materials Science,8.5
+Metallurgical Engineering and Materials Science,20
+Metallurgical Engineering and Materials Science,13
+Metallurgical Engineering and Materials Science,15
+Metallurgical Engineering and Materials Science,7
+Metallurgical Engineering and Materials Science,7
+Metallurgical Engineering and Materials Science,17.5
+Metallurgical Engineering and Materials Science,3
+Metallurgical Engineering and Materials Science,8.5
+Metallurgical Engineering and Materials Science,20
+Metallurgical Engineering and Materials Science,0.5
+Metallurgical Engineering and Materials Science,11
+Metallurgical Engineering and Materials Science,20
+Metallurgical Engineering and Materials Science,21.5
+Metallurgical Engineering and Materials Science,18
+Metallurgical Engineering and Materials Science,9
+Metallurgical Engineering and Materials Science,8.5
+Metallurgical Engineering and Materials Science,17
+Metallurgical Engineering and Materials Science,14.5
+Metallurgical Engineering and Materials Science,22
+Metallurgical Engineering and Materials Science,17.5
+Metallurgical Engineering and Materials Science,22.5
+Metallurgical Engineering and Materials Science,21.5
+Metallurgical Engineering and Materials Science,19
+Metallurgical Engineering and Materials Science,17
+Metallurgical Engineering and Materials Science,11
+Metallurgical Engineering and Materials Science,11
+Metallurgical Engineering and Materials Science,15
+Metallurgical Engineering and Materials Science,12
+Metallurgical Engineering and Materials Science,19
+Electrical Engineering,10
+Electrical Engineering,11.5
+Electrical Engineering,28
+Electrical Engineering,21.5
+Electrical Engineering,13.5
+Electrical Engineering,27
+Electrical Engineering,21
+Electrical Engineering,18
+Electrical Engineering,30
+Electrical Engineering,12
+Electrical Engineering,26
+Electrical Engineering,4.5
+Electrical Engineering,7.5
+Electrical Engineering,27
+Electrical Engineering,19.5
+Electrical Engineering,29.5
+Electrical Engineering,12.5
+Electrical Engineering,12
+Electrical Engineering,17.5
+Electrical Engineering,19
+Electrical Engineering,8
+Electrical Engineering,21
+Electrical Engineering,12.5
+Electrical Engineering,4.5
+Electrical Engineering,13.5
+Electrical Engineering,17
+Electrical Engineering,5
+Electrical Engineering,10
+Electrical Engineering,26
+Electrical Engineering,26
+Electrical Engineering,15.5
+Electrical Engineering,22
+Electrical Engineering,4.5
+Electrical Engineering,13
+Electrical Engineering,30.5
+Electrical Engineering,23.5
+Electrical Engineering,20
+Electrical Engineering,8
+Electrical Engineering,25
+Electrical Engineering,17
+Electrical Engineering,11
+Electrical Engineering,14.5
+Electrical Engineering,29
+Electrical Engineering,15.5
+Electrical Engineering,19.5
+Electrical Engineering,25
+Electrical Engineering,20
+Electrical Engineering,19.5
+Electrical Engineering,29
+Electrical Engineering,27
+Electrical Engineering,12
+Electrical Engineering,19
+Electrical Engineering,29.5
+Electrical Engineering,8.5
+Electrical Engineering,10.5
+Electrical Engineering,32
+Electrical Engineering,30.5
+Electrical Engineering,25.5
+Electrical Engineering,7
+Electrical Engineering,7.5
+Electrical Engineering,24
+Electrical Engineering,25
+Electrical Engineering,24.5
+Electrical Engineering,12.5
+Electrical Engineering,16
+Electrical Engineering,26.5
+Electrical Engineering,22
+Electrical Engineering,24
+Electrical Engineering,23
+Electrical Engineering,23
+Electrical Engineering,15.5
+Electrical Engineering,27
+Electrical Engineering,18.5
+Electrical Engineering,15
+Electrical Engineering,24
+Electrical Engineering,15.5
+Electrical Engineering,5.5
+Electrical Engineering,18.5
+Electrical Engineering,26
+Electrical Engineering,7.5
+Electrical Engineering,22
+Electrical Engineering,13
+Electrical Engineering,22.5
+Mathematics and Computing,6.5
+Mathematics and Computing,6.5
+Mathematics and Computing,26
+Mathematics and Computing,26.5
+Mathematics and Computing,13.5
+Mathematics and Computing,22.5
+Mathematics and Computing,21.5
+Mathematics and Computing,20.5
+Mathematics and Computing,12
+Mathematics and Computing,12
+Mathematics and Computing,25
+Mathematics and Computing,17
+Mathematics and Computing,5.5
+Mathematics and Computing,13.5
+Mathematics and Computing,19
+Mathematics and Computing,21
+Mathematics and Computing,20
+Mathematics and Computing,19
+Mathematics and Computing,11.5
+Mathematics and Computing,10.5
+Mathematics and Computing,15
+Mathematics and Computing,22.5
+Mathematics and Computing,10.5
+Mathematics and Computing,13
+Mathematics and Computing,15.5
+Mathematics and Computing,19
+Mathematics and Computing,15.5
+Mathematics and Computing,15
+Mathematics and Computing,13
+Mathematics and Computing,19
+Mathematics and Computing,17
+Mathematics and Computing,22
+Mathematics and Computing,17.5
+Mathematics and Computing,25
+Mathematics and Computing,25
+Mathematics and Computing,21.5
+Mathematics and Computing,21
+Mathematics and Computing,23
+Mathematics and Computing,23
+Mathematics and Computing,19
+Mechanical Engineering,9
+Mechanical Engineering,18.5
+Mechanical Engineering,14.5
+Mechanical Engineering,28
+Mechanical Engineering,12.5
+Mechanical Engineering,28
+Mechanical Engineering,27
+Mechanical Engineering,13
+Mechanical Engineering,6.5
+Mechanical Engineering,5
+Mechanical Engineering,14.5
+Mechanical Engineering,8.5
+Mechanical Engineering,6.5
+Mechanical Engineering,25
+Mechanical Engineering,21.5
+Mechanical Engineering,3.5
+Mechanical Engineering,12
+Mechanical Engineering,16
+Mechanical Engineering,6.5
+Mechanical Engineering,12
+Mechanical Engineering,13.5
+Mechanical Engineering,8
+Mechanical Engineering,11
+Mechanical Engineering,9
+Mechanical Engineering,14
+Mechanical Engineering,5.5
+Mechanical Engineering,21.5
+Mechanical Engineering,2
+Mechanical Engineering,14.5
+Mechanical Engineering,11.5
+Mechanical Engineering,21.5
+Mechanical Engineering,19.5
+Mechanical Engineering,8.5
+Mechanical Engineering,3.5
+Mechanical Engineering,4.5
+Mechanical Engineering,26.5
+Mechanical Engineering,8
+Mechanical Engineering,17
+Mechanical Engineering,33.5
+Mechanical Engineering,21
+Mechanical Engineering,16.5
+Mechanical Engineering,26
+Mechanical Engineering,20.5
+Mechanical Engineering,11
+Mechanical Engineering,6.5
+Mechanical Engineering,16
+Mechanical Engineering,12.5
+Mechanical Engineering,8
+Mechanical Engineering,13
+Mechanical Engineering,13
+Mechanical Engineering,13.5
+Mechanical Engineering,7.5
+Mechanical Engineering,9
+Mechanical Engineering,8.5
+Mechanical Engineering,16
+Mechanical Engineering,23
+Mechanical Engineering,12.5
+Mechanical Engineering,20
+Mechanical Engineering,17
+Mechanical Engineering,2.5
+Mechanical Engineering,15.5
+Mechanical Engineering,20
+Mechanical Engineering,18
+Mechanical Engineering,12
+Mechanical Engineering,12.5
+Mechanical Engineering,25
+Mechanical Engineering,29
+Mechanical Engineering,4
+Mechanical Engineering,23.5
+Mechanical Engineering,19.5
+Mechanical Engineering,8
+Mechanical Engineering,8
+Mechanical Engineering,10
+Mechanical Engineering,4
+Mechanical Engineering,17.5
+Mechanical Engineering,23
+Mechanical Engineering,21.5
+Mechanical Engineering,22
+Mechanical Engineering,16
+Mechanical Engineering,16.5
+Mechanical Engineering,20
+Space Science and Engineering,8
+Space Science and Engineering,29.5
+Space Science and Engineering,24
+Space Science and Engineering,24.5
+Space Science and Engineering,5.5
+Space Science and Engineering,18.5
+Space Science and Engineering,14.5
+Space Science and Engineering,21
+Space Science and Engineering,15
+Space Science and Engineering,4
+Space Science and Engineering,16
+Space Science and Engineering,5
+Space Science and Engineering,6.5
+Space Science and Engineering,24
+Space Science and Engineering,18.5
+Space Science and Engineering,6.5
+Space Science and Engineering,21
+Space Science and Engineering,29.5
+Space Science and Engineering,5`;
+
+        // Process data
+        const lines = csvData.trim().split('\n');
+        const data = lines.map(line => {
+            const [dept, score] = line.split(',');
+            return { dept: dept.trim(), score: parseFloat(score) };
+        }).filter(d => !isNaN(d.score));
+
+        // Calculate statistics
+        const scores = data.map(d => d.score);
+        const avgScore = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
+        const maxScore = Math.max(...scores);
+        const departments = [...new Set(data.map(d => d.dept))];
+
+        // Update stats
+        document.getElementById('totalStudents').textContent = data.length;
+        document.getElementById('avgScore').textContent = avgScore;
+        document.getElementById('maxScore').textContent = maxScore;
+        document.getElementById('totalDepts').textContent = departments.length;
+
+        // Histogram
+        const bins = [0, 5, 10, 15, 20, 25, 30, 35];
+        const binCounts = new Array(bins.length - 1).fill(0);
+        scores.forEach(score => {
+            for (let i = 0; i < bins.length - 1; i++) {
+                if (score >= bins[i] && score < bins[i + 1]) {
+                    binCounts[i]++;
+                    break;
+                }
+            }
+        });
+
+        new Chart(document.getElementById('histogramChart'), {
+            type: 'bar',
+            data: {
+                labels: bins.slice(0, -1).map((b, i) => `${b}-${bins[i + 1]}`),
+                datasets: [{
+                    label: 'Number of Students',
+                    data: binCounts,
+                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Count' } },
+                    x: { title: { display: true, text: 'Score Range' } }
+                }
+            }
+        });
+
+        // Department averages
+        const deptAvgs = {};
+        departments.forEach(dept => {
+            const deptScores = data.filter(d => d.dept === dept).map(d => d.score);
+            deptAvgs[dept] = (deptScores.reduce((a, b) => a + b, 0) / deptScores.length).toFixed(2);
+        });
+
+        const sortedDepts = Object.entries(deptAvgs).sort((a, b) => b[1] - a[1]);
+
+        new Chart(document.getElementById('deptAvgChart'), {
+            type: 'bar',
+            data: {
+                labels: sortedDepts.map(d => d[0].split(' ').slice(0, 2).join(' ')),
+                datasets: [{
+                    label: 'Average Score',
+                    data: sortedDepts.map(d => d[1]),
+                    backgroundColor: 'rgba(118, 75, 162, 0.8)',
+                    borderColor: 'rgba(118, 75, 162, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { beginAtZero: true, max: 35, title: { display: true, text: 'Average Score' } }
+                }
+            }
+        });
+
+        // Performance categories
+        const excellent = scores.filter(s => s >= 25).length;
+        const good = scores.filter(s => s >= 15 && s < 25).length;
+        const average = scores.filter(s => s >= 10 && s < 15).length;
+        const belowAvg = scores.filter(s => s < 10).length;
+
+        new Chart(document.getElementById('performanceChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Excellent (≥25)', 'Good (15-24)', 'Average (10-14)', 'Below Avg (<10)'],
+                datasets: [{
+                    data: [excellent, good, average, belowAvg],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(251, 191, 36, 0.8)',
+                        'rgba(239, 68, 68, 0.8)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Section comparison (simplified - just showing dept distribution)
+        const deptCounts = {};
+        departments.forEach(dept => {
+            deptCounts[dept] = data.filter(d => d.dept === dept).length;
+        });
+
+        new Chart(document.getElementById('sectionChart'), {
+            type: 'pie',
+            data: {
+                labels: departments.map(d => d.split(' ').slice(0, 2).join(' ')),
+                datasets: [{
+                    data: Object.values(deptCounts),
+                    backgroundColor: [
+                        'rgba(102, 126, 234, 0.8)',
+                        'rgba(118, 75, 162, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(251, 191, 36, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(236, 72, 153, 0.8)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'right' }
+                }
+            }
+        });
+
+        // Department abbreviations for shorter labels
+        const deptAbbreviations = {
+            "Chemical Engineering": "Chemical",
+            "Civil Engineering": "Civil",
+            "Computer Science and Engineering": "CSE",
+            "Engineering Physics": "EP",
+            "Metallurgical Engineering and Materials Science": "MEMS",
+            "Electrical Engineering": "EE",
+            "Mathematics and Computing": "M&C",
+            "Mechanical Engineering": "ME",
+            "Space Science and Engineering": "SSE"
+        };
+
+        // Box plot style chart
+        const deptBoxData = departments.map(dept => {
+            const deptScores = data.filter(d => d.dept === dept).map(d => d.score).sort((a, b) => a - b);
+            const min = Math.min(...deptScores);
+            const max = Math.max(...deptScores);
+            const avg = deptScores.reduce((a, b) => a + b, 0) / deptScores.length;
+            return { dept: deptAbbreviations[dept] || dept, min, max, avg };
+        });
+
+        new Chart(document.getElementById('deptBoxChart'), {
+            type: 'bar',
+            data: {
+                labels: deptBoxData.map(d => d.dept),
+                datasets: [
+                    {
+                        label: 'Max Score',
+                        data: deptBoxData.map(d => d.max),
+                        backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Average Score',
+                        data: deptBoxData.map(d => d.avg),
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Min Score',
+                        data: deptBoxData.map(d => d.min),
+                        backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: { beginAtZero: true, max: 35, title: { display: true, text: 'Score' } },
+                    x: { title: { display: true, text: 'Department' } }
+                },
+                plugins: {
+                    legend: { position: 'top' }
+                }
+            }
+        });
+
+        // Cumulative Distribution Function (CDF)
+        const sortedScores = scores.sort((a, b) => a - b);
+        const uniqueScores = [...new Set(sortedScores)];
+        const cumulativeData = uniqueScores.map(score => {
+            const count = sortedScores.filter(s => s <= score).length;
+            return { score, cumulative: (count / scores.length) * 100 };
+        });
+
+        new Chart(document.getElementById('cdfChart'), {
+            type: 'line',
+            data: {
+                labels: cumulativeData.map(d => d.score),
+                datasets: [{
+                    label: 'Cumulative Percentage',
+                    data: cumulativeData.map(d => d.cumulative),
+                    borderColor: 'rgba(139, 69, 19, 1)',
+                    backgroundColor: 'rgba(139, 69, 19, 0.1)',
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, max: 100, title: { display: true, text: 'Cumulative % of Students' } },
+                    x: { title: { display: true, text: 'Score Threshold' } }
+                }
+            }
+        });
+
+        // Radar Chart for department performance
+        new Chart(document.getElementById('radarChart'), {
+            type: 'radar',
+            data: {
+                labels: sortedDepts.map(d => d[0].split(' ').slice(0, 2).join(' ')),
+                datasets: [{
+                    label: 'Average Scores',
+                    data: sortedDepts.map(d => (parseFloat(d[1]) / 35) * 100), // Normalize to 0-100
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(75, 192, 192, 1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) { return value + '%'; }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Quartiles Analysis Chart
+        const qScores = sortedScores;
+        const q1 = qScores[Math.floor(qScores.length * 0.25)];
+        const median = qScores[Math.floor(qScores.length * 0.5)];
+        const q3 = qScores[Math.floor(qScores.length * 0.75)];
+        const iqr = q3 - q1;
+        const lowerFence = Math.max(q1 - 1.5 * iqr, qScores[0]);
+        const upperFence = Math.min(q3 + 1.5 * iqr, qScores[qScores.length - 1]);
+
+        new Chart(document.getElementById('quartileChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Lower Fence', 'Q1', 'Median', 'Q3', 'Upper Fence'],
+                datasets: [{
+                    label: 'Score Quartiles',
+                    data: [lowerFence, q1, median, q3, upperFence],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 205, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, max: 35, title: { display: true, text: 'Score' } },
+                    x: { title: { display: true, text: 'Quartile' } }
+                }
+            }
+        });
+
+        // Top 30 Performers Chart
+        const top30Data = data.sort((a, b) => b.score - a.score).slice(0, 30);
+        const top30Labels = top30Data.map((d, i) => `${i + 1}. ${deptAbbreviations[d.dept] || d.dept}`);
+        const top30Scores = top30Data.map(d => d.score);
+        const deptColors = {
+            "Chemical Engineering": 'rgba(102, 126, 234, 0.8)',
+            "Civil Engineering": 'rgba(118, 75, 162, 0.8)',
+            "Computer Science and Engineering": 'rgba(239, 68, 68, 0.8)',
+            "Engineering Physics": 'rgba(251, 191, 36, 0.8)',
+            "Metallurgical Engineering and Materials Science": 'rgba(16, 185, 129, 0.8)',
+            "Electrical Engineering": 'rgba(59, 130, 246, 0.8)',
+            "Mathematics and Computing": 'rgba(245, 158, 11, 0.8)',
+            "Mechanical Engineering": 'rgba(139, 92, 246, 0.8)',
+            "Space Science and Engineering": 'rgba(236, 72, 153, 0.8)'
+        };
+        const top30Colors = top30Data.map(d => deptColors[d.dept]);
+
+        new Chart(document.getElementById('topPerformersChart'), {
+            type: 'bar',
+            data: {
+                labels: top30Labels,
+                datasets: [{
+                    label: 'Top 30 Scores',
+                    data: top30Scores,
+                    backgroundColor: top30Colors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { beginAtZero: true, max: 35, title: { display: true, text: 'Score' } },
+                    y: { ticks: { autoSkip: false } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

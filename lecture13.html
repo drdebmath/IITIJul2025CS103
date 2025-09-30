@@ -1,16 +1,985 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 13: Constructors</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <meta charset="utf-8" />
+  <title>Lecture 13: Mid-Semester Exam Review</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Reveal.js Core CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+  <!-- Theme -->
+  <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css" />
+  <!-- Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+  <!-- KaTeX for Math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" />
+
+  <style>
+    .reveal .answer-box {
+      background-color: #e8f5e9;
+      padding: 15px;
+      margin: 10px 0;
+      border-left: 4px solid #4caf50;
+      text-align: left;
+    }
+    .reveal .error-box {
+      background-color: #ffebee;
+      padding: 15px;
+      margin: 10px 0;
+      border-left: 4px solid #f44336;
+      text-align: left;
+    }
+    .reveal .key-point {
+      color: #1976d2;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 13: Classes in Depth - Constructors and Destructors</h1>
-        <p>Details about the lecture will be updated here.</p>
-        <a href="index.html">Back to Course Outline</a>
-    </div>
+
+<button id="theme-toggle" style="position:fixed;top:10px;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;">Change Theme</button>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- Title Slide -->
+    <section data-markdown>
+      <textarea data-template>
+        # Lecture 13: Mid-Semester Exam Review
+        CS 103: Computer Programming
+        
+        September 22, 2025 Examination Analysis
+      </textarea>
+    </section>
+
+    <!-- Exam Overview -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Exam Structure Overview
+
+        **Total Marks:** 40 | **Duration:** 2 hours
+
+        - **Group A** (8 marks): Short answer questions
+        - **Group B** (4 marks): True/False with justification
+        - **Group C** (16 marks): Code output or error identification
+        - **Group D** (12 marks): Implementation problems
+
+        ---
+
+        ### Key Focus Areas
+        - Fundamental C++ concepts
+        - Error detection and debugging
+        - Practical programming skills
+      </textarea>
+    </section>
+
+    <!-- GROUP A DIVIDER -->
+    <section data-markdown>
+      <textarea data-template>
+        # Group A
+        ## Succinct Answers
+        
+        Conceptual Understanding
+      </textarea>
+    </section>
+
+    <!-- Group A - Question 1 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group A: Question 1 [2 marks]
+
+        **What is the difference between a compile-time error and a run-time error?**
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer:**
+        
+        A compile-time error occurs during compilation (e.g., syntax, type errors), preventing execution. A run-time error occurs while the program runs (e.g., divide by zero, null pointer). Compile-time errors are detected before execution; run-time errors are detected during execution.
+
+        </div>
+
+        ---
+
+        **Key Points:**
+        - **Compile-time:** Caught by compiler (syntax, types, declarations)
+        - **Run-time:** Occurs during execution (logic errors, invalid operations)
+        - **Detection timing** is the critical distinction
+      </textarea>
+    </section>
+
+    <!-- Group A - Question 2 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group A: Question 2 [2 marks]
+
+        **What is pass-by-reference and why is it used?**
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer:**
+        
+        Pass-by-reference passes the address of a variable instead of a copy. It allows the function to directly modify the caller's variable. It avoids copying large data and improves efficiency.
+
+        </div>
+
+        ---
+
+        **Key Benefits:**
+        - Modify original variables
+        - Avoid expensive copying
+        - Efficient for large data structures
+        
+        **Syntax:** `void func(int& x)` or `void func(const string& s)`
+      </textarea>
+    </section>
+
+    <!-- Group A - Question 3 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group A: Question 3 [2 marks]
+
+        **When is it essential to declare a function and when is it optional?**
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer:**
+        
+        A function must be declared before use if its definition appears later in the code. It is optional if the definition comes before its first call.
+
+        </div>
+
+        ---
+
+        **Examples:**
+
+        ```cpp
+        // Declaration needed
+        int add(int, int);  // Forward declaration
+        int main() { return add(1,2); }
+        int add(int a, int b) { return a+b; }
+
+        // Declaration optional
+        int add(int a, int b) { return a+b; }
+        int main() { return add(1,2); }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Group A - Question 4 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group A: Question 4 [2 marks]
+
+        **Why is it that a pointer of type `int` cannot store the address of a variable of type `float`?**
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer:**
+        
+        Each pointer type is tied to its data type for correct dereferencing. An `int*` expects memory formatted as an integer, but a `float` has a different representation. Mismatching causes undefined behavior during pointer arithmetic.
+
+        </div>
+
+        ---
+
+        **Key Concepts:**
+        - Type safety in C++
+        - Memory representation differs (int vs float)
+        - Pointer arithmetic depends on type size
+        - Dereferencing interprets bytes according to type
+      </textarea>
+    </section>
+
+    <!-- GROUP B DIVIDER -->
+    <section data-markdown>
+      <textarea data-template>
+        # Group B
+        ## True/False with Justification
+        
+        Testing Precise Understanding
+      </textarea>
+    </section>
+
+    <!-- Group B - Question 1 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group B: Question 1 [1 mark]
+
+        **Statement:** The scope of a global variable is the entire program.
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer: False**
+        
+        Global variables can be accessed anywhere only in the same file after declaration and across files with `extern`.
+
+        </div>
+
+        ---
+
+        **Important Details:**
+        - Scope limited to translation unit (file) by default
+        - Use `extern` for cross-file access
+        - Declaration point matters within the file
+        - Not automatically visible in all files
+      </textarea>
+    </section>
+
+    <!-- Group B - Question 2 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group B: Question 2 [1 mark]
+
+        **Statement:** The name of a static array is a pointer variable.
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer: False**
+        
+        The array name decays to a pointer in most contexts, but it is not itself a pointer variable. It is a constant pointer.
+
+        </div>
+
+        ---
+
+        **Key Distinction:**
+
+        ```cpp
+        int arr[5] = {1,2,3,4,5};
+        int* ptr = arr;  // Decay: arr converts to pointer
+        
+        arr++;  // ERROR: array name is not modifiable
+        ptr++;  // OK: ptr is a pointer variable
+        ```
+
+        Array name is a **constant address**, not a variable
+      </textarea>
+    </section>
+
+    <!-- Group B - Question 3 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group B: Question 3 [1 mark]
+
+        **Statement:** An assignment inside an `if` condition (e.g., `if (x = 0)`) is always a compile-time error in C++.
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer: False**
+        
+        It compiles but assigns 0 to x. There is only compile time warning. The assignment operation to 0 returns false.
+
+        </div>
+
+        ---
+
+        **Common Pitfall:**
+
+        ```cpp
+        int x = 5;
+        if (x = 0) {  // Assignment, not comparison!
+            cout << "True";  // Never executes
+        }
+        // x is now 0, condition evaluates to false
+        ```
+
+        Use `if (x == 0)` for comparison. Modern compilers warn about this.
+      </textarea>
+    </section>
+
+    <!-- Group B - Question 4 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group B: Question 4 [1 mark]
+
+        **Statement:** The execution of a program always starts at the main function.
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer: True**
+        
+        In C++, program execution always begins with `main()`.
+
+        </div>
+
+        ---
+
+        **Important Notes:**
+        - `main()` is the entry point for all C++ programs
+        - Global variable initialization happens before `main()`
+        - Static initializers run before `main()`
+        - But logical execution flow starts at `main()`
+      </textarea>
+    </section>
+
+    <!-- GROUP C DIVIDER -->
+    <section data-markdown>
+      <textarea data-template>
+        # Group C
+        ## Output / Error Type
+        
+        Code Analysis Skills
+      </textarea>
+    </section>
+
+    <!-- Group C - Question 1 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group C: Question 1 [2 marks]
+
+        ```cpp
+        #include <iostream>
+        int main() {
+            int a = 5;
+            std::cout << a++ << " " << ++a << '\n';
+            return 0;
+        }
+        ```
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer:** Output: `5 7` or `6 7`
+
+        </div>
+
+        ---
+
+        **Explanation:**
+        - `a++` is post-increment (use then increment)
+        - `++a` is pre-increment (increment then use)
+        - **Undefined behavior** due to sequence point violation
+        - Different compilers may produce different results
+        - Avoid modifying same variable multiple times in one statement
+      </textarea>
+    </section>
+
+    <!-- Group C - Question 2 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group C: Question 2 [2 marks]
+
+        ```cpp
+        #include <iostream>
+        int main() {
+            int arr[3] = {1,2,3};
+            std::cout << arr[3] << '\n';
+            return 0;
+        }
+        ```
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer:** Runtime error (out-of-bounds access, undefined behavior)
+
+        </div>
+
+        ---
+
+        **Why This Happens:**
+        - Array indices: 0, 1, 2 for size 3
+        - `arr[3]` accesses memory beyond array
+        - May crash, print garbage, or appear to work
+        - C++ does not check array bounds automatically
+        
+        **Prevention:** Use `std::vector` with `.at()` for bounds checking
+      </textarea>
+    </section>
+
+    <!-- Group C - Question 3 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group C: Question 3 [2 marks]
+
+        ```cpp
+        #include <iostream>
+        int main() {
+            char s[] = {'h','e','l','l','o','\0'};
+            std::cout << s << '\n';
+            return 0;
+        }
+        ```
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer:** Output: `hello`
+
+        </div>
+
+        ---
+
+        **Key Points:**
+        - Character array initialized with null terminator `'\0'`
+        - `cout` prints C-style strings until null terminator
+        - Without `'\0'`, behavior would be undefined
+        - Equivalent to: `char s[] = "hello";`
+      </textarea>
+    </section>
+
+    <!-- Group C - Question 4 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group C: Question 4 [2 marks]
+
+        ```cpp
+        #include <iostream>
+        int f() { return 3.7; }
+        int main() {
+            std::cout << f() << '\n';
+            return 0;
+        }
+        ```
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer:** Output: `3` (fractional part truncated)
+
+        </div>
+
+        ---
+
+        **Explanation:**
+        - Function `f()` has return type `int`
+        - Returning `3.7` causes implicit conversion
+        - Truncation (not rounding): `3.7` → `3`
+        - Compiler may warn about narrowing conversion
+        - Loss of precision occurs
+      </textarea>
+    </section>
+
+    <!-- Group C - Question 5 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group C: Question 5 [2 marks]
+
+        ```cpp
+        #include <iostream>
+        int main() {
+            int *p = nullptr;
+            std::cout << *p << '\n';
+            return 0;
+        }
+        ```
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer:** Runtime error (dereferencing null pointer)
+
+        </div>
+
+        ---
+
+        **Details:**
+        - `nullptr` means pointer doesn't point to valid memory
+        - Dereferencing (`*p`) attempts to access that memory
+        - Results in segmentation fault or crash
+        - **Always check pointers before dereferencing:**
+        
+        ```cpp
+        if (p != nullptr) {
+            std::cout << *p << '\n';
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Group C - Question 6 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group C: Question 6 [2 marks]
+
+        ```cpp
+        #include <iostream>
+        int main() {
+            if (1 = 2) std::cout << "yes\n";
+            return 0;
+        }
+        ```
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer:** Compile-time error (`1 = 2` is invalid; left operand must be a modifiable lvalue)
+
+        </div>
+
+        ---
+
+        **Why This Fails:**
+        - Assignment requires a modifiable lvalue on left
+        - `1` is a literal constant (rvalue)
+        - Cannot assign to literals
+        - Error: `lvalue required as left operand of assignment`
+        
+        **Correct comparison:** `if (1 == 2)`
+      </textarea>
+    </section>
+
+    <!-- Group C - Question 7 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group C: Question 7 [2 marks]
+
+        ```cpp
+        #include <iostream>
+        int main() {
+            bool x = (5 > 3);
+            std::cout << ((int)x - 1) << '\n';
+            return 0;
+        }
+        ```
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer:** Output: `0` (`true` is 1, so 1-1=0)
+
+        </div>
+
+        ---
+
+        **Step-by-Step:**
+        1. `5 > 3` evaluates to `true`
+        2. `x` stores `true` (boolean value)
+        3. `(int)x` converts `true` to integer `1`
+        4. `1 - 1` = `0`
+        5. Output: `0`
+        
+        **Note:** `true` = 1, `false` = 0 when converted to int
+      </textarea>
+    </section>
+
+    <!-- Group C - Question 8 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group C: Question 8 [2 marks]
+
+        ```cpp
+        #include <iostream>
+        int a[] = {1,2,3};
+        int main() {
+            a++;
+            std::cout << *a << '\n';
+            return 0;
+        }
+        ```
+
+        ---
+
+        <div class="answer-box">
+
+        **Answer:** Compile-time error (array name is not assignable / constant pointer cannot be incremented)
+
+        </div>
+
+        ---
+
+        **Why This Fails:**
+        - Array name is a constant pointer to first element
+        - Cannot modify array name itself
+        - Error: `lvalue required as increment operand`
+        
+        **Alternative:**
+        ```cpp
+        int* ptr = a;
+        ptr++;  // This works!
+        std::cout << *ptr << '\n';  // Prints 2
+        ```
+      </textarea>
+    </section>
+
+    <!-- GROUP D DIVIDER -->
+    <section data-markdown>
+      <textarea data-template>
+        # Group D
+        ## Implementation Questions
+        
+        Practical Programming Skills
+      </textarea>
+    </section>
+
+    <!-- Group D - Question 1 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group D: Question 1 [3 marks]
+
+        **Task:** Reverse an array in-place
+
+        Implement the `reverse` function that reverses the elements of array `a` of size `n` in-place.
+
+        ---
+
+        **Expected Output:** `{3, 5, 7, 2, 9}` → `{9, 2, 7, 5, 3}`
+      </textarea>
+    </section>
+
+    <section data-markdown> 
+        <textarea data-template>
+            ## Group D: Question 1 - Solution
+
+            ```cpp
+            void reverse(int* a, int n) {
+                for(int i=0; i < n; i++) {
+                    int temp = a[i];
+                    a[i] = a[n-i-1];
+                    a[n-i-1] = temp;
+                }
+            }
+            ```
+            ---
+            
+            Code does not work!!
+            
+            **Reason:**
+            
+            It swaps twice and so the elements return to their original positions.
+        </textarea>
+    </section>
+
+    <section data-markdown>
+      <textarea data-template>
+        ## Group D: Question 1 - Solution
+
+        ```cpp
+        void reverse(int* a, int n) {
+            int i = 0, j = n - 1;
+            while (i < j) {
+                int temp = a[i];
+                a[i] = a[j];
+                a[j] = temp;
+                i++; 
+                j--;
+            }
+        }
+        ```
+
+        ---
+
+        **Algorithm:**
+        - Use two pointers: start and end
+        - Swap elements and move pointers toward center
+        - Stop when pointers meet
+        - **Time Complexity:** O(n)
+        - **Space Complexity:** O(1) - in-place
+      </textarea>
+    </section>
+
+    <!-- Group D - Question 2 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group D: Question 2 [3 marks]
+
+        **Task:** Find the middle of an array
+
+        Implement `find_middle` to return the middle element's value. For even length, return the first of the two middle elements.
+
+        ---
+
+        **Example:** `{3,5,2,1,6}` → middle is `2` (index 2)
+      </textarea>
+    </section>
+
+    
+
+    <section data-markdown>
+      <textarea data-template>
+        ## Group D: Question 2 - Solution
+
+        ```cpp
+        int find_middle(int* arr, int size) {
+            int mid = (size - 1) / 2;
+            return arr[mid];
+        }
+        ```
+
+        ---
+
+        **Key Points:**
+        - For odd size (5): `(5-1)/2 = 2` ✓
+        - For even size (4): `(4-1)/2 = 1` (first of two middle)
+        - Integer division automatically floors the result
+        - **Time Complexity:** O(1)
+        
+        **Alternative for exact middle of even:**
+        ```cpp
+        int mid = size / 2;  // Returns second of two middle
+        ```
+      </textarea>
+    </section>
+
+    <!-- Group D - Question 3 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group D: Question 3 [3 marks]
+
+        **Task:** Multiply two complex numbers
+
+        Implement `compMult` to multiply `c1 = a+bi` and `c2 = c+di`, storing result in `real` and `imag`.
+
+        ---
+
+        **Formula:** (a+bi)(c+di) = (ac - bd) + (ad + bc)i
+
+        **Example:** (3+2i)(1+4i) = -5+14i
+      </textarea>
+    </section>
+
+    <section data-markdown>
+      <textarea data-template>
+        ## Group D: Question 3 - Solution
+
+        ```cpp
+        void compMult(double a, double b, double c, double d,
+                      double &real, double &imag) {
+            real = a * c - b * d;
+            imag = a * d + b * c;
+        }
+        ```
+
+        ---
+
+        **Mathematical Derivation:**
+        
+        (a + bi)(c + di) = ac + adi + bci + bdi²
+        
+        Since i² = -1:
+        
+        = ac + adi + bci - bd
+        
+        = (ac - bd) + (ad + bc)i
+
+        **Note:** Using pass-by-reference for output parameters
+      </textarea>
+    </section>
+
+    <!-- Group D - Question 4 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Group D: Question 4 [3 marks]
+
+        **Task:** Arrange characters alphabetically
+
+        Implement `alphabeticOrder` that sorts a character array in-place alphabetically using any sorting algorithm (e.g., bubble sort).
+
+        ---
+
+        **Example:** `{'q', 'w', 'e', 'r', 't', 'y'}` → `{'e', 'q', 'r', 't', 'w', 'y'}`
+      </textarea>
+    </section>
+
+    <section data-markdown>
+      <textarea data-template>
+        ## Group D: Question 4 - Solution
+
+        ```cpp
+        void alphabeticOrder(char* arr, int n) {
+            for (int i = 0; i < n - 1; i++) {
+                for (int j = 0; j < n - i - 1; j++) {
+                    if (arr[j] > arr[j + 1]) {
+                        char temp = arr[j];
+                        arr[j] = arr[j + 1];
+                        arr[j + 1] = temp;
+                    }
+                }
+            }
+        }
+        ```
+
+        ---
+
+        **Bubble Sort Algorithm:**
+        - Compare adjacent elements
+        - Swap if out of order
+        - Largest element "bubbles" to end each pass
+        - **Time Complexity:** O(n²)
+        - **Space Complexity:** O(1)
+      </textarea>
+    </section>
+
+    <!-- Common Mistakes Section -->
+    <section data-markdown>
+      <textarea data-template>
+        # Common Mistakes
+        ## What to Avoid
+      </textarea>
+    </section>
+
+    <section data-markdown>
+      <textarea data-template>
+        ## Common Mistakes - Memory & Pointers
+
+        ### 1. Null Pointer Dereferencing
+        ```cpp
+        int* p = nullptr;
+        cout << *p;  // ❌ CRASH!
+        ```
+
+        ### 2. Array Out of Bounds
+        ```cpp
+        int arr[5];
+        cout << arr[5];  // ❌ Undefined behavior
+        ```
+
+        ### 3. Using Uninitialized Variables
+        ```cpp
+        int x;
+        cout << x;  // ❌ Garbage value
+        ```
+      </textarea>
+    </section>
+
+    <section data-markdown>
+      <textarea data-template>
+        ## Common Mistakes - Syntax & Logic
+
+        ### 1. Assignment vs Comparison
+        ```cpp
+        if (x = 0)  // ❌ Assignment
+        if (x == 0) // ✓ Comparison
+        ```
+
+        ### 2. Missing Semicolons
+        ```cpp
+        cout << "Hello" << endl  // ❌
+        cout << "Hello" << endl; // ✓
+        ```
+
+        ### 3. Off-by-One Errors
+        ```cpp
+        for(int i = 0; i <= n; i++)  // ❌ One too many
+        for(int i = 0; i < n; i++)   // ✓ Correct
+        ```
+      </textarea>
+    </section>
+
+    <!-- Key Takeaways -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Key Takeaways from This Exam
+
+        ### Conceptual Understanding
+        - Know the difference between compile-time and run-time errors
+        - Understand pointer types and memory safety
+        - Master pass-by-value vs pass-by-reference
+
+        ### Practical Skills
+        - Array manipulation (reversal, searching)
+        - Pointer arithmetic and dereferencing
+        - Algorithm implementation (sorting, mathematical operations)
+
+        ---
+        ## Key Takeaways
+
+        ### Error Prevention
+        - Always initialize variables
+        - Check array bounds
+        - Validate pointers before dereferencing
+        - Use comparison (`==`) not assignment (`=`) in conditions
+      </textarea>
+    </section>
+
+    <!-- Study Tips -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Study Tips for Future Success
+
+        ### 1. Practice Code Reading
+        - Trace through code line by line
+        - Predict output before running
+        - Identify potential errors
+
+        ### 2. Understand, Don't Memorize
+        - Know *why* things work, not just *how*
+        - Understand error messages
+        - Learn from mistakes
+
+        ---
+        ## More Tips
+        
+        ### 3. Write Clean Code
+        - Use meaningful variable names
+        - Add comments for complex logic
+        - Test edge cases
+
+        ### 4. Debug Systematically
+        - Identify error type (compile/runtime/logic)
+        - Use print statements to trace values
+        - Check assumptions about data
+      </textarea>
+    </section>
+
+    <!-- Final Slide -->
+    <section data-markdown>
+      <textarea data-template>
+        # Questions?
+
+        Review these solutions carefully and practice similar problems.
+
+        ---
+
+        **Remember:** Programming is a skill that improves with practice!
+      </textarea>
+    </section>
+
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/math/math.js"></script>
+
+<script>
+  Reveal.initialize({
+    hash: true,
+    plugins: [ RevealMarkdown, RevealHighlight, RevealMath.KaTeX ],
+    katex: {
+      displayMode: true,
+      macros: { "\\cases": "\\begin{cases}#1\\end{cases}" }
+    },
+    margin: 0.1,
+    width: 1280,
+    height: 720
+  });
+
+  // Theme switcher
+  const themes = ['white','league','beige','serif','simple','sky','dracula','night','black','solarized','moon','blood'];
+  let idx = 0;
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.onclick = () => {
+      idx = (idx + 1) % themes.length;
+      document.getElementById('theme-link').href = `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[idx]}.css`;
+    };
+  }
+</script>
 </body>
 </html>
