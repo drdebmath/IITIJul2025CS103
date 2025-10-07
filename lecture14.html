@@ -1,16 +1,686 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 14: Operator overloading</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <meta charset="utf-8" />
+  <title>Lecture 14: C++ Strings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Reveal.js Core CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+  <!-- Theme -->
+  <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css" />
+  <!-- Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+  <!-- KaTeX for Math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" />
+
+  <style>
+    /* Custom CSS if needed */
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 14: Classes in Depth - Operator Overloading</h1>
-        <p>Details about the lecture will be updated here.</p>
-        <a href="index.html">Back to Course Outline</a>
-    </div>
+
+<button id="theme-toggle" style="position:fixed;top:10px;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;">Change Theme</button>
+<button id="font-size-toggle" style="position:fixed;top:50px;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;">Font Size</button>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- Title Slide -->
+    <section data-markdown>
+      <textarea data-template>
+        # Lecture 14: C++ Strings
+        String Manipulation, Character Arrays, and String Class
+      </textarea>
+    </section>
+
+    <!-- Introduction -->
+    <section data-markdown>
+      <textarea data-template>
+        ## What are Strings?
+
+        ### Definition
+        - A **string** is a sequence of characters used to represent text
+        - Fundamental data type for text processing
+        - Used in almost every program for input/output, messages, data storage
+
+        ### Two Ways to Work with Strings in C++
+        1. **C-style strings**: character arrays (legacy approach)
+        2. **C++ std::string**: modern object-oriented class
+      </textarea>
+    </section>
+
+    <!-- C-Style Strings -->
+    <section data-markdown>
+      <textarea data-template>
+        ## C-Style Strings: Character Arrays
+
+        ### Key Concepts
+        - Strings as arrays of characters
+        - Null-terminated: end with `'\0'` (null character)
+        - Fixed size once declared
+        - Direct memory manipulation
+
+        ### Declaration
+        ```cpp
+        char str1[6] = "Hello";  // {'H','e','l','l','o','\0'}
+        char str2[] = "World";   // Size automatically calculated
+        char str3[20];           // Empty string buffer
+        ```
+
+        **Important:** The null terminator `'\0'` marks the end of the string!
+      </textarea>
+    </section>
+
+    <!-- C-Style String Example -->
+    <section data-markdown>
+      <textarea data-template>
+        ## C-Style Strings: Code Example
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            char greeting[20] = "Hello";
+            
+            // Access individual characters
+            cout << "First char: " << greeting[0] << endl;
+            
+            // Modify characters
+            greeting[0] = 'h';  // Now "hello"
+            
+            // Display string
+            cout << greeting << endl;
+            
+            // String length (manual)
+            int len = 0;
+            while(greeting[len] != '\0') len++;
+            cout << "Length: " << len << endl;
+            
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- cstring Header -->
+    <section data-markdown>
+      <textarea data-template>
+        ## The cstring Header
+
+        ### Common Functions for C-Style Strings
+        ```cpp
+        #include <cstring>
+        ```
+
+        | Function | Purpose | Example |
+        |----------|---------|---------|
+        | `strlen(s)` | Get string length | `strlen("Hello")` → 5 |
+        | `strcpy(dest, src)` | Copy string | `strcpy(s1, s2)` |
+        | `strcat(dest, src)` | Concatenate | `strcat(s1, s2)` |
+        | `strcmp(s1, s2)` | Compare strings | Returns 0 if equal |
+        | `strchr(s, ch)` | Find character | Returns pointer or NULL |
+        | `strstr(s1, s2)` | Find substring | Returns pointer or NULL |
+      </textarea>
+    </section>
+
+    <!-- cstring Functions Example -->
+    <section data-markdown>
+      <textarea data-template>
+        ## cstring Functions: Code Example
+
+        ```cpp
+        #include <iostream>
+        #include <cstring>
+        using namespace std;
+
+        int main() {
+            char str1[50] = "Hello";
+            char str2[50] = "World";
+            
+            // Length
+            cout << "Length: " << strlen(str1) << endl;
+            
+            // Copy
+            strcpy(str2, str1);  // str2 is now "Hello"
+            
+            // Concatenate
+            strcat(str1, " World");  // str1 is "Hello World"
+            
+            // Compare
+            if(strcmp(str1, str2) == 0) {
+                cout << "Strings are equal" << endl;
+            }
+            
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- C-Style String Dangers -->
+    <section data-markdown>
+      <textarea data-template>
+        ## C-Style Strings: Dangers
+
+        ### Common Problems
+        1. **Buffer overflow**: Writing beyond array bounds
+        2. **Missing null terminator**: Undefined behavior
+        3. **Memory management**: Manual size tracking
+        4. **No bounds checking**: Unsafe operations
+
+        ### Example of Danger
+        ```cpp
+        char small[5] = "Hi";
+        strcat(small, " there!");  // BUFFER OVERFLOW!
+        // Writes beyond array bounds - crashes or corrupts memory
+        ```
+
+        **Recommendation:** Use C++ `std::string` for safer code!
+      </textarea>
+    </section>
+
+    <!-- std::string Class -->
+    <section data-markdown>
+      <textarea data-template>
+        ## C++ std::string Class
+
+        ### Modern Approach to Strings
+        - Defined in `<string>` header
+        - Dynamic sizing (grows/shrinks automatically)
+        - Safe operations with bounds checking
+        - Rich set of member functions
+        - Operator overloading for intuitive syntax
+
+        ### Declaration
+        ```cpp
+        #include <string>
+        
+        string str1 = "Hello";           // Initialize
+        string str2("World");            // Constructor
+        string str3;                     // Empty string
+        string str4(5, 'A');             // "AAAAA"
+        ```
+      </textarea>
+    </section>
+
+    <!-- std::string Basic Operations -->
+    <section data-markdown>
+      <textarea data-template>
+        ## std::string: Basic Operations
+
+        ```cpp
+        #include <iostream>
+        #include <string>
+        using namespace std;
+
+        int main() {
+            string s1 = "Hello";
+            string s2 = "World";
+            
+            // Concatenation
+            string s3 = s1 + " " + s2;  // "Hello World"
+            
+            // Length
+            cout << "Length: " << s3.length() << endl;
+            
+            // Access characters
+            cout << "First: " << s3[0] << endl;
+            cout << "Safe access: " << s3.at(1) << endl;
+            
+            // Comparison
+            if(s1 == s2) cout << "Equal" << endl;
+            if(s1 < s2) cout << "s1 comes before s2" << endl;
+            
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- std::string Member Functions 1 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## std::string: Common Member Functions (1)
+
+        ### Size and Capacity
+        ```cpp
+        string s = "Hello";
+        s.length();      // Returns 5 (same as size())
+        s.size();        // Returns 5
+        s.empty();       // Returns false
+        s.clear();       // Empties the string
+        ```
+
+        ### Accessing Elements
+        ```cpp
+        s[0];            // 'H' - no bounds checking
+        s.at(0);         // 'H' - throws exception if out of bounds
+        s.front();       // 'H' - first character
+        s.back();        // 'o' - last character
+        ```
+      </textarea>
+    </section>
+
+    <!-- std::string Member Functions 2 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## std::string: Common Member Functions (2)
+
+        ### Modification
+        ```cpp
+        string s = "Hello";
+        
+        s.append(" World");      // s = "Hello World"
+        s += " !";               // s = "Hello World !"
+        s.insert(5, ",");        // Insert at position 5
+        s.erase(5, 1);           // Remove 1 char at position 5
+        s.replace(0, 5, "Hi");   // Replace "Hello" with "Hi"
+        s.push_back('!');        // Add character at end
+        s.pop_back();            // Remove last character
+        ```
+      </textarea>
+    </section>
+
+    <!-- std::string Member Functions 3 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## std::string: Common Member Functions (3)
+
+        ### Searching
+        ```cpp
+        string s = "Hello World";
+        
+        s.find("World");         // Returns position 6
+        s.find("xyz");           // Returns string::npos (not found)
+        s.rfind("o");            // Find last occurrence of 'o'
+        s.find_first_of("aeiou"); // Find first vowel
+        s.find_last_of("aeiou");  // Find last vowel
+        ```
+
+        ### Substring
+        ```cpp
+        s.substr(0, 5);          // "Hello" - from pos 0, length 5
+        s.substr(6);             // "World" - from pos 6 to end
+        ```
+      </textarea>
+    </section>
+
+    <!-- String Manipulation Example -->
+    <section data-markdown>
+      <textarea data-template>
+        ## String Manipulation: Comprehensive Example
+
+        ```cpp
+        #include <iostream>
+        #include <string>
+        using namespace std;
+
+        int main() {
+            string text = "C++ Programming";
+            
+            // Length and access
+            cout << "Length: " << text.length() << endl;
+            cout << "Character at 0: " << text[0] << endl;
+            
+            // Substring
+            string lang = text.substr(0, 3);  // "C++"
+            cout << "Language: " << lang << endl;
+            
+            // Find and replace
+            size_t pos = text.find("Programming");
+            if(pos != string::npos) {
+                text.replace(pos, 11, "Strings");
+            }
+            cout << text << endl;  // "C++ Strings"
+            
+            // Concatenation
+            text += " are easy!";
+            cout << text << endl;
+            
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- String Input/Output -->
+    <section data-markdown>
+      <textarea data-template>
+        ## String Input and Output
+
+        ### Reading Strings
+        ```cpp
+        string name;
+        
+        // Read single word (stops at whitespace)
+        cin >> name;
+        
+        // Read entire line (including spaces)
+        getline(cin, name);
+        
+        // Read line with custom delimiter
+        getline(cin, name, ',');
+        ```
+
+        ### Example
+        ```cpp
+        string firstName, fullName;
+        cout << "Enter first name: ";
+        cin >> firstName;
+        cin.ignore();  // Clear newline from buffer
+        
+        cout << "Enter full name: ";
+        getline(cin, fullName);
+        ```
+      </textarea>
+    </section>
+
+    <!-- String Conversions -->
+    <section data-markdown>
+      <textarea data-template>
+        ## String Conversions
+
+        ### String to Number
+        ```cpp
+        #include <string>
+        
+        string s1 = "123";
+        string s2 = "45.67";
+        
+        int num = stoi(s1);           // String to int
+        long lnum = stol(s1);         // String to long
+        double dnum = stod(s2);       // String to double
+        float fnum = stof(s2);        // String to float
+        ```
+
+        ### Number to String
+        ```cpp
+        int n = 42;
+        double d = 3.14;
+        
+        string s1 = to_string(n);     // "42"
+        string s2 = to_string(d);     // "3.140000"
+        ```
+      </textarea>
+    </section>
+
+    <!-- Character Functions -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Character Functions (cctype)
+
+        ### Useful for String Processing
+        ```cpp
+        #include <cctype>
+        
+        char ch = 'A';
+        
+        isalpha(ch);   // Check if alphabetic
+        isdigit(ch);   // Check if digit
+        isalnum(ch);   // Check if alphanumeric
+        isspace(ch);   // Check if whitespace
+        isupper(ch);   // Check if uppercase
+        islower(ch);   // Check if lowercase
+        
+        toupper(ch);   // Convert to uppercase
+        tolower(ch);   // Convert to lowercase
+        ```
+      </textarea>
+    </section>
+
+    <!-- Practical Example -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Practical Example: String Processing
+
+        ```cpp
+        #include <iostream>
+        #include <string>
+        #include <cctype>
+        using namespace std;
+
+        int main() {
+            string text = "Hello World 123";
+            
+            // Count vowels
+            int vowels = 0;
+            for(char c : text) {
+                c = tolower(c);
+                if(c=='a' || c=='e' || c=='i' || c=='o' || c=='u')
+                    vowels++;
+            }
+            cout << "Vowels: " << vowels << endl;
+            
+            // Convert to uppercase
+            string upper;
+            for(char c : text) upper += toupper(c);
+            cout << "Upper: " << upper << endl;
+            
+            // Remove spaces
+            string noSpace;
+            for(char c : text) {
+                if(!isspace(c)) noSpace += c;
+            }
+            cout << "No spaces: " << noSpace << endl;
+            
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Common Error 1 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Common Error: Buffer Overflow
+
+        **Error Example:**
+        ```cpp
+        #include <cstring>
+        using namespace std;
+
+        int main() {
+            char small[5];
+            strcpy(small, "Hello World");  // OVERFLOW!
+            return 0;
+        }
+        ```
+
+        ---
+
+        **Error Message:** Undefined behavior, potential crash or memory corruption.
+
+        **Error Type:** Runtime Error (buffer overflow)
+
+        **Resolution:** Use adequate buffer size or use `std::string`.
+
+        ```cpp
+        // Fixed with C-style
+        char large[20];
+        strcpy(large, "Hello World");
+
+        // Better: use std::string
+        string s = "Hello World";  // Safe!
+        ```
+      </textarea>
+    </section>
+
+    <!-- Common Error 2 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Common Error: Out of Bounds Access
+
+        **Error Example:**
+        ```cpp
+        #include <iostream>
+        #include <string>
+        using namespace std;
+
+        int main() {
+            string s = "Hello";
+            cout << s[10] << endl;  // Out of bounds!
+            return 0;
+        }
+        ```
+
+        ---
+
+        **Error Message:** Undefined behavior (may crash or show garbage).
+
+        **Error Type:** Runtime Error (out of bounds access)
+
+        **Resolution:** Use `.at()` for bounds checking or validate index.
+
+        ```cpp
+        // Fixed with bounds checking
+        if(10 < s.length()) {
+            cout << s[10] << endl;
+        }
+
+        // Or use at() which throws exception
+        try {
+            cout << s.at(10) << endl;
+        } catch(const out_of_range& e) {
+            cout << "Index out of range!" << endl;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Common Error 3 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Common Error: Mixing cin >> and getline
+
+        **Error Example:**
+        ```cpp
+        #include <iostream>
+        #include <string>
+        using namespace std;
+
+        int main() {
+            int age;
+            string name;
+            
+            cout << "Enter age: ";
+            cin >> age;
+            
+            cout << "Enter name: ";
+            getline(cin, name);  // Reads empty string!
+            
+            cout << "Name: " << name << endl;
+            return 0;
+        }
+        ```
+
+        ---
+
+        **Error Type:** Logic Error (leftover newline in buffer)
+
+        **Resolution:** Use `cin.ignore()` to clear the buffer.
+
+        ```cpp
+        cin >> age;
+        cin.ignore();  // Clear the newline character
+        getline(cin, name);  // Now works correctly
+        ```
+      </textarea>
+    </section>
+
+    <!-- Comparison: C-Style vs std::string -->
+    <section data-markdown>
+      <textarea data-template>
+        ## C-Style Strings vs std::string
+
+        | Feature | C-Style (char[]) | std::string |
+        |---------|------------------|-------------|
+        | Size | Fixed | Dynamic |
+        | Safety | No bounds check | Bounds checking with `.at()` |
+        | Memory | Manual | Automatic |
+        | Concatenation | `strcat()` | `+` operator |
+        | Comparison | `strcmp()` | `==`, `<`, `>` |
+        | Length | `strlen()` | `.length()` |
+        | Ease of use | Complex | Intuitive |
+
+        ---
+
+        ### Recommendation
+        **Use `std::string` for modern C++ code!**
+        Use C-style only when interfacing with legacy code or C libraries.
+      </textarea>
+    </section>
+
+    <!-- Summary -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Summary
+
+        ### Key Takeaways
+        1. **Two string types**: C-style (char arrays) and C++ std::string
+        2. **C-style strings**: Null-terminated, fixed size, use `<cstring>` functions
+        3. **std::string**: Dynamic, safe, feature-rich, modern approach
+        4. **String operations**: concatenation, searching, substring, conversion
+        5. **Character functions**: `<cctype>` for character classification
+        6. **Common errors**: buffer overflow, out of bounds, input buffer issues
+
+        ---
+
+        ### Best Practices
+        - Prefer `std::string` over C-style strings
+        - Use `.at()` for safe element access
+        - Use `cin.ignore()` when mixing `>>` and `getline()`
+        - Always validate input and check string bounds
+      </textarea>
+    </section>
+
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/math/math.js"></script>
+
+<script>
+  Reveal.initialize({
+    hash: true,
+    plugins: [ RevealMarkdown, RevealHighlight, RevealMath.KaTeX ],
+    katex: {
+      displayMode: true,
+      macros: { "\\cases": "\\begin{cases}#1\\end{cases}" }
+    },
+    margin: 0.1,
+    width: 1280,
+    height: 720
+  });
+
+  // Theme switcher
+  const themes = ['white','league','beige','serif','simple','sky','dracula','night','black','solarized','moon','blood'];
+  let idx = 0;
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.onclick = () => {
+      idx = (idx + 1) % themes.length;
+      document.getElementById('theme-link').href = `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[idx]}.css`;
+    };
+  }
+
+  // Font size switcher
+  const fontSizes = ['0.8em', '1em', '1.5em', '2em', '2.5em'];
+  const fontLabels = ['Small', 'Medium', 'Large', 'XL', 'XXL'];
+  let fontIdx = 2; // Start at Medium
+  const fontSizeToggleBtn = document.getElementById('font-size-toggle');
+  if (fontSizeToggleBtn) {
+    fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+    fontSizeToggleBtn.onclick = () => {
+      fontIdx = (fontIdx + 1) % fontSizes.length;
+      document.querySelector('.reveal').style.fontSize = fontSizes[fontIdx];
+      fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+    };
+  }
+</script>
 </body>
 </html>
