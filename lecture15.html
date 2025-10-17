@@ -1,16 +1,1019 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 15: Inheritance</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <meta charset="utf-8" />
+  <title>Lecture 15: Classes, Constructors, and Operator Overloading</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Reveal.js Core CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+  <!-- Theme -->
+  <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css" />
+  <!-- Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+  <!-- KaTeX for Math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" />
+
+  <style>
+    /* Custom CSS if needed */
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 15: Advanced OOP - Inheritance</h1>
-        <p>Details about the lecture will be updated here.</p>
+
+<button id="theme-toggle" style="position:fixed;top:10px;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;">Change Theme</button>
+<button id="font-size-toggle" style="position:fixed;top:50px;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;">Font Size</button>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- Title Slide -->
+    <section data-markdown>
+      <textarea data-template>
+        # Lecture 15: Classes, Constructors, and Operator Overloading
+        Object-Oriented Programming Fundamentals in C++
+      </textarea>
+    </section>
+
+    <!-- Introduction -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Why Classes?
+
+        ### Procedural vs Object-Oriented Programming
+
+        | Procedural Programming | Object-Oriented Programming |
+        |-----------------------|----------------------------|
+        | Focus on functions and procedures | Focus on objects and classes |
+        | Data and functions are separate | Data and functions are bundled together |
+        | Hard to model real-world entities | Easy to model real-world entities |
+
+        ---
+
+        ### Classes: Blueprint for Objects
+        - A class is a user-defined data type
+        - Classes encapsulate data (member variables) and behavior (member functions)
+        - Objects are instances of classes
+      </textarea>
+    </section>
+
+    <!-- Class Definition Syntax -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Class Definition and Syntax
+
+        ### Basic Class Structure
+        ```cpp
+        class ClassName {
+        private:
+            // Private member variables and functions
+            // Accessible only within the class
+
+        public:
+            // Public member variables and functions
+            // Accessible from outside the class
+
+        protected:
+            // Protected members (used in inheritance)
+            // We'll cover this in a future lecture
+        };
+        ```
+
+        ---
+
+        ### Access Specifiers
+        - **`private`**: Only accessible within the class
+        - **`public`**: Accessible from anywhere
+        - **`protected`**: Accessible within the class and derived classes
+      </textarea>
+    </section>
+
+    <!-- First Class Example -->
+    <section data-markdown>
+      <textarea data-template>
+        ## First Class Example
+
+        ```cpp
+        #include <iostream>
+        #include <string>
+        using namespace std;
+
+        class Student {
+        private:
+            string name;
+            int rollNumber;
+            float marks;
+
+        public:
+            // Member functions
+            void setDetails(string n, int r, float m) {
+                name = n;
+                rollNumber = r;
+                marks = m;
+            }
+
+            void display() {
+                cout << "Name: " << name << endl;
+                cout << "Roll: " << rollNumber << endl;
+                cout << "Marks: " << marks << endl;
+            }
+        };
+
+        int main() {
+            Student s;  // Create object
+            s.setDetails("John Doe", 101, 95.5);
+            s.display();
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Constructors -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Constructors: Special Member Functions
+
+        ### What is a Constructor?
+        - A special member function that initializes objects
+        - Automatically called when an object is created
+        - Has the same name as the class
+        - No return type (not even void)
+
+        ---
+
+        ### Constructor Characteristics
+        ```cpp
+        class MyClass {
+        public:
+            MyClass() {  // Constructor
+                // Initialization code
+            }
+        };
+        ```
+
+        ### When Constructors are Called
+        ```cpp
+        MyClass obj1;           // Call default constructor
+        MyClass obj2 = obj1;    // Copy constructor (if defined)
+        MyClass* ptr = new MyClass();  // Constructor called via new
+        ```
+      </textarea>
+    </section>
+
+    <!-- Types of Constructors -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Types of Constructors
+
+        ### Overview
+        - Default Constructor
+        - Parameterized Constructor
+        - Copy Constructor
+      </textarea>
+    </section>
+
+    <!-- Default Constructor -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Default Constructor
+
+        ### Characteristics
+        - Takes no parameters
+        - If not defined, C++ provides one automatically
+        - Initializes members to default values
+
+        ---
+
+        ### Example
+        ```cpp
+        class Rectangle {
+        private:
+            int length, breadth;
+        public:
+            Rectangle() {      // Default constructor
+                length = breadth = 0;
+            }
+        };
+
+        int main() {
+            Rectangle rect; // Calls Rectangle()
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Parameterized Constructor -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Parameterized Constructor
+
+        ### Characteristics
+        - Takes parameters to initialize objects
+        - Allows custom initialization
+        - Can be overloaded
+
+        ---
+
+        ### Example
+        ```cpp
+        class Rectangle {
+        private:
+            int length, breadth;
+        public:
+            Rectangle(int l, int b) {  // Parameterized constructor
+                length = l;
+                breadth = b;
+            }
+        };
+
+        int main() {
+            Rectangle rect(5, 10); // Calls Rectangle(int, int)
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Copy Constructor -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Copy Constructor
+
+        ### Characteristics
+        - Creates a copy of an existing object
+        - Called during object copying (assignment, passing by value)
+        - Takes const reference to same class object
+
+        ---
+
+        ### Example
+        ```cpp
+        class Rectangle {
+        private:
+            int length, breadth;
+        public:
+            Rectangle(const Rectangle& r) {  // Copy constructor
+                length = r.length;
+                breadth = r.breadth;
+            }
+        };
+
+        int main() {
+            Rectangle rect1(5, 10);
+            Rectangle rect2 = rect1; // Calls copy constructor
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Constructor Overloading -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Constructor Overloading
+
+        ### Multiple Constructors
+        ```cpp
+        class Rectangle {
+        private:
+            int length, breadth;
+
+        public:
+            // Default constructor
+            Rectangle() {
+                length = breadth = 1;
+            }
+
+            // Parameterized constructor
+            Rectangle(int l, int b) {
+                length = l;
+                breadth = b;
+            }
+
+            // Copy constructor
+            Rectangle(const Rectangle& r) {
+                length = r.length;
+                breadth = r.breadth;
+            }
+
+            int area() {
+                return length * breadth;
+            }
+        };
+
+        int main() {
+            Rectangle r1;          // Default: 1x1
+            Rectangle r2(5, 10);   // Parameterized: 5x10
+            Rectangle r3 = r2;     // Copy: 5x10
+
+            cout << r1.area() << endl;  // 1
+            cout << r2.area() << endl;  // 50
+            cout << r3.area() << endl;  // 50
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Destructors Introduction -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Destructors: Introduction
+
+        ### What is a Destructor?
+        - Special member function for cleanup
+        - Automatically called when object is destroyed
+        - Same name as class with `~` prefix
+        - No return type (not even void)
+        - Cannot be overloaded
+
+        ---
+
+        ### Why Destructors Matter
+        - Essential for resource management
+        - Prevent memory leaks
+        - Ensure proper cleanup of resources
+        - Part of RAII (Resource Acquisition Is Initialization)
+      </textarea>
+    </section>
+
+    <!-- Destructor Syntax -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Destructors: Syntax and Definition
+
+        ### Destructor Syntax
+        ```cpp
+        class MyClass {
+        public:
+            MyClass() {  // Constructor
+                // Initialization code
+            }
+
+            ~MyClass() {  // Destructor
+                // Cleanup code goes here
+            }
+        };
+        ```
+
+        ---
+
+        ### Destructor Characteristics
+        - Same name as class with `~` prefix
+        - No parameters and no return type
+        - Cannot be overloaded
+        - Called automatically (never call manually)
+        - Only one destructor per class
+      </textarea>
+    </section>
+
+    <!-- When Destructors are Called -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Destructors: When They Are Called
+
+        ### Lifecycle of Objects
+        - **Creation**: Constructor is called
+        - **Usage**: Object performs its operations
+        - **Destruction**: Destructor is called
+
+        ---
+
+        ### When Destructors are Called
+        - **Local Objects**: When they go out of scope
+        ```cpp
+        void function() {
+            MyClass obj;  // Constructor called
+            // Use obj
+        }  // Destructor called here
+        ```
+
+        - **Global Objects**: At program termination
+
+        - **Dynamic Objects**: When `delete` is used
+        ```cpp
+        MyClass* ptr = new MyClass();  // Constructor
+        // Use ptr
+        delete ptr;  // Destructor called
+        ```
+      </textarea>
+    </section>
+
+    <!-- Destructor Example -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Destructor Example
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        class ResourceManager {
+        private:
+            int* data;
+
+        public:
+            ResourceManager(int size) {
+                data = new int[size];  // Allocate memory
+                cout << "Constructor: Allocated " << size << " ints" << endl;
+            }
+
+            ~ResourceManager() {
+                delete[] data;  // Free memory
+                cout << "Destructor: Freed memory" << endl;
+            }
+
+            void display() {
+                cout << "ResourceManager object alive" << endl;
+            }
+        };
+
+        int main() {
+            {
+                ResourceManager rm(10);
+                rm.display();
+            }  // rm goes out of scope, destructor called
+
+            cout << "Back in main" << endl;
+            return 0;
+        }
+        ```
+
+        **Output:**
+        ```
+        Constructor: Allocated 10 ints
+        ResourceManager object alive
+        Destructor: Freed memory
+        Back in main
+        ```
+      </textarea>
+    </section>
+
+    <!-- What is Operator Overloading -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Operator Overloading: Making Operators Work with Classes
+
+        ### Why Operator Overloading?
+        - Classes represent abstract data types
+        - We want to use familiar operators with our objects
+        - Makes code more intuitive and readable
+
+        ---
+
+        ### Example: Complex Numbers
+        ```cpp
+        // Without operator overloading
+        Complex c1(1, 2), c2(3, 4), result;
+        result = add(c1, c2);  // Verbose
+
+        // With operator overloading
+        result = c1 + c2;      // Natural!
+        ```
+
+        ---
+
+        ### How It Works
+        - Define operator functions in the class
+        - Syntax: `operator<symbol>()`
+        - Return type and parameters like normal functions
+        - Enables natural syntax for class objects
+      </textarea>
+    </section>
+
+    <!-- Operator Overloading Syntax -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Operator Overloading Syntax
+
+        ### Basic Form
+        ```cpp
+        class MyClass {
+        public:
+            // Unary operator
+            ReturnType operator<op>() {
+                // Implementation
+            }
+
+            // Binary operator
+            ReturnType operator<op>(const MyClass& other) {
+                // Implementation
+            }
+        };
+        ```
+
+        ---
+
+        ### Common Operators to Overload
+        | Operator | Name | Example |
+        |----------|------|---------|
+        | `+` | Addition | `a + b` |
+        | `-` | Subtraction | `a - b` |
+        | `*` | Multiplication | `a * b` |
+        | `/` | Division | `a / b` |
+        | `==` | Equality | `a == b` |
+        | `<` | Less than | `a < b` |
+        | `<<` | Output stream | `cout << a` |
+        | `>>` | Input stream | `cin >> a` |
+        | `=` | Assignment | `a = b` |
+        | `[]` | Array subscript | `a[5]` |
+      </textarea>
+    </section>
+
+    <!-- Binary Operator Overloading -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Binary Operator Overloading Example
+
+        ### Complex Number Class
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        class Complex {
+        private:
+            double real, imag;
+
+        public:
+            // Constructor
+            Complex(double r = 0, double i = 0) {
+                real = r;
+                imag = i;
+            }
+
+            // Addition operator
+            Complex operator+(const Complex& other) {
+                Complex result;
+                result.real = real + other.real;
+                result.imag = imag + other.imag;
+                return result;
+            }
+
+            // Display function
+            void display() {
+                cout << real << " + " << imag << "i" << endl;
+            }
+        };
+
+        int main() {
+            Complex c1(1, 2), c2(3, 4);
+            Complex sum = c1 + c2;  // Calls c1.operator+(c2)
+
+            cout << "c1: "; c1.display();
+            cout << "c2: "; c2.display();
+            cout << "Sum: "; sum.display();
+
+            return 0;
+        }
+        ```
+
+        **Output:**
+        ```
+        c1: 1 + 2i
+        c2: 3 + 4i
+        Sum: 4 + 6i
+        ```
+      </textarea>
+    </section>
+
+    <!-- Stream Operators -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Stream Operators: `<<` and `>>`
+
+        ### Why Stream Operators?
+        - Enable natural I/O syntax with objects
+        - `cout << obj` instead of `obj.display()`
+        - `cin >> obj` for input
+
+        ---
+
+        ### Output Stream Operator (`<<`)
+        - Friend function (not member function)
+        - Returns `ostream&` for chaining
+        - First parameter: `ostream& out`
+        - Second parameter: `const ClassType& obj`
+
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        class Complex {
+        private:
+            double real, imag;
+
+        public:
+            Complex(double r = 0, double i = 0) : real(r), imag(i) {}
+
+            // Friend function for output
+            friend ostream& operator<<(ostream& out, const Complex& c) {
+                out << c.real << " + " << c.imag << "i";
+                return out;
+            }
+        };
+
+        int main() {
+            Complex c(3, 4);
+            cout << "Complex number: " << c << endl;
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Input Stream Operator -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Input Stream Operator (`>>`)
+
+        ### Input Stream Overloading
+        ```cpp
+        class Complex {
+        private:
+            double real, imag;
+
+        public:
+            Complex(double r = 0, double i = 0) : real(r), imag(i) {}
+
+            // Friend function for input
+            friend istream& operator>>(istream& in, Complex& c) {
+                cout << "Enter real part: ";
+                in >> c.real;
+                cout << "Enter imaginary part: ";
+                in >> c.imag;
+                return in;
+            }
+
+            friend ostream& operator<<(ostream& out, const Complex& c) {
+                out << c.real << " + " << c.imag << "i";
+                return out;
+            }
+        };
+
+        int main() {
+            Complex c;
+            cout << "Enter a complex number:" << endl;
+            cin >> c;           // Calls operator>>(cin, c)
+            cout << "You entered: " << c << endl;
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Comparison Operators -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Comparison Operators: `==`, `!=`, `<`, etc.
+
+        ```cpp
+        class Time {
+        private:
+            int hours, minutes;
+
+        public:
+            Time(int h = 0, int m = 0) : hours(h), minutes(m) {}
+
+            // Equality operator
+            bool operator==(const Time& other) const {
+                return (hours == other.hours && minutes == other.minutes);
+            }
+
+            // Less than operator
+            bool operator<(const Time& other) const {
+                if (hours != other.hours)
+                    return hours < other.hours;
+                return minutes < other.minutes;
+            }
+
+            // Other comparison operators can be derived
+            bool operator!=(const Time& other) const {
+                return !(*this == other);
+            }
+
+            bool operator<=(const Time& other) const {
+                return (*this < other) || (*this == other);
+            }
+
+            friend ostream& operator<<(ostream& out, const Time& t) {
+                out << t.hours << ":" << t.minutes;
+                return out;
+            }
+        };
+
+        int main() {
+            Time t1(9, 30), t2(10, 15);
+
+            if (t1 < t2) {
+                cout << "t1 comes before t2" << endl;
+            }
+
+            if (t1 != t2) {
+                cout << "t1 and t2 are different" << endl;
+            }
+
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Assignment Operator -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Assignment Operator (`=`)
+
+        ### Why Overload Assignment?
+        - C++ provides default assignment operator
+        - May not be sufficient for dynamic resources
+        - Need deep copy instead of shallow copy
+
+
+        ---
+
+        ```cpp
+        class String {
+        private:
+            char* data;
+            int length;
+
+        public:
+            // Constructor
+            String(const char* str = "") {
+                length = strlen(str);
+                data = new char[length + 1];
+                strcpy(data, str);
+            }
+
+            // Copy constructor (not shown)
+            String(const String& other) {
+                length = other.length;
+                data = new char[length + 1];
+                strcpy(data, other.data);
+            }
+
+            // Assignment operator
+            String& operator=(const String& other) {
+                if (this != &other) {  // Self-assignment check
+                    delete[] data;    // Free existing memory
+
+                    length = other.length;
+                    data = new char[length + 1];
+                    strcpy(data, other.data);
+                }
+                return *this;  // Return reference for chaining
+            }
+
+            ~String() {
+                delete[] data;
+            }
+
+            void display() const {
+                cout << data << endl;
+            }
+        };
+
+        int main() {
+            String s1("Hello");
+            String s2;
+            s2 = s1;  // Assignment
+            s1.display();
+            s2.display();
+            return 0;
+        }
+        ```
+      </textarea>
+    </section>
+
+
+    <!-- Common Error 2 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Common Error: Returning by Value vs Reference
+
+        ### Error Example
+        ```cpp
+        #include <iostream>
+        using namespace std;
+
+        class Complex {
+        private:
+            double real, imag;
+
+        public:
+            Complex(double r = 0, double i = 0) : real(r), imag(i) {}
+
+            Complex operator+(const Complex& other) {
+                Complex temp;
+                temp.real = real + other.real;
+                temp.imag = imag + other.imag;
+                return temp;
+            }
+
+            Complex& operator++() {  // prefix ++
+                real += 1;
+                imag += 1;
+                return *this;
+            }
+
+            void display() const {
+                cout << real << " + " << imag << "i" << endl;
+            }
+        };
+
+        int main() {
+            Complex a(1, 2), b(3, 4);
+            Complex c = a + b;
+            ++a;
+
+            c.display();  // 4 + 6i
+            a.display();  // 2 + 3i
+            return 0;
+        }
+```
+
+        ---
+
+        **Good Practice:** 
+        - Binary operators usually return by value
+        - Unary operators that modify (like `++`) return by reference
+        - Assignment operators return by reference for chaining
+      </textarea>
+    </section>
+
+    <!-- Common Error 3 -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Common Error: Self-Assignment
+
+        **Error Example:**
+        ```cpp
+        String& operator=(const String& other) {
+            delete[] data;     // Delete current data
+
+            length = other.length;
+            data = new char[length + 1];
+            strcpy(data, other.data);
+
+            return *this;
+        }
+
+        int main() {
+            String s("test");
+            s = s;  // Self-assignment - CRASH!
+        }
+        ```
+
+        ---
+
+        **Error Message:** Program crashes on self-assignment.
+
+        **Error Type:** Runtime error (memory corruption)
+
+        **Resolution:** Add self-assignment check.
+
+        ```cpp
+        String& operator=(const String& other) {
+            if (this != &other) {  // Self-assignment check
+                delete[] data;     // Safe to delete now
+                // ... rest of assignment
+            }
+            return *this;
+        }
+        ```
+      </textarea>
+    </section>
+
+    <!-- Best Practices -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Best Practices for Operator Overloading
+
+        ### Design Principles
+        1. **Intuitive Behavior**: Operators should do what users expect
+           ```cpp
+           a + b;  // Should behave like mathematical addition
+           a += b; // Equivalent to a = a + b
+           ```
+
+        2. **Consistency**: Related operators should be consistent
+           ```cpp
+           if (a == b) should be equivalent to !(a != b)
+           if (a < b) then !(b < a) or (a == b)
+           ```
+
+        3. **Minimal Set**: Only overload operators that make sense
+           - Don't overload `+` for Date class to add years
+           - Use member functions for operations without clear operators
+
+        ---
+        
+           ### Design Principles
+
+           4. **Return Types**:
+           - Binary operators: return by value
+           - Assignment operators: return `Type&` for chaining
+           - Comparison operators: return `bool`
+           - Stream operators: return stream reference
+
+        5. **Friend vs Member Functions**:
+           - Use member functions when possible (no `friend` needed)
+           - Use `friend` only for symmetric operators like `<<`
+      </textarea>
+    </section>
+
+    <!-- Summary -->
+    <section data-markdown>
+      <textarea data-template>
+        ## Summary
+
+        ### Key Takeaways
+
+        **Classes:**
+        - Blueprint for creating objects
+        - Encapsulate data and behavior
+        - Access specifiers: `private`, `public`, `protected`
+
+        **Constructors:**
+        - Initialize objects automatically
+        - Default, parameterized, and copy constructors
+        - Constructor overloading for flexible initialization
+
+        ---
+
+        **Destructors:**
+        - Cleanup resources when objects are destroyed
+        - Automatically called
+        - Essential for memory management
+
+        **Operator Overloading:**
+        - Make operators work with user-defined types
+        - Syntax: `operator<symbol>()`
+        - Member functions or friend functions
+        - Common operators: `+`, `<<`, `==`, `=`
+
+        ---
+
+        ### Best Practices
+        - Keep constructors simple
+        - Implement RAII (Resource Acquisition Is Initialization)
+        - Overload operators only when intuitive
+        - Ensure consistency across related operators
+        - Handle self-assignment in assignment operators
+        </textarea>
+      </section>
+
+      <section>
+        <h2>Back to Course Outline</h2>
         <a href="index.html">Back to Course Outline</a>
+      </section>
+
+      </div>
     </div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/math/math.js"></script>
+
+<script>
+  Reveal.initialize({
+    hash: true,
+    plugins: [ RevealMarkdown, RevealHighlight, RevealMath.KaTeX ],
+    katex: {
+      displayMode: true,
+      macros: { "\\cases": "\\begin{cases}#1\\end{cases}" }
+    },
+    margin: 0.1,
+    width: 1280,
+    height: 720
+  });
+
+  // Theme switcher
+  const themes = ['white','league','beige','serif','simple','sky','dracula','night','black','solarized','moon','blood'];
+  let idx = 0;
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.onclick = () => {
+      idx = (idx + 1) % themes.length;
+      document.getElementById('theme-link').href = `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[idx]}.css`;
+    };
+  }
+
+  // Font size switcher
+  const fontSizes = ['0.8em', '1em', '1.5em', '2em', '2.5em'];
+  const fontLabels = ['Small', 'Medium', 'Large', 'XL', 'XXL'];
+  let fontIdx = 2; // Start at Medium
+  const fontSizeToggleBtn = document.getElementById('font-size-toggle');
+  if (fontSizeToggleBtn) {
+    fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+    fontSizeToggleBtn.onclick = () => {
+      fontIdx = (fontIdx + 1) % fontSizes.length;
+      document.querySelector('.reveal').style.fontSize = fontSizes[fontIdx];
+      fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+    };
+  }
+</script>
 </body>
 </html>

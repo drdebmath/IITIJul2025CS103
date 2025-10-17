@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Lecture 1: Introduction to Programming</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Reveal.js Core CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+  <!-- Theme -->
+  <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css" />
+  <!-- Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+
+  <style>
+    .reveal .answer-box {
+      background-color: #e8f5e9;
+      padding: 15px;
+      margin: 10px 0;
+      border-left: 4px solid #4caf50;
+      text-align: left;
+    }
+    .reveal .key-point {
+      color: #1976d2;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<button id="theme-toggle" style="position:fixed;top:10px;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;">Change Theme</button>
+
+<div class="reveal">
+        <div class="slides">
+
+    <!-- Title Slide -->
+    <section data-markdown>
+      <textarea data-template>
+        # Lecture 1: Introduction to Programming
+        CS 103: Computer Programming
+
+        Welcome to CS103! This lecture will introduce you to the fundamental concepts of programming and set the stage for our journey into C++.
+
+        **Instructor:** [Dr. Debasish Pattanayak](https://drdebmath.github.io)
+
+        Use arrow keys or spacebar to navigate slides.
+      </textarea>
+    </section>
+
+    <!-- What is Programming? -->
+    <section data-markdown>
+      <textarea data-template>
+        ## What is Programming?
+
+        Programming is giving computers instructions to solve problems. It involves **algorithms** (step-by-step solutions), **syntax** (language rules), **logic** (reasoning), and **debugging** (fixing errors).
+
+        - **Algorithms:** Step-by-step solutions to problems
+        - **Syntax:** Rules of the programming language
+        - **Logic:** The reasoning behind your code
+        - **Debugging:** Finding and fixing errors
+
+        ---
+
+        ### What is Programming? (Details)
+
+        Programming is the process of creating a set of instructions that tell a computer how to perform a task.
+
+        **Key Concepts:**
+        - **Algorithms:** Finite sequence of well-defined instructions
+        - **Syntax:** Grammar rules of the language
+        - **Logic:** What the code does
+        - **Debugging:** Systematic error fixing
+      </textarea>
+    </section>
+
+    <section data-markdown>
+      <textarea data-template>
+        ## More on Key Concepts
+
+        **Algorithms:** Be precise and executable. Example: Making tea involves boil water, add tea leaves, steep, pour.
+
+        ---
+
+        **Syntax:** Even a misplaced comma creates an error. Compiler catches these before running.
+
+        ---
+
+        **Logic:** Determines program behavior. Flaws lead to incorrect results.
+
+        ---
+
+        **Debugging:** Find **why** the code fails and **fix** it. Takes significant time.
+      </textarea>
+    </section>
+
+    <!-- How Computers Work -->
+    <section data-markdown>
+      <textarea data-template>
+        ## How Do Computers Work?
+
+        Computers are **deterministic machines** that follow instructions precisely and predictably.
+
+        - **Binary System:** Everything is 0s and 1s (electricity on/off)
+        - **CPU (Processor):** Executes instructions one by one
+        - **Memory (RAM):** Temporarily stores data and instructions
+        - **Storage:** Permanent data storage (hard drive, SSD)
+        - **Deterministic:** Same input → Same output, every time
+
+        ```cpp
+        // Deterministic example:
+        int result = 5 + 3; // Always equals 8
+        ```
+      </textarea>
+    </section>
+
+    <section data-markdown>
+      <textarea data-template>
+        ## Computer Architecture Details
+
+        At their core, computers are **deterministic machines** that process information through predictable operations.
+
+        **Basic Components:**
+        - **Binary System:** All data represented as 0s/1s for electrical states
+        - **CPU:** Executes instructions sequentially  
+        - **Memory (RAM):** Temporary storage for active programs
+        - **Storage:** Permanent data retention (HDD/SSD)
+        - **I/O Devices:** Input/output interfaces
+
+        **Key Principle:** Same input always produces same output. Programs must be precise.
+      </textarea>
+    </section>
+
+            <section>
+                <section>
+                    <h2>Brief History of Programming Languages</h2>
+                    <p>Programming languages evolved from machine code (0s and 1s) to human-readable high-level languages.</p>
+                    <ul>
+                        <li><strong>1GL:</strong> Machine Language (binary)</li>
+                        <li><strong>2GL:</strong> Assembly Language</li>
+                        <li><strong>3GL:</strong> High-Level Languages (C++, Python)</li>
+                        <li><strong>4GL:</strong> Domain-Specific (SQL)</li>
+                        <li><strong>5GL:</strong> AI-focused languages</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>History of Programming Languages (Details)</h3>
+                    <p>From early, cumbersome machine code to the sophisticated, human-friendly languages of today, programming has undergone a remarkable evolution, driven by the need for greater abstraction, efficiency, and problem-solving capabilities.</p>
+                    <ul>
+                        <li><strong>First Generation (1GL): Machine Language</strong> (e.g., binary code - 0s and 1s).</li>
+                        <li><strong>Second Generation (2GL): Assembly Language</strong> (e.g., Assembly).</li>
+                        <li><strong>Third Generation (3GL): High-Level Languages</strong> (e.g., Fortran, COBOL, C, C++, Java, Python).</li>
+                        <li><strong>Fourth Generation (4GL): Domain-Specific Languages</strong> (e.g., SQL for database queries).</li>
+                        <li><strong>Fifth Generation (5GL): Artificial Intelligence Languages</strong> (e.g., Prolog, OPS5).</li>
+                    </ul>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h2>High-Level vs. Low-Level Languages</h2>
+                    <p>A look at the trade-offs between performance and abstraction.</p>
+                    <ul>
+                        <li><strong>Low-Level (e.g., Assembly):</strong> Fast, direct hardware control. Complex & platform-dependent.</li>
+                        <li><strong>High-Level (e.g., C++):</strong> Human-friendly, portable. Easier & faster to develop.</li>
+                    </ul>
+                    <pre><code class="cpp">// High-Level (C++)
+int sum = 5 + 10;
+
+// Low-Level (Conceptual Assembly)
+MOV AX, 5
+ADD AX, 10</code></pre>
+                </section>
+                <section>
+                    <h3>High-Level vs. Low-Level (Details)</h3>
+                    <p>The distinction between high-level and low-level languages is crucial for understanding how software interacts with hardware and for choosing the right tool for a given task.</p>
+                    <ul>
+                        <li><strong>Low-Level Languages:</strong> Closer to machine code, fast, platform-dependent.
+                            <pre><code class="asm">; Add two numbers
+MOV AX, 5
+MOV BX, 10
+ADD AX, BX</code></pre>
+                        </li>
+                        <li><strong>High-Level Languages:</strong> Closer to human language, easier, portable.
+                            <pre><code class="cpp">// Add two numbers
+int a = 5;
+int b = 10;
+int sum = a + b;</code></pre>
+                        </li>
+                    </ul>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h2>Your First C++ Program: "Hello, World!"</h2>
+                    <p>The classic "Hello, World!" demonstrates the basic structure of a C++ program.</p>
+                    <pre><code class="cpp">#include <iostream>
+
+int main() {
+    std::cout << "Hello, World!" << std::endl;
+    return 0;
+}</code></pre>
+                    <ul>
+                        <li><strong>#include:</strong> Brings in external functionality</li>
+                        <li><strong>main():</strong> The entry point of every C++ program</li>
+                        <li><strong>std::cout:</strong> Outputs text to the console</li>
+                        <li><strong>return 0:</strong> Indicates successful execution</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>Hello World (Details)</h3>
+                    <p>Let's start with the classic "Hello, World!" program in C++. This simple program is traditionally the first program learned in any language, as it demonstrates the basic structure and how to produce output. It will print the text "Hello, World!" to the console.</p>
+                    <pre><code class="cpp">#include <iostream> // Allows input and output operations.
+
+int main() { // The entry point of the program.
+    std::cout << "Hello, World!" << std::endl; // Prints to the console.
+    return 0; // Indicates successful execution.
+}</code></pre>
+                    <p><strong>Explanation:</strong> <code>#include <iostream></code>, <code>int main()</code>, <code>std::cout</code>, <code><<</code>, <code>"Hello, World!"</code>, <code>std::endl</code>, and <code>return 0;</code> are the key components.</p>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h2>Setting Up Your Development Environment</h2>
+                    <p>You need a compiler (like G++) to turn your <code>.cpp</code> code into an executable program.</p>
+                    <ul>
+                        <li><strong>Windows:</strong> Install MinGW-w64</li>
+                        <li><strong>macOS:</strong> Install Xcode Command Line Tools</li>
+                        <li><strong>Linux:</strong> Install `build-essential`</li>
+                    </ul>
+                    <p><strong>Example Compilation:</strong></p>
+                    <pre><code class="bash"># Compile the code
+g++ hello.cpp -o hello
+
+# Run the program
+./hello</code></pre>
+                </section>
+                <section>
+                    <h3>Development Setup (Details)</h3>
+                    <p>To write, compile, and run C++ programs, you'll need a C++ compiler and a text editor or Integrated Development Environment (IDE). The compiler translates your human-readable C++ code into machine code that your computer can execute.</p>
+                    <h4>Installing a C++ Compiler (GCC/G++)</h4>
+                    <ul>
+                        <li><strong>Windows:</strong> Install MinGW-w64.</li>
+                        <li><strong>macOS:</strong> Install Xcode Command Line Tools.</li>
+                        <li><strong>Linux (Debian/Ubuntu):</strong> Install `build-essential`.</li>
+                    </ul>
+                    <h4>Compiling and Running C++ Programs</h4>
+                    <ol>
+                        <li>Save your code as <code>hello.cpp</code>.</li>
+                        <li>Open Terminal/Command Prompt.</li>
+                        <li>Compile: <code>g++ hello.cpp -o hello</code></li>
+                        <li>Run: <code>./hello</code> (on macOS/Linux) or <code>hello.exe</code> (on Windows).</li>
+                    </ol>
+                    <h4>Setting Up GitHub (Basic)</h4>
+                    <p>GitHub is a web-based platform for version control using Git. It's essential for managing your code.</p>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h2>C++ vs. Python: Why C++ in the Age of Python?</h2>
+                    <p>C++ offers superior performance, system-level control, and resource efficiency. This makes it vital for:</p>
+                    <ul>
+                        <li><strong>Game Engines:</strong> Real-time graphics and performance</li>
+                        <li><strong>Operating Systems:</strong> Low-level system programming</li>
+                        <li><strong>Embedded Systems:</strong> Resource-constrained devices</li>
+                        <li><strong>High-Frequency Trading:</strong> Microsecond-level performance</li>
+                        <li><strong>Scientific Computing:</strong> Computationally intensive tasks</li>
+                    </ul>
+                    <p>It also provides a deep understanding of computer architecture and memory management.</p>
+                </section>
+                <section>
+                    <h3>Why C++? (Details)</h3>
+                    <p>Python is incredibly popular, but C++ is still a fundamental language to learn, especially in a course like CS103. The answer lies in C++'s unique strengths and its role in foundational computing.</p>
+                    <ul>
+                        <li><strong>Performance:</strong> C++ is compiled, resulting in significantly faster execution speeds compared to interpreted languages like Python.</li>
+                        <li><strong>System-Level Programming:</strong> C++ provides low-level memory management and direct hardware access.</li>
+                        <li><strong>Resource Efficiency:</strong> C++ gives you precise control over memory and CPU usage.</li>
+                        <li><strong>Foundation for Libraries:</strong> Many high-performance Python libraries (e.g., NumPy, TensorFlow) have their core components written in C++.</li>
+                        <li><strong>Understanding Computer Architecture:</strong> C++ forces you to think about how computers actually work.</li>
+                    </ul>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h2>Problem-Solving Methodology</h2>
+                    <p>A systematic approach to tackling programming challenges:</p>
+                    <ul>
+                        <li><strong>1. Understand:</strong> Read the problem carefully, identify inputs/outputs</li>
+                        <li><strong>2. Plan:</strong> Break down into smaller steps, create pseudocode</li>
+                        <li><strong>3. Code:</strong> Implement your solution step by step</li>
+                        <li><strong>4. Test:</strong> Try different inputs, edge cases</li>
+                        <li><strong>5. Debug:</strong> Fix any errors or unexpected behavior</li>
+                        <li><strong>6. Optimize:</strong> Improve efficiency and readability</li>
+                    </ul>
+                    <pre><code class="cpp">// Example: Find the larger of two numbers
+// 1. Understand: Compare two integers, return the larger one
+// 2. Plan: Use if-else statement for comparison
+int findMax(int a, int b) {
+    return (a > b) ? a : b;
+}</code></pre>
+                </section>
+                <section>
+                    <h3>Problem Solving (Details)</h3>
+                    <p>Effective programming isn't just about knowing syntax - it's about developing a systematic approach to problem-solving. This methodology will serve you throughout your programming journey.</p>
+                    <h4>The Six-Step Process</h4>
+                    <ol>
+                        <li><strong>Understand the Problem:</strong> Read carefully, identify what you're given and what you need to produce.</li>
+                        <li><strong>Plan Your Approach:</strong> Break the problem into smaller, manageable pieces. Write pseudocode.</li>
+                        <li><strong>Implement Your Solution:</strong> Write the actual code, focusing on one piece at a time.</li>
+                        <li><strong>Test Thoroughly:</strong> Try various inputs, including edge cases and invalid data.</li>
+                        <li><strong>Debug and Fix:</strong> When things don't work as expected, systematically find and fix issues.</li>
+                        <li><strong>Optimize and Refactor:</strong> Make your code more efficient, readable, and maintainable.</li>
+                    </ol>
+                    <p>This process becomes second nature with practice and will make you a more effective programmer.</p>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h2>Fun Programming Expert Bar</h2>
+                    <p>An interactive tool to estimate your programming expertise. This slide is best viewed in normal mode!</p>
+                    <p>Switch back to normal view to try the interactive calculator that measures your programming skills based on languages known, algorithms implemented, and data structures understood.</p>
+                </section>
+                <section>
+                    <h3>Expert Bar (Interactive)</h3>
+                    <p>How do you measure up as a programming expert? Enter your stats below!</p>
+                    <form id="expertForm">
+                        <div>
+                            <label for="languages">Number of Programming Languages Known:</label>
+                            <input type="number" id="languages" placeholder="e.g., 5" value="0">
+                        </div>
+                        <div>
+                            <label for="algorithms">Number of Algorithms You Can Implement:</label>
+                            <input type="number" id="algorithms" placeholder="e.g., 10" value="0">
+                        </div>
+                        <div>
+                            <label for="dataStructures">Number of Data Structures You Understand:</label>
+                            <input type="number" id="dataStructures" placeholder="e.g., 7" value="0">
+                        </div>
+                        <button type="button" onclick="calculateExpertLevel()">Calculate Expert Level</button>
+                    </form>
+                    <div id="expertOutput" style="display: none;"></div>
+                    <p><em>(Note: This is just for fun and doesn't reflect actual expertise!)</em></p>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h2>C++ Comments and Variables</h2>
+                    <p>Comments (<code>//</code> or <code>/*...*/</code>) explain code. Variables are named containers for storing data.</p>
+                    <p>You must declare a variable's <strong>type</strong> before using it:</p>
+                    <pre><code class="cpp">// dataType variableName = value;
+int score = 100;
+double price = 19.99;
+std::string playerName = "Alex";
+bool isActive = true;</code></pre>
+                    <ul>
+                        <li><strong>Comments:</strong> Documentation for your code</li>
+                        <li><strong>Variables:</strong> Named storage for data</li>
+                        <li><strong>Data Types:</strong> int, double, string, bool, char</li>
+                        <li><strong>Static Typing:</strong> Must declare type before use</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>Comments and Variables (Details)</h3>
+                    <p>As you begin writing your own C++ programs, two fundamental concepts you'll encounter immediately are comments and variables.</p>
+                    <h4>C++ Comments</h4>
+                    <ul>
+                        <li><strong>Single-line comments:</strong> Start with <code>//</code>.</li>
+                        <li><strong>Multi-line comments:</strong> Start with <code>/*</code> and end with <code>*/</code>.</li>
+                    </ul>
+                    <h4>C++ Variables</h4>
+                    <p>Variables are named storage locations that hold data. You must declare them with a data type:</p>
+                    <ul>
+                        <li><code>int</code>: for whole numbers (e.g., <code>100</code>).</li>
+                        <li><code>double</code>: for decimal numbers (e.g., <code>98.6</code>).</li>
+                        <li><code>char</code>: for single characters (e.g., <code>'A'</code>).</li>
+                        <li><code>bool</code>: for <code>true</code> or <code>false</code>.</li>
+                        <li><code>std::string</code>: for text (e.g., <code>"Alice"</code>).</li>
+                    </ul>
+                </section>
+            </section>
+
+            <section>
+                <h2>End of Lecture 1</h2>
+                <p><a href="index.html">Back to Course Outline</a></p>
+            </section>
+        </div>
+    </div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+
+<script>
+  Reveal.initialize({
+    hash: true,
+    plugins: [ RevealMarkdown, RevealHighlight ],
+    width: 1280,
+    height: 720
+  });
+
+  // Theme switcher
+  const themes = ['white','league','beige','serif','simple','sky','dracula','night','black','solarized','moon','blood'];
+  let idx = 0;
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.onclick = () => {
+      idx = (idx + 1) % themes.length;
+      document.getElementById('theme-link').href = `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[idx]}.css`;
+    };
+  }
+</script>
+
+    <!-- Custom JS for expert bar -->
+    <script>
+        function calculateExpertLevel() {
+            const languages = parseInt(document.getElementById('languages').value) || 0;
+            const algorithms = parseInt(document.getElementById('algorithms').value) || 0;
+            const dataStructures = parseInt(document.getElementById('dataStructures').value) || 0;
+
+            const score = languages * 10 + algorithms * 5 + dataStructures * 8;
+
+            let level = '';
+            if (score < 50) level = 'Beginner';
+            else if (score < 100) level = 'Intermediate';
+            else if (score < 150) level = 'Advanced';
+            else level = 'Expert';
+
+            document.getElementById('expertOutput').innerHTML = '<div style="color: #f39c12; font-size: 24px;">Your Expert Level: ' + level + '</div><p>Score: ' + score + '</p>';
+            document.getElementById('expertOutput').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
