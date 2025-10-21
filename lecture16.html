@@ -1,16 +1,456 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 16: Polymorphism</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta charset="utf-8" />
+    <title>Lecture 16: Friend Functions and Inheritance</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Reveal.js Core CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+    <!-- Theme -->
+    <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css" />
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+    <!-- KaTeX for Math -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" />
+
+    <style>
+        /* Small style tweaks */
+        .control-btn {
+            position: fixed;
+            right: 10px;
+            z-index: 999;
+            cursor: pointer;
+            padding: 8px 12px;
+            font-size: 1rem;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.9);
+            border: 1px solid #ccc;
+        }
+        #theme-toggle { top: 10px; }
+        #font-size-toggle { top: 50px; }
+        .poll-buttons button {
+            margin-right: 8px;
+            padding: 8px 12px;
+            font-size: 0.95rem;
+        }
+        .poll-result { margin-top: 8px; font-weight: 600; }
+        /* Ensure code blocks wrap nicely on small screens */
+        pre code { white-space: pre-wrap; word-break: break-word; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 16: Advanced OOP - Polymorphism</h1>
-        <p>Details about the lecture will be updated here.</p>
-        <a href="index.html">Back to Course Outline</a>
+
+<button id="theme-toggle" class="control-btn">Change Theme</button>
+<button id="font-size-toggle" class="control-btn">Font Size</button>
+
+<div class="reveal">
+    <div class="slides">
+
+        <!-- Title Slide -->
+        <section data-markdown>
+            <textarea data-template>
+# Lecture 16: Friend Functions and Inheritance  
+*When C++ Classes Start a Family Drama!*
+            </textarea>
+        </section>
+
+        <!-- Introduction -->
+        <section data-markdown>
+            <textarea data-template>
+## Welcome to Lecture 16!
+
+Today we'll explore:
+
+- **Friend Functions**: The "trusted outsiders"  
+- **Inheritance**: Class family trees and the occasional drama  
+
+🎯 *Goal*: Understand how classes cooperate and pass down traits—just like families (but with fewer arguments).
+            </textarea>
+        </section>
+
+        <!-- Friend Functions Recap -->
+        <section data-markdown>
+            <textarea data-template>
+## Friend Functions – The Trusted Outsiders
+
+Recall from last time:
+
+```cpp
+class Complex {
+    friend ostream& operator<<(ostream& out, const Complex& c);
+    friend istream& operator>>(istream& in, Complex& c);
+};
+```
+
+**Purpose:**
+
+* Allow access to private members
+* Useful for symmetric and I/O operations
+* Should be used *wisely* — too many friends spoil encapsulation
+            </textarea>
+        </section>
+
+        <!-- Inheritance Introduction -->
+        <section data-markdown>
+            <textarea data-template>
+## Inheritance: When Classes Have Children
+
+**Story Time:**
+Think of the *iPhone lineage*: each new model inherits features from its parent — same core, new tricks!
+
+### Why Use Inheritance?
+
+* Code reuse
+* Logical hierarchy
+* Polymorphism (the child behaves like the parent — sometimes better!)
+
+🧠 **Analogy:**
+`Vehicle → Car → ElectricCar`
+Each inherits wheels, but adds unique behavior.
+            </textarea>
+        </section>
+
+        <!-- Visual Hierarchy -->
+        <section data-markdown>
+            <textarea data-template>
+## Visualizing Class Hierarchy
+
+```
+LivingThing
+     │
+     ├── Animal
+     │     ├── Dog
+     │     └── Cat
+     └── Plant
+```
+
+🔍 Observe: *Dog "is-an" Animal*, not *has-an* Animal.
+**Public inheritance = "is-a" relationship**
+            </textarea>
+        </section>
+
+        <!-- Fun Example -->
+        <section data-markdown>
+            <textarea data-template>
+## The Superhero Family
+
+```cpp
+class SuperHuman {
+protected:
+    string name;
+public:
+    SuperHuman(string n) : name(n) {}
+    virtual string power() { return "Generic power"; }
+};
+
+class FlyingHero : public SuperHuman {
+public:
+    FlyingHero(string n): SuperHuman(n) {}
+    string power() override { return "Flying (and crash landings)"; }
+};
+
+class InvisibleHero : public SuperHuman {
+public:
+    InvisibleHero(string n): SuperHuman(n) {}
+    string power() override { return "Invisibility (except during allergy season)"; }
+};
+```
+
+😄 **Observation:**
+Even superheroes have inheritance issues!
+            </textarea>
+        </section>
+
+        <!-- Virtual Function Demonstration -->
+        <section data-markdown>
+            <textarea data-template>
+## The Power of Virtual Functions ⚡
+
+```cpp
+FlyingHero f("Captain Crash");
+InvisibleHero i("Sneezor");
+
+SuperHuman* team[2] = { &f, &i };
+
+for (auto hero : team)
+    cout << hero->power() << endl;
+```
+
+Output:
+
+```
+Flying (and crash landings)
+Invisibility (except during allergy season)
+```
+
+🧩 *Polymorphism*: the correct function is chosen at runtime!
+            </textarea>
+        </section>
+
+        <!-- Quick Prediction: converted to an HTML slide to support interactivity -->
+        <section>
+            <h2>Quick Prediction 🔮</h2>
+
+            <pre><code>class Animal {
+public:
+    void eat() { cout << "Eating..."; }
+};
+
+class Dog : public Animal {
+public:
+    void bark() { cout << "Woof!"; }
+};
+
+int main() {
+    Dog d;
+    d.eat();
+    d.bark();
+}</code></pre>
+
+            <p><strong>Question:</strong> If I call <code>d.eat()</code>, whose function is that — Dog's or Animal's?</p>
+
+            <div class="poll-buttons" aria-live="polite">
+                <button id="vote-dog">Dog</button>
+                <button id="vote-animal">Animal</button>
+                <button id="reveal-answer">Reveal Answer</button>
+            </div>
+
+            <div id="poll-result" class="poll-result" hidden>
+                You voted: <span id="user-vote"></span> — <strong>Correct answer:</strong> <span id="correct-answer">Animal</span>
+            </div>
+
+        </section>
+
+        <!-- Operator Precedence -->
+        <section data-markdown>
+            <textarea data-template>
+## ⚠️ Operator Precedence: Can't Change the Rules!
+
+**Important:** When you overload operators, you **cannot** change their precedence!
+
+```cpp
+class Matrix {
+    Matrix operator+(const Matrix& m);
+    Matrix operator*(const Matrix& m);
+};
+
+Matrix A, B, C;
+Matrix result = A + B * C;  // Always: A + (B * C)
+```
+
+🎯 **Key Points:**
+
+* `*` still has higher precedence than `+`
+* Associativity remains the same (left-to-right or right-to-left)
+* Can't make `+` execute before `*` by overloading
+            </textarea>
+        </section>
+
+        <!-- Operator Precedence Example -->
+        <section data-markdown>
+            <textarea data-template>
+## The Trap of Intuitive Naming 🪤
+
+```cpp
+class Temperature {
+    double celsius;
+public:
+    Temperature operator+(const Temperature& t);
+    Temperature operator/(int divisor);
+};
+
+Temperature t1(100), t2(50);
+Temperature avg = t1 + t2 / 2;  // What happens?
+```
+
+**Result:** `t1 + (t2 / 2)` — NOT `(t1 + t2) / 2` ! 
+
+⚡ **Division happens first** (higher precedence), then addition.
+
+💡 **Solution:** Use explicit parentheses or create named methods like `average()`.
+            </textarea>
+        </section>
+
+        <!-- Interactive Quiz -->
+        <section data-markdown>
+            <textarea data-template>
+## Quick Quiz 🧠
+
+**Q1.** What does public inheritance mean?
+    
+A. Copying code
+    
+B. "Is-a" relationship
+    
+C. "Has-a" relationship
+    
+D. Private access
+    
+---
+
+    💡 *Answer:* **B.** It defines an "is-a" relationship.
+            </textarea>
+        </section>
+
+        <!-- Funny Failure -->
+        <section data-markdown>
+            <textarea data-template>
+## Family Feud Example 😅
+
+```cpp
+class A { public: void show(){ cout << "A"; } };
+class B { public: void show(){ cout << "B"; } };
+class C : public A, public B {};
+
+int main() {
+    C obj;
+    obj.show(); // Which one??
+}
+```
+
+❗ Ambiguity!
+C++ doesn't know which parent's `show()` to call — family feud begins.
+
+✅ Fix it:
+
+```cpp
+obj.A::show();
+```
+            </textarea>
+        </section>
+
+        <!-- Mini Challenge -->
+        <section data-markdown>
+            <textarea data-template>
+## ⚔️ Mini Challenge
+
+Design a class hierarchy for:
+
+* A Zoo 🦁
+* A Vehicle Showroom 🚗
+* Hogwarts 🧙‍♂️
+
+**Rules:**
+
+* Use inheritance logically
+* Add at least one virtual function
+* Funniest example wins extra points!
+            </textarea>
+        </section>
+
+        <!-- Summary -->
+        <section data-markdown>
+            <textarea data-template>
+## Summary
+
+**Friend Functions:**
+
+* Access private members safely
+* Useful for symmetric operators
+* Use sparingly
+
+**Inheritance:**
+
+* Enables code reuse and hierarchy
+* Public = "is-a", Private = "implemented-in-terms-of"
+* Virtual functions enable polymorphism
+* Avoid deep hierarchies—composition often works better
+
+🧠 *Takeaway:*
+"With great inheritance comes great responsibility."
+            </textarea>
+        </section>
+
+        <!-- Navigation -->
+        <section>
+            <h1>Navigation</h1>
+            <a href="index.html">Back to Course Outline</a>
+            <br>
+            <a href="lecture15.html">Previous: Operator Overloading</a>
+        </section>
+
     </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/math/math.js"></script>
+
+<script>
+    // Initialize Reveal
+    Reveal.initialize({
+        hash: true,
+        plugins: [ RevealMarkdown, RevealHighlight, RevealMath.KaTeX ],
+        katex: { displayMode: true },
+        margin: 0.1,
+        width: 1280,
+        height: 720
+    });
+
+    // Theme switcher
+    const themes = ['white','league','beige','serif','simple','sky','dracula','night','black','solarized','moon','blood'];
+    let idx = 0;
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (themeToggleBtn) {
+        themeToggleBtn.onclick = () => {
+            idx = (idx + 1) % themes.length;
+            document.getElementById('theme-link').href =
+                `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[idx]}.css`;
+        };
+    }
+
+    // Font size switcher
+    const fontSizes = ['0.8em','1em','1.5em','2em','2.5em'];
+    const fontLabels = ['Small','Medium','Large','XL','XXL'];
+    let fontIdx = 1; // Medium
+    const fontSizeToggleBtn = document.getElementById('font-size-toggle');
+    if (fontSizeToggleBtn) {
+        fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+        fontSizeToggleBtn.onclick = () => {
+            fontIdx = (fontIdx + 1) % fontSizes.length;
+            document.querySelector('.reveal').style.fontSize = fontSizes[fontIdx];
+            fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+        };
+    }
+
+    // Simple in-slide poll logic for Quick Prediction slide
+    (function() {
+        const btnDog = document.getElementById('vote-dog');
+        const btnAnimal = document.getElementById('vote-animal');
+        const revealBtn = document.getElementById('reveal-answer');
+        const pollResult = document.getElementById('poll-result');
+        const userVoteSpan = document.getElementById('user-vote');
+        const correctAnswerSpan = document.getElementById('correct-answer');
+
+        let userVote = null;
+        const correct = 'Animal';
+
+        if (btnDog) {
+            btnDog.addEventListener('click', () => {
+                userVote = 'Dog';
+                userVoteSpan.textContent = userVote;
+                pollResult.hidden = false;
+            });
+        }
+        if (btnAnimal) {
+            btnAnimal.addEventListener('click', () => {
+                userVote = 'Animal';
+                userVoteSpan.textContent = userVote;
+                pollResult.hidden = false;
+            });
+        }
+        if (revealBtn) {
+            revealBtn.addEventListener('click', () => {
+                userVoteSpan.textContent = userVote ? userVote : 'No vote';
+                correctAnswerSpan.textContent = correct;
+                pollResult.hidden = false;
+            });
+        }
+    })();
+</script>
+
 </body>
 </html>
