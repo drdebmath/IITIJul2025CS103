@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Lecture 17: Multiple Inheritance and Polymorphism</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Reveal.js Core CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+    <!-- Theme -->
+    <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css" />
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+    <!-- KaTeX for Math -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" />
+
+    <style>
+        /* Small style tweaks */
+        .control-btn {
+            position: fixed;
+            right: 10px;
+            z-index: 999;
+            cursor: pointer;
+            padding: 8px 12px;
+            font-size: 1rem;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.9);
+            border: 1px solid #ccc;
+        }
+        #theme-toggle { top: 10px; }
+        #font-size-toggle { top: 50px; }
+        .poll-buttons button {
+            margin-right: 8px;
+            padding: 8px 12px;
+            font-size: 0.95rem;
+        }
+        .poll-result { margin-top: 8px; font-weight: 600; }
+        /* Ensure code blocks wrap nicely on small screens */
+        pre code { white-space: pre-wrap; word-break: break-word; }
+        .svg-slide { display:flex; justify-content:center; align-items:center; }
+    </style>
+</head>
+<body>
+
+<button id="theme-toggle" class="control-btn">Change Theme</button>
+<button id="font-size-toggle" class="control-btn">Font Size</button>
+
+<div class="reveal">
+    <div class="slides">
+
+        <!-- Title Slide -->
+        <section data-markdown>
+            <textarea data-template>
+# Lecture 17: Multiple Inheritance and Polymorphism
+*Advanced C++ inheritance patterns, v-tables, and design considerations.*
+            </textarea>
+        </section>
+
+        <!-- Multiple Inheritance Intro (split using ---) -->
+        <section data-markdown>
+            <textarea data-template>
+## Multiple Inheritance: Concept and Syntax
+
+**Definition:** A derived class inherits from more than one base class.
+
+**Syntax example:**
+```cpp
+class FlyingCar : public Car, public Airplane { /*...*/ };
+````
+---
+
+**Advantages:**
+
+* Composition of orthogonal behaviours.
+* Natural modeling for cross-cutting capabilities.
+
+**Pitfalls:**
+
+* Diamond problem (duplicate base subobjects).
+* Increased complexity — careful design required.
+
+---
+
+### Quick note: Diamond problem
+
+If `A` -> `B` and `A` -> `C`, and `D` inherits `B` and `C`, then `A` may appear twice in `D` unless virtual inheritance is used.
+        </textarea> 
+    </section>
+
+<section class="svg-slide">
+    <svg width="500" height="400" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+        <title>Diamond Problem Class Diagram</title>
+
+        <defs>
+            <!-- Arrow marker -->
+            <marker id="arrowhead-diamond" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                <polygon points="0 0, 10 3, 0 6" fill="#2c3e50" />
+            </marker>
+
+            <!-- Gradient for classes -->
+            <linearGradient id="classGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#e74c3c;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#c0392b;stop-opacity:1" />
+            </linearGradient>
+        </defs>
+
+        <style>
+            .class-box { rx: 8; ry: 8; fill: url(#classGrad); stroke: #2c3e50; stroke-width: 2; }
+            .class-name { font-family: Arial, sans-serif; font-size: 16px; fill: white; font-weight: bold; text-anchor: middle; }
+            .arrow { stroke: #2c3e50; stroke-width: 2; fill: none; marker-end: url(#arrowhead-diamond); }
+            .problem-text { font-family: Arial, sans-serif; font-size: 14px; fill: #e74c3c; text-anchor: middle; font-weight: bold; }
+        </style>
+
+        <!-- Class A (top) -->
+        <rect x="225" y="50" width="50" height="40" class="class-box"/>
+        <text x="250" y="75" class="class-name">A</text>
+
+        <!-- Class B (left) -->
+        <rect x="150" y="150" width="50" height="40" class="class-box"/>
+        <text x="175" y="175" class="class-name">B</text>
+
+        <!-- Class C (right) -->
+        <rect x="300" y="150" width="50" height="40" class="class-box"/>
+        <text x="325" y="175" class="class-name">C</text>
+
+        <!-- Class D (bottom) -->
+        <rect x="225" y="250" width="50" height="40" class="class-box"/>
+        <text x="250" y="275" class="class-name">D</text>
+
+        <!-- Arrows -->
+        <!-- A -> B -->
+        <path d="M 250 90 L 175 150" class="arrow"/>
+        <!-- A -> C -->
+        <path d="M 250 90 L 325 150" class="arrow"/>
+        <!-- B -> D -->
+        <path d="M 175 190 L 250 250" class="arrow"/>
+        <!-- C -> D -->
+        <path d="M 325 190 L 250 250" class="arrow"/>
+
+        <!-- Problem text -->
+        <text x="250" y="330" class="problem-text">Two paths to A in D!</text>
+        <text x="250" y="350" class="problem-text">Ambiguity without virtual inheritance</text>
+    </svg>
+</section>
+
+<!-- Multiple Inheritance: Example code slide (complete) -->
+    <section data-markdown>
+        <textarea data-template>
+## Example: Amphibious Vehicle 
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class LandVehicle {
+public:
+    void drive() const { cout << "Driving on road\n"; }
+};
+
+class WaterVehicle {
+public:
+    void sail() const { cout << "Sailing on water\n"; }
+};
+
+class Amphibious : public LandVehicle, public WaterVehicle {
+public:
+    void operate() const {
+        drive();
+        sail();
+    }
+};
+
+int main() {
+    Amphibious am;
+    am.operate();
+    return 0;
+}
+```
+</textarea> </section>
+
+<section data-markdown>
+    <textarea data-template>
+## Diamond Problem Example (ambiguous without virtual inheritance)
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class Animal {
+public:
+    void eat() { cout << "Eating..." << endl; }
+};
+
+class Mammal : public Animal {};
+class Aquatic : public Animal {};
+
+class Platypus : public Mammal, public Aquatic {};
+
+int main() {
+    Platypus p;
+    // p.eat();  // Ambiguous! Two 'Animal' copies
+    p.Mammal::eat();  // OK, specify which path
+    p.Aquatic::eat(); // OK, specify which path
+    return 0;
+}
+```
+
+**Error:** `error: request for member 'eat' is ambiguous`
+
+**Fix:** Use `virtual public Animal` in `Mammal` and `Aquatic`. </textarea> </section>
+
+    <!-- Quiz after Multiple Inheritance -->
+    <section data-markdown>
+        <textarea data-template>
+## Quiz: Multiple Inheritance
+
+**Q1.** The "Diamond Problem" occurs when:
+
+A. A class inherits from two unrelated interfaces
+
+B. A derived class inherits the same base subobject through two paths
+
+C. The compiler runs out of memory
+
+D. Two functions have the same name
+
+---
+
+**Answer:** B. </textarea> </section>
+
+    <!-- Public vs Private Inheritance (split) -->
+    <section data-markdown>
+        <textarea data-template>
+
+## Public vs Private Inheritance
+
+**Public inheritance:** models an "is-a" relationship; public and protected members remain accessible accordingly.
+
+**Private inheritance:** models "implemented-in-terms-of"; base's public interface is hidden from outsiders.
+
+**Use-case guidance:**
+
+* Use public when substitutability is required.
+* Use private when reusing implementation but hiding base semantics.
+
+---
+
+*`using` can selectively re-expose base members when private inheritance is used.* </textarea> </section>
+
+    <!-- Public Inheritance code slide (complete) -->
+    <section data-markdown>
+        <textarea data-template>
+
+## Public Inheritance: Zoo example (complete program)
+
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Animal {
+protected:
+    string species;
+public:
+    Animal(const string& s) : species(s) {}
+    virtual void speak() const { cout << species << " makes a sound\n"; }
+    virtual ~Animal() = default;
+};
+
+class Lion : public Animal {
+public:
+    Lion() : Animal("Lion") {}
+    void speak() const override { cout << "Roar\n"; }
+};
+
+int main() {
+    Animal* a = new Lion();
+    a->speak(); // Polymorphic call
+    delete a;
+    return 0;
+}
+```
+
+---
+
+*Demonstrates public inheritance and polymorphism via virtual function.* </textarea> </section>
+
+    <!-- Private Inheritance code slide (complete) -->
+    <section data-markdown>
+        <textarea data-template>
+
+## Private Inheritance: Implementing a Stack (complete program)
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class VectorWrapper {
+protected:
+    vector<int> data;
+    void push_back(int x) { data.push_back(x); }
+    void pop_back() { data.pop_back(); }
+    int back() const { return data.back(); }
+    bool empty() const { return data.empty(); }
+};
+
+class Stack : private VectorWrapper {
+public:
+    void push(int x) { push_back(x); }
+    int pop() {
+        if (empty()) throw runtime_error("Stack empty");
+        int v = back();
+        pop_back();
+        return v;
+    }
+    size_t size() const { return data.size(); } // re-expose needed method
+};
+
+int main() {
+    Stack s;
+    s.push(10);
+    s.push(20);
+    cout << s.pop() << "\n"; // 20
+    cout << s.pop() << "\n"; // 10
+    return 0;
+}
+```
+
+---
+
+*Vector functions are hidden; Stack exposes only the intended API.* </textarea> </section>
+
+    <!-- Quiz after Inheritance Types -->
+    <section data-markdown>
+        <textarea data-template>
+
+## Quiz: Inheritance Types
+
+**Q2.** Which is correct?
+
+A. Private inheritance implies "is-a" relationship
+B. Public inheritance hides the base class interface
+C. Private inheritance is suitable when you want to reuseImplementation but not expose base semantics
+D. Both A and B
+
+---
+
+**Answer:** C. </textarea> </section>
+
+    <!-- Virtual Functions & V-Table section -->
+    <section data-markdown>
+        <textarea data-template>
+
+
+## Virtual Functions and the V-Table
+
+**Virtual function:** enables runtime dispatch through a v-table lookup.
+
+**Implementation notes:**
+
+* A class with virtual functions has a v-table.
+* Each object typically stores a pointer to its class' v-table.
+* `override` enforces intent and prevents silent mismatches.
+
+## **Trade-off:** minor runtime cost; large gains in extensibility.
+
+*Use virtual destructors when using polymorphism to avoid leaks.* </textarea> </section>
+
+
+    <!-- Virtual functions example code slide (complete) -->
+    <section data-markdown>
+        <textarea data-template>
+
+
+## Virtual Functions: Safe polymorphism (complete program)
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class Shape {
+public:
+    virtual void draw() const { cout << "Generic shape\n"; }
+    virtual ~Shape() = default;
+};
+
+class Circle : public Shape {
+public:
+    void draw() const override { cout << "Drawing a circle\n"; }
+};
+
+class Square : public Shape {
+public:
+    void draw() const override { cout << "Drawing a square\n"; }
+};
+
+int main() {
+    vector<Shape*> shapes;
+    shapes.push_back(new Circle());
+    shapes.push_back(new Square());
+    for (auto s : shapes) s->draw();
+    for (auto s : shapes) delete s;
+    return 0;
+}
+```
+
+---
+
+*Illustrates v-table-powered calls using `override` and a virtual destructor.* </textarea> </section>
+
+
+    <!-- Quiz after Virtual Functions -->
+    <section data-markdown>
+        <textarea data-template>
+
+
+## Quiz: Virtual Functions
+
+**Q3.** Why declare destructors `virtual` in base classes?
+
+A. To allow compile-time selection
+B. To ensure derived destructors are invoked when deleting via base pointer
+C. To avoid type casting
+D. Not necessary ever
+
+---
+
+**Answer:** B. </textarea> </section>
+
+
+    <!-- Polymorphism intro -->
+    <section data-markdown>
+        <textarea data-template>
+
+
+## Polymorphism: Design and Patterns
+
+**Purpose:** Write code operating on base interfaces while letting derived types supply behavior.
+
+**Patterns that rely on polymorphism:**
+
+* Factory
+* Strategy
+* Visitor (advanced)
+
+---
+
+*Polymorphism increases extensibility and reduces conditional branching.* </textarea> </section>
+
+
+    <!-- Polymorphism example code slide (complete) -->
+    <section data-markdown>
+        <textarea data-template>
+
+
+## Polymorphism Example: Factory Pattern (complete program)
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+class Vehicle {
+public:
+    virtual void drive() const = 0;
+    virtual ~Vehicle() = default;
+};
+
+class Car : public Vehicle {
+public:
+    void drive() const override { cout << "Car: Vroom\n"; }
+};
+
+class Bike : public Vehicle {
+public:
+    void drive() const override { cout << "Bike: Zoom\n"; }
+};
+
+Vehicle* createVehicle(const string& type) {
+    if (type == "car") return new Car();
+    return new Bike();
+}
+
+int main() {
+    vector<Vehicle*> fleet;
+    fleet.push_back(createVehicle("car"));
+    fleet.push_back(createVehicle("bike"));
+    for (auto v : fleet) v->drive();
+    for (auto v : fleet) delete v;
+    return 0;
+}
+```
+
+---
+
+*Factory returns base pointer while concrete types supply implementations.* </textarea> </section>
+
+
+    <!-- Quiz after Polymorphism -->
+    <section data-markdown>
+        <textarea data-template>
+
+
+## Quiz: Polymorphism
+
+**Q4.** The primary advantage of polymorphism is:
+
+A. Faster execution
+B. Reduced binary size
+C. Writing generic, extensible code that works with multiple types at runtime
+D. Eliminating the need for headers
+
+---
+
+**Answer:** C. </textarea> </section>
+
+
+    <!-- Mini Challenge -->
+    <section data-markdown>
+        <textarea data-template>
+
+
+## Mini Challenge (in-class)
+
+Design a polymorphic media player:
+
+* Base: `Song` with `virtual void play()`.
+* Derived: `MP3Song`, `WavSong` — override `play()` with different messages.
+* Provide `playAll(const vector<Song*>&)` that calls `play()` polymorphically.
+
+**Deliverable:** Draw class diagram and write a short main() implementing the playlist. </textarea> </section>
+
+
+    <!-- Exercise for students -->
+    <section data-markdown>
+        <textarea data-template>
+
+
+## Hands-on Exercise (homework)
+
+1. Implement a `Zoo` with:
+
+   * `Animal` (base), `Mammal`, `Bird`, `Aquatic` (intermediate).
+   * `Platypus` inherits from both `Mammal` and `Aquatic`.
+   * Use `virtual` inheritance if necessary to avoid duplicate `Animal` subobjects.
+   * Provide `void info()` virtual method that prints species and capabilities.
+
+2. Submit:
+
+   * Full compilable code.
+   * Short README explaining whether you used virtual inheritance and why.
+
+**Hint:** Try both with and without `virtual` inheritance to observe object size and behaviour. </textarea> </section>
+
+<section>
+<svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <title>Comprehensive Zoo Class Inheritance Diagram</title>
+    
+    <defs>
+        <!-- Arrow marker -->
+        <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <polygon points="0 0, 10 3, 0 6" fill="#2c3e50" />
+        </marker>
+        
+        <!-- Gradients for modern look -->
+        <linearGradient id="baseGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#3498db;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#2980b9;stop-opacity:1" />
+        </linearGradient>
+        
+        <linearGradient id="interGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#2ecc71;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#27ae60;stop-opacity:1" />
+        </linearGradient>
+        
+        <linearGradient id="leafGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#f39c12;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#e67e22;stop-opacity:1" />
+        </linearGradient>
+        
+        <linearGradient id="multiGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#9b59b6;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#8e44ad;stop-opacity:1" />
+        </linearGradient>
+        
+        <filter id="shadow">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+        </filter>
+    </defs>
+    
+    <style>
+        .box { rx: 8; ry: 8; stroke: #2c3e50; stroke-width: 2; filter: url(#shadow); }
+        .class-name { font-family: 'Segoe UI', Arial, sans-serif; font-size: 16px; fill: white; font-weight: 700; }
+        .method { font-family: 'Courier New', monospace; font-size: 11px; fill: white; }
+        .arrow { stroke: #2c3e50; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+        .dashed { stroke-dasharray: 5,5; }
+        .title-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 28px; fill: #2c3e50; font-weight: 700; }
+        .legend-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; fill: #2c3e50; }
+        .legend-title { font-family: 'Segoe UI', Arial, sans-serif; font-size: 15px; fill: #2c3e50; font-weight: 700; }
+    </style>
+    
+    <!-- Title -->
+    <text x="600" y="35" class="title-text" text-anchor="middle">Zoo Class Inheritance Hierarchy</text>
+    
+    <!-- Base Class: Animal -->
+    <rect x="510" y="70" width="180" height="80" class="box" fill="url(#baseGrad)"/>
+    <text x="600" y="95" class="class-name" text-anchor="middle">Animal</text>
+    <text x="600" y="115" class="method" text-anchor="middle">+ name: string</text>
+    <text x="600" y="130" class="method" text-anchor="middle">+ age: int</text>
+    <text x="600" y="145" class="method" text-anchor="middle">+ makeSound()</text>
+    
+    <!-- Intermediate Layer 1 -->
+    <rect x="80" y="210" width="160" height="75" class="box" fill="url(#interGrad)"/>
+    <text x="160" y="235" class="class-name" text-anchor="middle">Mammal</text>
+    <text x="160" y="255" class="method" text-anchor="middle">+ furColor: string</text>
+    <text x="160" y="270" class="method" text-anchor="middle">+ giveBirth()</text>
+    
+    <rect x="280" y="210" width="160" height="75" class="box" fill="url(#interGrad)"/>
+    <text x="360" y="235" class="class-name" text-anchor="middle">Bird</text>
+    <text x="360" y="255" class="method" text-anchor="middle">+ wingspan: float</text>
+    <text x="360" y="270" class="method" text-anchor="middle">+ fly()</text>
+    
+    <rect x="480" y="210" width="160" height="75" class="box" fill="url(#interGrad)"/>
+    <text x="560" y="235" class="class-name" text-anchor="middle">Reptile</text>
+    <text x="560" y="255" class="method" text-anchor="middle">+ scaleType: string</text>
+    <text x="560" y="270" class="method" text-anchor="middle">+ shedSkin()</text>
+    
+    <rect x="680" y="210" width="160" height="75" class="box" fill="url(#interGrad)"/>
+    <text x="760" y="235" class="class-name" text-anchor="middle">Aquatic</text>
+    <text x="760" y="255" class="method" text-anchor="middle">+ depth: int</text>
+    <text x="760" y="270" class="method" text-anchor="middle">+ swim()</text>
+    
+    <rect x="880" y="210" width="160" height="75" class="box" fill="url(#interGrad)"/>
+    <text x="960" y="235" class="class-name" text-anchor="middle">Flying</text>
+    <text x="960" y="255" class="method" text-anchor="middle">+ maxAltitude: int</text>
+    <text x="960" y="270" class="method" text-anchor="middle">+ takeOff()</text>
+    
+    <!-- Concrete Classes -->
+    <rect x="20" y="360" width="130" height="60" class="box" fill="url(#leafGrad)"/>
+    <text x="85" y="385" class="class-name" text-anchor="middle">Lion</text>
+    <text x="85" y="405" class="method" text-anchor="middle">+ roar()</text>
+    
+    <rect x="170" y="360" width="130" height="60" class="box" fill="url(#leafGrad)"/>
+    <text x="235" y="385" class="class-name" text-anchor="middle">Elephant</text>
+    <text x="235" y="405" class="method" text-anchor="middle">+ trumpet()</text>
+    
+    <rect x="470" y="360" width="130" height="60" class="box" fill="url(#leafGrad)"/>
+    <text x="535" y="385" class="class-name" text-anchor="middle">Snake</text>
+    <text x="535" y="405" class="method" text-anchor="middle">+ slither()</text>
+    
+    <rect x="720" y="360" width="130" height="60" class="box" fill="url(#leafGrad)"/>
+    <text x="785" y="385" class="class-name" text-anchor="middle">Shark</text>
+    <text x="785" y="405" class="method" text-anchor="middle">+ hunt()</text>
+    
+    <rect x="890" y="360" width="130" height="60" class="box" fill="url(#leafGrad)"/>
+    <text x="955" y="385" class="class-name" text-anchor="middle">Eagle</text>
+    <text x="955" y="405" class="method" text-anchor="middle">+ dive()</text>
+    
+    <!-- Multiple Inheritance Classes -->
+    <rect x="320" y="500" width="150" height="65" class="box" fill="url(#multiGrad)"/>
+    <text x="395" y="525" class="class-name" text-anchor="middle">Bat</text>
+    <text x="395" y="545" class="method" text-anchor="middle">+ echolocate()</text>
+    
+    <rect x="510" y="500" width="150" height="65" class="box" fill="url(#multiGrad)"/>
+    <text x="585" y="525" class="class-name" text-anchor="middle">Platypus</text>
+    <text x="585" y="545" class="method" text-anchor="middle">+ layEggs()</text>
+    
+    <rect x="700" y="500" width="150" height="65" class="box" fill="url(#multiGrad)"/>
+    <text x="775" y="525" class="class-name" text-anchor="middle">Penguin</text>
+    <text x="775" y="545" class="method" text-anchor="middle">+ waddle()</text>
+    
+    <!-- Arrows from Animal to Intermediate -->
+    <path d="M 600 150 L 160 210" class="arrow"/>
+    <path d="M 600 150 L 360 210" class="arrow"/>
+    <path d="M 600 150 L 560 210" class="arrow"/>
+    <path d="M 600 150 L 760 210" class="arrow"/>
+    <path d="M 600 150 L 960 210" class="arrow"/>
+    
+    <!-- Arrows from Intermediate to Concrete -->
+    <path d="M 110 285 L 85 360" class="arrow"/>
+    <path d="M 210 285 L 235 360" class="arrow"/>
+    <path d="M 560 285 L 535 360" class="arrow"/>
+    <path d="M 760 285 L 785 360" class="arrow"/>
+    <path d="M 960 285 L 955 360" class="arrow"/>
+    
+    <!-- Multiple Inheritance Arrows -->
+    <!-- Bat: Mammal + Flying -->
+    <path d="M 160 285 L 360 500" class="arrow"/>
+    <path d="M 960 285 L 430 500" class="arrow"/>
+    
+    <!-- Platypus: Mammal + Aquatic -->
+    <path d="M 190 285 L 550 500" class="arrow"/>
+    <path d="M 730 285 L 620 500" class="arrow"/>
+    
+    <!-- Penguin: Bird + Aquatic -->
+    <path d="M 390 285 L 740 500" class="arrow"/>
+    <path d="M 760 285 L 775 500" class="arrow"/>
+    
+    <!-- Legend -->
+    <rect x="50" y="650" width="1100" height="130" rx="10" fill="#ecf0f1" stroke="#2c3e50" stroke-width="2"/>
+    <text x="600" y="675" class="legend-title" text-anchor="middle">Legend</text>
+    
+    <rect x="80" y="690" width="30" height="25" rx="4" fill="url(#baseGrad)" stroke="#2c3e50" stroke-width="1.5"/>
+    <text x="120" y="708" class="legend-text">Base Class - Root of hierarchy (Animal)</text>
+    
+    <rect x="380" y="690" width="30" height="25" rx="4" fill="url(#interGrad)" stroke="#2c3e50" stroke-width="1.5"/>
+    <text x="420" y="708" class="legend-text">Intermediate Classes - Shared traits (Mammal, Bird, etc.)</text>
+    
+    <rect x="80" y="730" width="30" height="25" rx="4" fill="url(#leafGrad)" stroke="#2c3e50" stroke-width="1.5"/>
+    <text x="120" y="748" class="legend-text">Concrete Classes - Single inheritance (Lion, Elephant, Snake, etc.)</text>
+    
+    <rect x="550" y="730" width="30" height="25" rx="4" fill="url(#multiGrad)" stroke="#2c3e50" stroke-width="1.5"/>
+    <text x="590" y="748" class="legend-text">Multiple Inheritance - Inherits from 2+ classes (Bat, Platypus, Penguin)</text>
+    
+    <text x="600" y="770" class="legend-text" text-anchor="middle" style="font-style: italic;">
+        Note: Multiple inheritance should use virtual inheritance to avoid diamond problem
+    </text>
+</svg>
+
+</section>
+
+    <!-- Comprehensive Platypus code (complete) -->
+    <section data-markdown>
+        <textarea data-template>
+
+
+## Complete Example: Platypus with virtual inheritance (complete program)
+
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Animal {
+protected:
+    string name;
+public:
+    Animal(const string& n="Animal") : name(n) {}
+    virtual void info() const { cout << "Animal: " << name << "\n"; }
+    virtual ~Animal() = default;
+};
+
+class Mammal : virtual public Animal {
+public:
+    Mammal(const string& n="Mammal") : Animal(n) {}
+    void nurse() const { cout << "Nursing young\n"; }
+    void info() const override { cout << "Mammal: " << name << "\n"; }
+};
+
+class Aquatic : virtual public Animal {
+public:
+    Aquatic(const string& n="Aquatic") : Animal(n) {}
+    void swim() const { cout << "Swimming\n"; }
+    void info() const override { cout << "Aquatic: " << name << "\n"; }
+};
+
+class Platypus : public Mammal, public Aquatic {
+public:
+    Platypus() : Animal("Platypus"), Mammal("Platypus"), Aquatic("Platypus") {}
+    void info() const override {
+        cout << "Platypus: a mammal that is semi-aquatic and lays eggs\n";
+    }
+};
+
+int main() {
+    Platypus p;
+    p.info();
+    p.nurse();
+    p.swim();
+    return 0;
+}
+```
+
+---
+
+*Demonstrates `virtual` base `Animal` to avoid diamond duplication.* </textarea> </section>
+
+
+    <!-- Final summary -->
+    <section data-markdown>
+        <textarea data-template>
+
+
+## Summary
+
+* Multiple inheritance is powerful but requires care (diamond problem).
+* Use virtual inheritance when sharing a common ancestor across multiple paths.
+* Prefer public inheritance for "is-a" relationships; private when hiding implementation.
+* Always design with clear ownership and virtual destructors for polymorphism.
+
+---
+
+**Next:** Implement the Zoo exercise; test with and without `virtual` inheritance to observe differences. </textarea> </section>
+
+    <!-- Navigation -->
+    <section>
+        <h1>Navigation</h1>
+        <a href="index.html">Back to Course Outline</a>
+        <br>
+        <a href="lecture16.html">Previous: Friend Functions and Inheritance</a>
+    </section>
+
+</div>
+
+
+</div>
+
+<!-- Scripts -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/math/math.js"></script>
+
+<script>
+    // Initialize Reveal
+    Reveal.initialize({
+        hash: true,
+        plugins: [ RevealMarkdown, RevealHighlight, RevealMath.KaTeX ],
+        katex: { displayMode: true },
+        margin: 0.1,
+        width: 1280,
+        height: 720
+    });
+
+    // Theme switcher
+    const themes = ['white','league','beige','serif','simple','sky','dracula','night','black','solarized','moon','blood'];
+    let idx = 0;
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (themeToggleBtn) {
+        themeToggleBtn.onclick = () => {
+            idx = (idx + 1) % themes.length;
+            document.getElementById('theme-link').href =
+                `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[idx]}.css`;
+        };
+    }
+
+    // Font size switcher
+    const fontSizes = ['0.8em','1em','1.5em','2em','2.5em'];
+    const fontLabels = ['Small','Medium','Large','XL','XXL'];
+    let fontIdx = 1; // Medium
+    const fontSizeToggleBtn = document.getElementById('font-size-toggle');
+    if (fontSizeToggleBtn) {
+        fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+        fontSizeToggleBtn.onclick = () => {
+            fontIdx = (fontIdx + 1) % fontSizes.length;
+            document.querySelector('.reveal').style.fontSize = fontSizes[fontIdx];
+            fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+        };
+    }
+
+    // Simple in-slide poll logic (for the earlier poll)
+    (function() {
+        const btnPublic = document.getElementById('vote-public');
+        const btnPrivate = document.getElementById('vote-private');
+        const revealBtn = document.getElementById('reveal-answer');
+        const pollResult = document.getElementById('poll-result');
+        const userVoteSpan = document.getElementById('user-vote');
+        const correctAnswerSpan = document.getElementById('correct-answer');
+
+        if (!btnPublic) return;
+        let userVote = null;
+        const correct = 'Private Inheritance';
+
+        btnPublic.addEventListener('click', () => {
+            userVote = 'Public Inheritance';
+            userVoteSpan.textContent = userVote;
+            pollResult.hidden = false;
+        });
+        btnPrivate.addEventListener('click', () => {
+            userVote = 'Private Inheritance';
+            userVoteSpan.textContent = userVote;
+            pollResult.hidden = false;
+        });
+        revealBtn.addEventListener('click', () => {
+            userVoteSpan.textContent = userVote ? userVote : 'No vote';
+            correctAnswerSpan.textContent = correct;
+            pollResult.hidden = false;
+        });
+    })();
+</script>
+
+</body>
+</html>
