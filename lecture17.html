@@ -247,11 +247,42 @@ D. Two functions have the same name
 
 *`using` can selectively re-expose base members when private inheritance is used.* </textarea> </section>
 
+<section data-markdown>
+    <textarea data-template>
+```cpp
+        #include <iostream>
+using namespace std;
+
+class Base {
+public:
+    void show() { cout << "Base::show()" << endl; }
+    void display() { cout << "Base::display()" << endl; }
+};
+
+class Derived : private Base {
+public:
+    using Base::show; // selectively re-expose Base::show() as public
+
+    void callDisplay() {
+        Base::display(); // accessible only within Derived
+    }
+};
+
+int main() {
+    Derived d;
+    d.show();         // allowed (re-exposed)
+    // d.display();   // error: 'display' is private in Derived
+}
+```
+
+
+</textarea> </section>
+
     <!-- Public Inheritance code slide (complete) -->
     <section data-markdown>
         <textarea data-template>
 
-## Public Inheritance: Zoo example (complete program)
+## Public Inheritance: Zoo example 
 
 ```cpp
 #include <iostream>
@@ -289,7 +320,7 @@ int main() {
     <section data-markdown>
         <textarea data-template>
 
-## Private Inheritance: Implementing a Stack (complete program)
+## Private Inheritance: Implementing a Stack 
 
 ```cpp
 #include <iostream>
@@ -373,7 +404,7 @@ D. Both A and B
         <textarea data-template>
 
 
-## Virtual Functions: Safe polymorphism (complete program)
+## Virtual Functions: Safe polymorphism 
 
 ```cpp
 #include <iostream>
@@ -421,8 +452,11 @@ int main() {
 **Q3.** Why declare destructors `virtual` in base classes?
 
 A. To allow compile-time selection
+
 B. To ensure derived destructors are invoked when deleting via base pointer
+
 C. To avoid type casting
+
 D. Not necessary ever
 
 ---
@@ -455,7 +489,7 @@ D. Not necessary ever
         <textarea data-template>
 
 
-## Polymorphism Example: Factory Pattern (complete program)
+## Polymorphism Example: Factory Pattern 
 
 ```cpp
 #include <iostream>
@@ -509,8 +543,11 @@ int main() {
 **Q4.** The primary advantage of polymorphism is:
 
 A. Faster execution
+
 B. Reduced binary size
+
 C. Writing generic, extensible code that works with multiple types at runtime
+
 D. Eliminating the need for headers
 
 ---
@@ -727,7 +764,7 @@ Design a polymorphic media player:
         <textarea data-template>
 
 
-## Complete Example: Platypus with virtual inheritance (complete program)
+## Complete Example: Platypus with virtual Inheritance
 
 ```cpp
 #include <iostream>
