@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Lecture 18: Advanced Data Structures with Polymorphism</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Reveal.js Core CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+    <!-- Theme -->
+    <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css" />
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+    <!-- KaTeX for Math -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" />
+
+    <style>
+        /* Small style tweaks */
+        .control-btn {
+            position: fixed;
+            right: 10px;
+            z-index: 999;
+            cursor: pointer;
+            padding: 8px 12px;
+            font-size: 1rem;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.9);
+            border: 1px solid #ccc;
+        }
+        #theme-toggle { top: 10px; }
+        #font-size-toggle { top: 50px; }
+        .poll-buttons button {
+            margin-right: 8px;
+            padding: 8px 12px;
+            font-size: 0.95rem;
+        }
+        .poll-result { margin-top: 8px; font-weight: 600; }
+        /* Ensure code blocks wrap nicely on small screens */
+        pre code { white-space: pre-wrap; word-break: break-word; }
+        .svg-slide { display:flex; justify-content:center; align-items:center; }
+    </style>
+</head>
+<body>
+
+<button id="theme-toggle" class="control-btn">Change Theme</button>
+<button id="font-size-toggle" class="control-btn">Font Size</button>
+
+<div class="reveal">
+    <div class="slides">
+
+        <!-- Title Slide -->
+        <section data-markdown>
+            <textarea data-template>
+# Lecture 18: Advanced Data Structures with Polymorphism
+*Using polymorphism in data structures for flexible and extensible designs.*
+            </textarea>
+        </section>
+
+        <!-- Intro to Polymorphism in Data Structures -->
+        <section data-markdown>
+            <textarea data-template>
+## Polymorphism in Data Structures: Why and How
+
+**Advanced data structures** benefit from polymorphism to:
+
+* **Handle heterogeneous data:** Store objects of different derived types in a uniform way.
+* **Enable extensibility:** Add new data types without changing existing code.
+* **Separate interfaces from implementations:** Use base classes for common operations.
+
+---
+
+**Examples we'll explore:**
+
+* Polymorphic containers holding different element types.
+* Graph data structures with varied node and edge types.
+* Trees with polymorphic node behaviors.
+
+---
+
+*We leverage `virtual` functions and inheritance to achieve this.*
+            </textarea>
+        </section>
+
+        <!-- Polymorphic Elements in Containers -->
+        <section data-markdown>
+            <textarea data-template>
+## Example: Polymorphic Container - Shape Manager
+
+**Problem:** Manage a collection of different geometric shapes: circles, squares, triangles, etc. Each shape needs to compute area, draw itself, etc.
+
+**Solution:** Use a base `Shape` class with virtual methods; store pointers to base in a vector.
+
+---
+
+**Benefits:**
+
+* Uniform handling via base pointers.
+* Easy to add new shape types (extensibility).
+* Runtime resolution of which `draw()` or `area()` to call.
+
+---
+
+**Code Structure:**
+
+* Base class: `Shape` with `virtual double area() const` and `virtual void draw() const`.
+* Derived: `Circle`, `Square`, etc., overriding methods.
+* Container: `std::vector<Shape*>` to hold pointers.
+            </textarea>
+        </section>
+
+        <!-- Shape Manager Code Example -->
+        <section data-markdown>
+            <textarea data-template>
+## Shape Manager Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <memory>
+using namespace std;
+
+class Shape {
+public:
+    virtual double area() const = 0;
+    virtual void draw() const = 0;
+    virtual ~Shape() = default;
+};
+
+class Circle : public Shape {
+private:
+    double radius;
+public:
+    Circle(double r) : radius(r) {}
+    double area() const override { return M_PI * radius * radius; }
+    void draw() const override { cout << "Drawing a circle\n"; }
+};
+
+class Square : public Shape {
+private:
+    double side;
+public:
+    Square(double s) : side(s) {}
+    double area() const override { return side * side; }
+    void draw() const override { cout << "Drawing a square\n"; }
+};
+
+class ShapeManager {
+private:
+    vector<Shape*> shapes;
+public:
+    void addShape(Shape* s) { shapes.push_back(s); }
+    void drawAll() const {
+        for (auto s : shapes) s->draw();
+    }
+    double totalArea() const {
+        double total = 0;
+        for (auto s : shapes) total += s->area();
+        return total;
+    }
+    ~ShapeManager() {
+        for (auto s : shapes) delete s;
+    }
+};
+
+int main() {
+    ShapeManager manager;
+    manager.addShape(new Circle(5.0));
+    manager.addShape(new Square(4.0));
+    manager.drawAll();
+    cout << "Total area: " << manager.totalArea() << endl;
+    return 0;
+}
+```
+
+---
+
+*Note: Using `unique_ptr` in C++11+ is safer to avoid manual deletion.*
+            </textarea>
+        </section>
+
+        <!-- Quiz after Shape Manager -->
+        <section data-markdown>
+            <textarea data-template>
+## Quiz: Polymorphic Containers
+
+**Q1.** Why use `virtual` functions in the `Shape` class?
+
+A. To allow compilation
+
+B. To enable runtime polymorphic behavior for derived classes
+
+C. To make methods static
+
+D. Not useful here
+
+---
+
+**Answer:** B. </textarea>
+        </section>
+
+        <!-- Advanced Example: Polymorphic Graph -->
+        <section data-markdown>
+            <textarea data-template>
+## Advanced Example: Polymorphic Graph Data Structure
+
+**Problem:** Build a graph where vertices and edges can represent different domain objects: 
+
+* Vertices: Cities, Computers, Persons, etc.
+* Edges: Roads, Network connections, Relationships, etc.
+
+---
+
+**Solution:** Use polymorphism for `Vertex` and `Edge` base classes with virtual methods.
+
+**Key Components:**
+
+* Base `Vertex` with `virtual string label() const`.
+* Base `Edge` with `virtual void describe() const`.
+* Graph holds `vector<Vertex*>` and adjacency list of `vector<vector<Edge*>>`.
+
+---
+
+**Benefits:**
+
+* Graph can model multiple domains without rewriting code.
+* New vertex/edge types added easily.
+* Extensible and maintainable.
+            </textarea>
+        </section>
+
+        <!-- graph visualization with basic js in html canvas demo using cytoscape.js-->
+        <section>
+            <h2>Tokyo Railways</h2>
+            <iframe src="https://js.cytoscape.org/demos/tokyo-railways/" width="100%" height="600px" frameborder="0"></iframe>
+        </section>
+
+        <!-- Graph Code Example Part 1: Base Classes -->
+        <section data-markdown>
+            <textarea data-template>
+## Polymorphic Graph: Base Classes
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <memory>
+using namespace std;
+
+// Base Vertex class
+class Vertex {
+protected:
+    string id;
+public:
+    Vertex(string i) : id(i) {}
+    virtual string getLabel() const { return id; }
+    virtual void displayInfo() const { cout << "Vertex: " << id << endl; }
+    virtual ~Vertex() = default;
+};
+
+// Derived Vertex types
+class CityVertex : public Vertex {
+    int population;
+public:
+    CityVertex(string id, int pop) : Vertex(id), population(pop) {}
+    string getLabel() const override { return id + " (City)"; }
+    void displayInfo() const override {
+        cout << "City " << id << ", Population: " << population << endl;
+    }
+};
+
+class ComputerVertex : public Vertex {
+    string ip;
+public:
+    ComputerVertex(string id, string addr) : Vertex(id), ip(addr) {}
+    string getLabel() const override { return id + " (Computer)"; }
+    void displayInfo() const override {
+        cout << "Computer " << id << ", IP: " << ip << endl;
+    }
+};
+
+// Base Edge class
+class Edge {
+protected:
+    Vertex* source;
+    Vertex* dest;
+public:
+    Edge(Vertex* s, Vertex* d) : source(s), dest(d) {}
+    virtual Vertex* getSource() const { return source; }
+    virtual Vertex* getDest() const { return dest; }
+    virtual void describe() const {
+        cout << source->getLabel() << " -> " << dest->getLabel() << endl;
+    }
+    virtual ~Edge() = default;
+};
+
+// Derived Edge types
+class RoadEdge : public Edge {
+    double distance;
+public:
+    RoadEdge(Vertex* s, Vertex* d, double dist) : Edge(s, d), distance(dist) {}
+    void describe() const override {
+        cout << "Road from " << source->getLabel() << " to " << dest->getLabel()
+             << ", Distance: " << distance << " km" << endl;
+    }
+};
+
+class NetworkEdge : public Edge {
+    double bandwidth;
+public:
+    NetworkEdge(Vertex* s, Vertex* d, double bw) : Edge(s, d), bandwidth(bw) {}
+    void describe() const override {
+        cout << "Network link: " << source->getLabel() << " <-> " << dest->getLabel()
+             << ", Bandwidth: " << bandwidth << " Mbps" << endl;
+    }
+};
+```
+            </textarea>
+        </section>
+
+        <!-- Graph Code Example Part 2: Graph Class -->
+        <section data-markdown>
+            <textarea data-template>
+## Polymorphic Graph: Graph Class Implementation
+
+```cpp
+class Graph {
+private:
+    vector<Vertex*> vertices;
+    vector<vector<Edge*>> adjList;
+    vector<Edge*> allEdges; // Owns edges
+
+public:
+    ~Graph() {
+        for (auto e : allEdges) delete e;
+        for (auto v : vertices) delete v;
+    }
+
+    void addVertex(Vertex* v) {
+        vertices.push_back(v);
+        adjList.push_back(vector<Edge*>()); // Add empty adj list for this vertex
+    }
+
+    void addEdge(Edge* e) {
+        allEdges.push_back(e);
+        // Find indices
+        int srcIdx = -1, destIdx = -1;
+        for (int i = 0; i < vertices.size(); ++i) {
+            if (vertices[i] == e->getSource()) srcIdx = i;
+            if (vertices[i] == e->getDest()) destIdx = i;
+        }
+        if (srcIdx != -1) adjList[srcIdx].push_back(e);
+        // Could add to dest if undirected
+    }
+
+    void displayGraph() const {
+        cout << "Vertices:" << endl;
+        for (auto v : vertices) v->displayInfo();
+
+        cout << "\nEdges:" << endl;
+        for (auto e : allEdges) e->describe();
+    }
+
+    vector<Edge*> getAdjacentEdges(Vertex* v) const {
+        for (size_t i = 0; i < vertices.size(); ++i) {
+            if (vertices[i] == v) return adjList[i];
+        }
+        return vector<Edge*>();
+    }
+};
+```
+
+---
+
+*Note: This is a simplified directed graph; undirected would need bidirectional edges.*            </textarea>
+        </section>
+
+        <!-- Graph Code Example Part 3: Usage -->
+        <section data-markdown>
+            <textarea data-template>
+## Polymorphic Graph: Usage Example
+
+```cpp
+int main() {
+    Graph g;
+
+    // Add cities
+    CityVertex* delhi = new CityVertex("Delhi", 32000000);
+    CityVertex* mumbai = new CityVertex("Mumbai", 21000000);
+    g.addVertex(delhi);
+    g.addVertex(mumbai);
+
+    // Add computers
+    ComputerVertex* comp1 = new ComputerVertex("PC1", "192.168.1.1");
+    ComputerVertex* comp2 = new ComputerVertex("PC2", "192.168.1.2");
+    g.addVertex(comp1);
+    g.addVertex(comp2);
+
+    // Add edges
+    g.addEdge(new RoadEdge(delhi, mumbai, 1400));
+    g.addEdge(new NetworkEdge(comp1, comp2, 100));
+
+    // Display
+    g.displayGraph();
+
+    return 0;
+}
+```
+
+---
+
+**Output:**
+
+```
+Vertices:
+City Delhi, Population: 32000000
+City Mumbai, Population: 21000000
+Computer PC1, IP: 192.168.1.1
+Computer PC2, IP: 192.168.1.2
+
+Edges:
+Road from Delhi (City) to Mumbai (City), Distance: 1400 km
+Network link: PC1 (Computer) <-> PC2 (Computer), Bandwidth: 100 Mbps
+```
+
+---
+
+*Demonstrates polymorphism: different behaviors for different vertex/edge types.*
+            </textarea>
+        </section>
+
+        <!-- Quiz after Graph -->
+        <section data-markdown>
+            <textarea data-template>
+## Quiz: Polymorphic Graph
+
+**Q2.** Why are base pointers used in the `Graph` class?
+
+A. To save memory
+
+B. To allow runtime polymorphism for different vertex/edge types
+
+C. To avoid templates
+
+D. Not applicable
+
+---
+
+**Answer:** B. </textarea>
+        </section>
+
+        <!-- Mini Challenge -->
+        <section data-markdown>
+            <textarea data-template>
+## Mini Challenge (in-class)
+
+Extend the Shape Manager to support resizing shapes polymorphically.
+
+* Add `virtual void scale(double factor)` to resize shapes.
+* Get total area after scaling.
+* Draw all shapes.
+
+**Deliverable:** Write code for a new `Triangle` class and demonstrate scaling. </textarea>
+        </section>
+
+        <!-- Hands-on Exercise -->
+        <section data-markdown>
+            <textarea data-template>
+## Hands-on Exercise (homework)
+
+1. **Polymorphic Tree Structure:**
+
+   Implement a `Tree` class that can represent either a file system tree or an expression tree.
+
+   * Base `Node` class with `virtual void display(int indent) const` (for hierarchical printing).
+   * For file tree: `FileNode` (leaf), `FolderNode` (internal with children).
+   * For expression tree: `NumberNode` (leaf), `BinaryOpNode` (internal with left, right, operator).
+
+   * Provide methods to build and display the trees.
+   * Use polymorphism to handle different node types uniformly.
+
+2. **Test Cases:**
+
+   * Build a file tree: Root folder containing subfolders and files.
+   * Build an expression tree for (3 + 4) * 5.
+   * Display both trees.
+
+**Hint:** Use `vector<Node*>` for children. Remember RAII and virtual destructors. </textarea>
+        </section>
+
+        <!-- Summary -->
+        <section data-markdown>
+            <textarea data-template>
+## Summary
+
+* Polymorphism enables flexible data structures that handle heterogeneous types.
+* Base classes define interfaces; derived classes provide specific behaviors.
+* Key benefits: Extensibility, maintainability, reusability.
+* Always use virtual destructors when polymorphic objects are stored via pointers.
+
+---
+
+**Next:** Practice with the Tree exercise; explore standard library containers like `std::deque` with allocators. </textarea>
+        </section>
+
+        <!-- Navigation -->
+        <section>
+            <h1>Navigation</h1>
+            <a href="index.html">Back to Course Outline</a>
+            <br>
+            <a href="lecture17.html">Previous: Multiple Inheritance and Polymorphism</a>
+        </section>
+
+    </div>
+</div>
+
+<!-- Scripts -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/math/math.js"></script>
+
+<script>
+    // Initialize Reveal
+    Reveal.initialize({
+        hash: true,
+        plugins: [ RevealMarkdown, RevealHighlight, RevealMath.KaTeX ],
+        katex: { displayMode: true },
+        margin: 0.1,
+        width: 1280,
+        height: 720
+    });
+
+    // Theme switcher
+    const themes = ['white','league','beige','serif','simple','sky','dracula','night','black','solarized','moon','blood'];
+    let idx = 0;
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (themeToggleBtn) {
+        themeToggleBtn.onclick = () => {
+            idx = (idx + 1) % themes.length;
+            document.getElementById('theme-link').href =
+                `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[idx]}.css`;
+        };
+    }
+
+    // Font size switcher
+    const fontSizes = ['0.8em','1em','1.5em','2em','2.5em'];
+    const fontLabels = ['Small','Medium','Large','XL','XXL'];
+    let fontIdx = 1; // Medium
+    const fontSizeToggleBtn = document.getElementById('font-size-toggle');
+    if (fontSizeToggleBtn) {
+        fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+        fontSizeToggleBtn.onclick = () => {
+            fontIdx = (fontIdx + 1) % fontSizes.length;
+            document.querySelector('.reveal').style.fontSize = fontSizes[fontIdx];
+            fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+        };
+    }
+</script>
+
+</body>
+</html>
