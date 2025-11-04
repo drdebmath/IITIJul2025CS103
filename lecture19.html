@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Lecture 19: Flight Booking System Design</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Reveal.js Core CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+    <!-- Theme -->
+    <link id="theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css" />
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+    <!-- KaTeX for Math -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" />
+
+    <style>
+        /* Small style tweaks */
+        .control-btn {
+            position: fixed;
+            right: 10px;
+            z-index: 999;
+            cursor: pointer;
+            padding: 8px 12px;
+            font-size: 1rem;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.9);
+            border: 1px solid #ccc;
+        }
+        #theme-toggle { top: 10px; }
+        #font-size-toggle { top: 50px; }
+        .poll-buttons button {
+            margin-right: 8px;
+            padding: 8px 12px;
+            font-size: 0.95rem;
+        }
+        .poll-result { margin-top: 8px; font-weight: 600; }
+        /* Ensure code blocks wrap nicely on small screens */
+        pre code { white-space: pre-wrap; word-break: break-word; }
+        .svg-slide { display:flex; justify-content:center; align-items:center; }
+    </style>
+</head>
+<body>
+
+<button id="theme-toggle" class="control-btn">Change Theme</button>
+<button id="font-size-toggle" class="control-btn">Font Size</button>
+
+<div class="reveal">
+    <div class="slides">
+
+        <!-- Title Slide -->
+        <section data-markdown>
+            <textarea data-template>
+# Lecture 19: OOP in Practice
+*Object-oriented design principles in a real-world flight booking system.*
+            </textarea>
+        </section>
+
+        <!-- Introduction to System Design -->
+        <section data-markdown>
+            <textarea data-template>
+## System Design Principles: Flight Booking Example
+
+**System design** involves creating scalable, maintainable software systems using:
+
+* **Modular design:** Breaking complex systems into manageable components.
+* **Abstraction:** Hiding implementation details behind interfaces.
+* **Inheritance and polymorphism:** For flexible and extensible code.
+* **Design patterns:** Reusable solutions to common problems.
+
+---
+
+**Flight booking system requirements:**
+
+* Handle different types of flights and bookings.
+* Support multiple airlines and pricing strategies.
+* Manage passenger information and seat assignments.
+* Process payments and generate tickets.
+
+---
+
+*We'll design a system using OOP principles with C++.*
+            </textarea>
+        </section>
+
+        <!-- Encapsulation Explained -->
+        <section data-markdown>
+            <textarea data-template>
+## Encapsulation: Data Hiding and Protection
+
+**Encapsulation** is the bundling of data and methods that operate on that data within a single unit (class), while restricting access to the internal state.
+
+**Key Principles:**
+
+* **Data Hiding:** Private data members are not accessible from outside the class.
+* **Access Control:** Public interface provides controlled access to functionality.
+* **Information Hiding:** Implementation details are hidden from users of the class.
+
+---
+
+**Why Encapsulation Matters:**
+
+* **Security:** Prevents unauthorized access to sensitive data.
+* **Maintainability:** Changes to implementation don't affect external code.
+* **Modularity:** Classes can be developed and tested independently.
+* **Abstraction:** Users interact with a simplified interface.
+
+---
+
+**Access Modifiers in C++:**
+
+* `public`: Accessible from anywhere
+* `private`: Accessible only within the class
+* `protected`: Accessible within class and derived classes
+            </textarea>
+        </section>
+
+        <!-- Encapsulation in Flight Booking -->
+        <section data-markdown>
+            <textarea data-template>
+## Encapsulation in Flight Booking System
+
+**Passenger Class - Encapsulation Example:**
+
+```cpp
+class Passenger {
+private:  // Private data - hidden from outside
+    string name;
+    string passportNumber;
+    string contactNumber;
+    string email;
+
+public:   // Public interface - controlled access
+    Passenger(string n, string pass, string contact, string mail)
+        : name(n), passportNumber(pass), contactNumber(contact), email(mail) {}
+
+    // Getters provide read-only access to private data
+    string getName() const { return name; }
+    string getPassport() const { return passportNumber; }
+    string getContact() const { return contactNumber; }
+    string getEmail() const { return email; }
+
+    // Method to display information (controlled access)
+    void displayInfo() const {
+        cout << "Name: " << name << endl;
+        cout << "Passport: " << passportNumber << endl;
+        cout << "Contact: " << contactNumber << endl;
+        cout << "Email: " << email << endl;
+    }
+};
+```
+
+---
+
+**Benefits in this example:**
+
+* **Data Protection:** Passport numbers and contact info are private.
+* **Controlled Access:** External code can't modify passenger data directly.
+* **Validation:** Constructor ensures data integrity during object creation.
+* **Interface:** Clean public methods for interaction.
+
+---
+
+**Without Encapsulation (Bad Practice):**
+
+```cpp
+struct BadPassenger {
+    string name;           // Public - anyone can modify!
+    string passportNumber; // Public - security risk!
+    string contactNumber;  // Public - no control!
+    string email;          // Public - can be corrupted!
+};
+```
+
+*This approach exposes data and allows uncontrolled modifications.*
+            </textarea>
+        </section>
+
+        <!-- Encapsulation in Flight Class -->
+        <section data-markdown>
+            <textarea data-template>
+## Encapsulation in Flight Class
+
+**Flight Class - Internal State Protection:**
+
+```cpp
+class Flight {
+protected:  // Protected for inheritance
+    string flightNumber;
+    string departureCity;
+    string arrivalCity;
+    string departureTime;
+    string arrivalTime;
+    int totalSeats;
+    int availableSeats;  // Private state
+
+public:
+    Flight(string fn, string dep, string arr, string depTime, string arrTime, int seats)
+        : flightNumber(fn), departureCity(dep), arrivalCity(arr),
+          departureTime(depTime), arrivalTime(arrTime), totalSeats(seats), availableSeats(seats) {}
+
+    // Public interface methods
+    virtual double getBasePrice() const = 0;
+    virtual string getFlightType() const = 0;
+
+    // Controlled seat booking
+    bool bookSeat() {
+        if (availableSeats > 0) {
+            availableSeats--;  // Modify private state safely
+            return true;
+        }
+        return false;
+    }
+
+    // Read-only access to flight information
+    void displayInfo() const {
+        cout << flightNumber << ": " << departureCity << " -> " << arrivalCity
+             << " (" << departureTime << " - " << arrivalTime << ")" << endl;
+        cout << "Available seats: " << availableSeats << "/" << totalSeats << endl;
+    }
+
+    // No direct access to availableSeats from outside!
+    // This prevents invalid seat counts or unauthorized modifications
+};
+```
+
+---
+
+**Encapsulation Benefits:**
+
+* **State Integrity:** `availableSeats` can't be set to invalid values.
+* **Business Logic:** Seat booking logic is centralized and controlled.
+* **Data Validation:** Internal state changes go through proper channels.
+* **Security:** Prevents external code from corrupting flight data.
+
+---
+
+**What if availableSeats was public?**
+
+```cpp
+// Dangerous - anyone could do this!
+flight.availableSeats = -100;  // Invalid state!
+flight.availableSeats = 10000; // Impossible value!
+```
+
+*Encapsulation prevents such data corruption.*
+            </textarea>
+        </section>
+
+        <!-- Core Classes Design -->
+        <section data-markdown>
+            <textarea data-template>
+## Core Classes: Flight and Booking System
+
+**Main components:**
+
+* `Flight`: Represents a flight with airline, route, schedule.
+* `Passenger`: Customer information and preferences.
+* `Booking`: Reservation linking passenger to flight.
+* `Payment`: Handles transaction processing.
+
+---
+
+**Design considerations:**
+
+* Use inheritance for different flight classes (Domestic, International).
+* Polymorphism for pricing strategies.
+* Encapsulation for data protection.
+* Association relationships between classes.
+
+---
+
+**Benefits:**
+
+* Easy to extend with new features.
+* Maintainable codebase.
+* Reusable components.
+            </textarea>
+        </section>
+
+        <!-- Flight Class Hierarchy -->
+        <section data-markdown>
+            <textarea data-template>
+## Flight Class Hierarchy
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <memory>
+using namespace std;
+
+class Flight {
+protected:
+    string flightNumber;
+    string departureCity;
+    string arrivalCity;
+    string departureTime;
+    string arrivalTime;
+    int totalSeats;
+    int availableSeats;
+
+public:
+    Flight(string fn, string dep, string arr, string depTime, string arrTime, int seats)
+        : flightNumber(fn), departureCity(dep), arrivalCity(arr),
+          departureTime(depTime), arrivalTime(arrTime), totalSeats(seats), availableSeats(seats) {}
+
+    virtual double getBasePrice() const = 0;
+    virtual string getFlightType() const = 0;
+
+    bool bookSeat() {
+        if (availableSeats > 0) {
+            availableSeats--;
+            return true;
+        }
+        return false;
+    }
+
+    void displayInfo() const {
+        cout << flightNumber << ": " << departureCity << " -> " << arrivalCity
+             << " (" << departureTime << " - " << arrivalTime << ")" << endl;
+        cout << "Available seats: " << availableSeats << "/" << totalSeats << endl;
+    }
+
+    virtual ~Flight() = default;
+};
+
+class DomesticFlight : public Flight {
+public:
+    DomesticFlight(string fn, string dep, string arr, string depTime, string arrTime, int seats)
+        : Flight(fn, dep, arr, depTime, arrTime, seats) {}
+
+    double getBasePrice() const override { return 5000.0; }
+    string getFlightType() const override { return "Domestic"; }
+};
+
+class InternationalFlight : public Flight {
+public:
+    InternationalFlight(string fn, string dep, string arr, string depTime, string arrTime, int seats)
+        : Flight(fn, dep, arr, depTime, arrTime, seats) {}
+
+    double getBasePrice() const override { return 25000.0; }
+    string getFlightType() const override { return "International"; }
+};
+```
+
+---
+
+*Polymorphism allows different pricing for domestic vs international flights.*
+            </textarea>
+        </section>
+
+        <!-- Passenger and Booking Classes -->
+        <section data-markdown>
+            <textarea data-template>
+## Passenger and Booking Classes
+
+```cpp
+class Passenger {
+private:
+    string name;
+    string passportNumber;
+    string contactNumber;
+    string email;
+
+public:
+    Passenger(string n, string pass, string contact, string mail)
+        : name(n), passportNumber(pass), contactNumber(contact), email(mail) {}
+
+    string getName() const { return name; }
+    string getPassport() const { return passportNumber; }
+    string getContact() const { return contactNumber; }
+    string getEmail() const { return email; }
+
+    void displayInfo() const {
+        cout << "Name: " << name << endl;
+        cout << "Passport: " << passportNumber << endl;
+        cout << "Contact: " << contactNumber << endl;
+        cout << "Email: " << email << endl;
+    }
+};
+
+enum class SeatClass { Economy, Business, First };
+
+class Booking {
+private:
+    string bookingId;
+    shared_ptr<Flight> flight;
+    shared_ptr<Passenger> passenger;
+    SeatClass seatClass;
+    double totalPrice;
+    bool confirmed;
+
+public:
+    Booking(string id, shared_ptr<Flight> f, shared_ptr<Passenger> p, SeatClass sc)
+        : bookingId(id), flight(f), passenger(p), seatClass(sc), confirmed(false) {
+        calculatePrice();
+    }
+
+    void calculatePrice() {
+        double basePrice = flight->getBasePrice();
+        double multiplier = 1.0;
+        switch (seatClass) {
+            case SeatClass::Economy: multiplier = 1.0; break;
+            case SeatClass::Business: multiplier = 2.5; break;
+            case SeatClass::First: multiplier = 4.0; break;
+        }
+        totalPrice = basePrice * multiplier;
+    }
+
+    bool confirmBooking() {
+        if (flight->bookSeat()) {
+            confirmed = true;
+            return true;
+        }
+        return false;
+    }
+
+    void displayBooking() const {
+        cout << "Booking ID: " << bookingId << endl;
+        passenger->displayInfo();
+        cout << "Flight: " << flight->getFlightType() << endl;
+        flight->displayInfo();
+        cout << "Class: ";
+        switch (seatClass) {
+            case SeatClass::Economy: cout << "Economy"; break;
+            case SeatClass::Business: cout << "Business"; break;
+            case SeatClass::First: cout << "First"; break;
+        }
+        cout << endl << "Total Price: $" << totalPrice << endl;
+        cout << "Status: " << (confirmed ? "Confirmed" : "Pending") << endl;
+    }
+
+    double getTotalPrice() const { return totalPrice; }
+    bool isConfirmed() const { return confirmed; }
+};
+```
+
+---
+
+*Booking class demonstrates composition and enum usage.*
+            </textarea>
+        </section>
+
+        <!-- Booking System Manager -->
+        <section data-markdown>
+            <textarea data-template>
+## Booking System Manager
+
+```cpp
+class FlightBookingSystem {
+private:
+    vector<shared_ptr<Flight>> flights;
+    vector<shared_ptr<Booking>> bookings;
+    int bookingCounter;
+
+public:
+    FlightBookingSystem() : bookingCounter(1000) {}
+
+    void addFlight(shared_ptr<Flight> flight) {
+        flights.push_back(flight);
+    }
+
+    shared_ptr<Booking> createBooking(shared_ptr<Passenger> passenger, string flightNumber, SeatClass seatClass) {
+        for (auto& flight : flights) {
+            // In a real system, we'd have a proper flight lookup
+            // For demo, we'll assume flight numbers are unique
+            if (flight->getFlightType() == "Domestic" || flight->getFlightType() == "International") {
+                string bookingId = "BK" + to_string(bookingCounter++);
+                auto booking = make_shared<Booking>(bookingId, flight, passenger, seatClass);
+                bookings.push_back(booking);
+                return booking;
+            }
+        }
+        return nullptr;
+    }
+
+    void displayAllFlights() const {
+        cout << "Available Flights:" << endl;
+        for (const auto& flight : flights) {
+            flight->displayInfo();
+            cout << "Base Price: $" << flight->getBasePrice() << endl << endl;
+        }
+    }
+
+    void displayAllBookings() const {
+        cout << "All Bookings:" << endl;
+        for (const auto& booking : bookings) {
+            booking->displayBooking();
+            cout << "------------------------" << endl;
+        }
+    }
+
+    double getTotalRevenue() const {
+        double total = 0.0;
+        for (const auto& booking : bookings) {
+            if (booking->isConfirmed()) {
+                total += booking->getTotalPrice();
+            }
+        }
+        return total;
+    }
+};
+```
+
+---
+
+*Manager class shows aggregation and system-level operations.*
+            </textarea>
+        </section>
+
+        <!-- Usage Example -->
+        <section data-markdown>
+            <textarea data-template>
+## System Usage Example
+
+```cpp
+int main() {
+    FlightBookingSystem system;
+
+    // Add flights
+    auto domesticFlight = make_shared<DomesticFlight>("AI101", "Delhi", "Mumbai", "10:00", "11:30", 150);
+    auto internationalFlight = make_shared<InternationalFlight>("AI301", "Delhi", "New York", "22:00", "06:00", 300);
+
+    system.addFlight(domesticFlight);
+    system.addFlight(internationalFlight);
+
+    // Create passengers
+    auto passenger1 = make_shared<Passenger>("John Doe", "P123456", "+91-9876543210", "john@example.com");
+    auto passenger2 = make_shared<Passenger>("Jane Smith", "P789012", "+1-555-0123", "jane@example.com");
+
+    // Create bookings
+    auto booking1 = system.createBooking(passenger1, "AI101", SeatClass::Economy);
+    auto booking2 = system.createBooking(passenger2, "AI301", SeatClass::Business);
+
+    // Confirm bookings
+    if (booking1) booking1->confirmBooking();
+    if (booking2) booking2->confirmBooking();
+
+    // Display information
+    system.displayAllFlights();
+    system.displayAllBookings();
+
+    cout << "Total Revenue: $" << system.getTotalRevenue() << endl;
+
+    return 0;
+}
+```
+
+---
+
+**Sample Output:**
+
+```
+Available Flights:
+AI101: Delhi -> Mumbai (10:00 - 11:30)
+Available seats: 149/150
+Base Price: $5000
+
+AI301: Delhi -> New York (22:00 - 06:00)
+Available seats: 299/300
+Base Price: $25000
+
+All Bookings:
+Booking ID: BK1000
+Name: John Doe
+...
+Class: Economy
+Total Price: $5000
+Status: Confirmed
+------------------------
+...
+Total Revenue: $72500
+```
+
+---
+
+*Demonstrates the complete system working together.*
+            </textarea>
+        </section>
+
+        <!-- Algorithmic Primitives -->
+        <section data-markdown>
+            <textarea data-template>
+## Algorithmic Primitives in Flight Booking
+
+**Flight booking systems require efficient algorithms for:**
+
+* **Search operations:** Finding flights by criteria (price, time, destination)
+* **Sorting operations:** Organizing results by relevance, price, duration
+* **Optimization:** Best price/route finding, seat allocation
+* **Data management:** Managing large datasets of flights and bookings
+
+---
+
+**Key algorithms we'll explore:**
+
+* Linear and binary search for flight lookup
+* Quick sort and merge sort for result organization
+* Dijkstra's algorithm for multi-city routing
+* Greedy algorithms for seat assignment
+            </textarea>
+        </section>
+
+        <!-- Search Algorithms -->
+        <section data-markdown>
+            <textarea data-template>
+## Search Algorithms: Finding Flights
+
+**Linear Search:** Simple but inefficient for large datasets.
+
+```cpp
+// Linear search for flights by destination
+shared_ptr<Flight> FlightBookingSystem::findFlightByDestination(const string& destination) const {
+    for (const auto& flight : flights) {
+        if (flight->arrivalCity == destination) {
+            return flight;
+        }
+    }
+    return nullptr;
+}
+
+// Linear search for flights within price range
+vector<shared_ptr<Flight>> FlightBookingSystem::findFlightsByPriceRange(double minPrice, double maxPrice) const {
+    vector<shared_ptr<Flight>> results;
+    for (const auto& flight : flights) {
+        double price = flight->getBasePrice();
+        if (price >= minPrice && price <= maxPrice) {
+            results.push_back(flight);
+        }
+    }
+    return results;
+}
+```
+
+**Time Complexity:** O(n) - must check each flight
+
+---
+
+**Binary Search:** Efficient for sorted data (requires sorted flight list).
+
+```cpp
+// Binary search for flights by price (assuming flights sorted by price)
+shared_ptr<Flight> FlightBookingSystem::findCheapestFlight(double maxPrice) const {
+    // Assume flights are sorted by base price
+    int left = 0, right = flights.size() - 1;
+    shared_ptr<Flight> result = nullptr;
+
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        double price = flights[mid]->getBasePrice();
+
+        if (price <= maxPrice) {
+            result = flights[mid];
+            left = mid + 1; // Look for cheaper options
+        } else {
+            right = mid - 1;
+        }
+    }
+    return result;
+}
+```
+
+**Time Complexity:** O(log n) - much faster for large datasets
+            </textarea>
+        </section>
+
+        <!-- Sorting Algorithms -->
+        <section data-markdown>
+            <textarea data-template>
+## Sorting Algorithms: Organizing Results
+
+**Quick Sort:** Fast, in-place sorting for flight results.
+
+```cpp
+// Sort flights by price using quick sort
+void FlightBookingSystem::sortFlightsByPrice(vector<shared_ptr<Flight>>& flightList) {
+    quickSort(flightList, 0, flightList.size() - 1);
+}
+
+void FlightBookingSystem::quickSort(vector<shared_ptr<Flight>>& arr, int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+int FlightBookingSystem::partition(vector<shared_ptr<Flight>>& arr, int low, int high) {
+    double pivot = arr[high]->getBasePrice();
+    int i = low - 1;
+
+    for (int j = low; j < high; j++) {
+        if (arr[j]->getBasePrice() <= pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+```
+
+**Time Complexity:** O(n log n) average case
+
+---
+
+**Merge Sort:** Stable sorting for booking results.
+
+```cpp
+// Sort bookings by total price using merge sort
+void FlightBookingSystem::sortBookingsByPrice() {
+    mergeSort(bookings, 0, bookings.size() - 1);
+}
+
+void FlightBookingSystem::mergeSort(vector<shared_ptr<Booking>>& arr, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
+    }
+}
+
+void FlightBookingSystem::merge(vector<shared_ptr<Booking>>& arr, int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+
+    vector<shared_ptr<Booking>> L(n1), R(n2);
+    for (int i = 0; i < n1; i++) L[i] = arr[left + i];
+    for (int j = 0; j < n2; j++) R[j] = arr[mid + 1 + j];
+
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        if (L[i]->getTotalPrice() <= R[j]->getTotalPrice()) {
+            arr[k] = L[i]; i++;
+        } else {
+            arr[k] = R[j]; j++;
+        }
+        k++;
+    }
+
+    while (i < n1) { arr[k] = L[i]; i++; k++; }
+    while (j < n2) { arr[k] = R[j]; j++; k++; }
+}
+```
+
+**Time Complexity:** O(n log n) worst case, stable sort
+            </textarea>
+        </section>
+
+        <!-- Advanced Algorithms -->
+        <section data-markdown>
+            <textarea data-template>
+## Advanced Algorithms: Route Optimization
+
+**Dijkstra's Algorithm:** Finding cheapest multi-city routes.
+
+```cpp
+#include <queue>
+#include <unordered_map>
+
+// Simplified route finding between cities
+class RouteOptimizer {
+private:
+    unordered_map<string, vector<pair<string, double>>> graph; // city -> [(destination, price)]
+
+public:
+    void addFlightRoute(const string& from, const string& to, double price) {
+        graph[from].push_back({to, price});
+        graph[to].push_back({from, price}); // Assuming bidirectional
+    }
+
+    double findCheapestRoute(const string& start, const string& end) {
+        unordered_map<string, double> distances;
+        priority_queue<pair<double, string>, vector<pair<double, string>>, greater<pair<double, string>>> pq;
+
+        for (auto& city : graph) {
+            distances[city.first] = numeric_limits<double>::infinity();
+        }
+        distances[start] = 0;
+        pq.push({0, start});
+
+        while (!pq.empty()) {
+            auto [cost, current] = pq.top(); pq.pop();
+
+            if (cost > distances[current]) continue;
+
+            for (auto& [neighbor, price] : graph[current]) {
+                double newCost = cost + price;
+                if (newCost < distances[neighbor]) {
+                    distances[neighbor] = newCost;
+                    pq.push({newCost, neighbor});
+                }
+            }
+        }
+
+        return distances[end];
+    }
+};
+```
+
+**Application:** Find cheapest route: Delhi → Mumbai → Bangalore
+
+---
+
+**Greedy Seat Assignment:** Optimal seat allocation.
+
+```cpp
+// Greedy algorithm for seat assignment (prefer window/aisle seats)
+class SeatAssigner {
+private:
+    vector<vector<bool>> seatMap; // true = occupied
+
+public:
+    SeatAssigner(int rows, int cols) : seatMap(rows, vector<bool>(cols, false)) {}
+
+    pair<int, int> assignBestSeat() {
+        // Priority: aisle seats, then window seats, then middle
+        vector<pair<int, int>> preferences;
+
+        int cols = seatMap[0].size();
+        for (int row = 0; row < seatMap.size(); row++) {
+            // Aisle seats (assuming 3-3-3 configuration: seats 0,2,3,5 are aisle)
+            if (!seatMap[row][0]) preferences.push_back({row, 0}); // Aisle
+            if (!seatMap[row][2]) preferences.push_back({row, 2}); // Aisle
+            if (!seatMap[row][3]) preferences.push_back({row, 3}); // Aisle
+            if (!seatMap[row][5]) preferences.push_back({row, 5}); // Aisle
+
+            // Window seats
+            if (!seatMap[row][cols-1]) preferences.push_back({row, cols-1}); // Window
+        }
+
+        if (!preferences.empty()) {
+            auto seat = preferences[0];
+            seatMap[seat.first][seat.second] = true;
+            return seat;
+        }
+
+        // Fallback: first available seat
+        for (int row = 0; row < seatMap.size(); row++) {
+            for (int col = 0; col < seatMap[row].size(); col++) {
+                if (!seatMap[row][col]) {
+                    seatMap[row][col] = true;
+                    return {row, col};
+                }
+            }
+        }
+
+        return {-1, -1}; // No seats available
+    }
+};
+```
+
+**Benefits:** Maximizes passenger satisfaction with seat preferences.
+            </textarea>
+        </section>
+
+        <!-- Algorithm Analysis Quiz -->
+        <section data-markdown>
+            <textarea data-template>
+## Quiz: Algorithmic Primitives
+
+**Q3.** What is the time complexity of linear search?
+
+A. O(1)
+
+B. O(log n)
+
+C. O(n)
+
+D. O(n²)
+
+---
+
+**Answer:** C. O(n) - proportional to number of elements
+
+---
+
+**Q4.** Which sorting algorithm is guaranteed O(n log n) in worst case?
+
+A. Quick Sort
+
+B. Bubble Sort
+
+C. Merge Sort
+
+D. Insertion Sort
+
+---
+
+**Answer:** C. Merge Sort
+
+---
+
+**Q5.** Which algorithm is best for finding the shortest path in a weighted graph?
+
+A. Binary Search
+
+B. Quick Sort
+
+C. Dijkstra's Algorithm
+
+D. Linear Search
+
+---
+
+**Answer:** C. Dijkstra's Algorithm
+            </textarea>
+        </section>
+
+        <!-- Quiz -->
+        <section data-markdown>
+            <textarea data-template>
+## Quiz: Flight Booking System Design
+
+**Q1.** What design principle allows different pricing for domestic and international flights?
+
+A. Encapsulation
+
+B. Inheritance
+
+C. Polymorphism
+
+D. Abstraction
+
+---
+
+**Answer:** C. Polymorphism (through virtual functions)
+
+---
+
+**Q2.** Which class demonstrates composition in the design?
+
+A. Flight
+
+B. Booking
+
+C. Passenger
+
+D. FlightBookingSystem
+
+---
+
+**Answer:** B. Booking (contains shared_ptr to Flight and Passenger)
+            </textarea>
+        </section>
+
+        <!-- Design Patterns Discussion -->
+        <section data-markdown>
+            <textarea data-template>
+## Design Patterns in Flight Booking
+
+**Factory Pattern:** For creating different types of flights.
+
+```cpp
+class FlightFactory {
+public:
+    static shared_ptr<Flight> createFlight(string type, string fn, string dep, string arr, string depTime, string arrTime, int seats) {
+        if (type == "Domestic") {
+            return make_shared<DomesticFlight>(fn, dep, arr, depTime, arrTime, seats);
+        } else if (type == "International") {
+            return make_shared<InternationalFlight>(fn, dep, arr, depTime, arrTime, seats);
+        }
+        return nullptr;
+    }
+};
+```
+
+---
+
+**Strategy Pattern:** For different pricing strategies.
+
+```cpp
+class PricingStrategy {
+public:
+    virtual double calculatePrice(double basePrice, SeatClass seatClass) = 0;
+    virtual ~PricingStrategy() = default;
+};
+
+class StandardPricing : public PricingStrategy {
+public:
+    double calculatePrice(double basePrice, SeatClass seatClass) override {
+        double multiplier = 1.0;
+        switch (seatClass) {
+            case SeatClass::Business: multiplier = 2.5; break;
+            case SeatClass::First: multiplier = 4.0; break;
+        }
+        return basePrice * multiplier;
+    }
+};
+```
+
+---
+
+*Design patterns make the system more flexible and maintainable.*
+            </textarea>
+        </section>
+
+        <!-- Mini Challenge -->
+        <section data-markdown>
+            <textarea data-template>
+## Mini Challenge (in-class)
+
+Extend the flight booking system to support seat selection.
+
+* Add a `Seat` class with row, column, and type.
+* Modify `Flight` to manage seat availability by position.
+* Update `Booking` to include specific seat assignment.
+* Implement seat selection logic in `FlightBookingSystem`.
+
+**Deliverable:** Demonstrate booking a specific seat (e.g., 12A) on a flight. </textarea>
+        </section>
+
+        <!-- Hands-on Exercise -->
+        <section data-markdown>
+            <textarea data-template>
+## Hands-on Exercise (homework)
+
+1. **Payment System Integration:**
+
+   Create a payment processing module for the flight booking system.
+
+   * Abstract base class `PaymentMethod` with `virtual bool processPayment(double amount)`.
+   * Derived classes: `CreditCardPayment`, `DebitCardPayment`, `UPIPayment`.
+   * Integrate with `Booking` class to handle payments before confirmation.
+   * Add transaction logging and success/failure handling.
+
+---
+
+2. **Enhanced Features:**
+
+   * Add `Cancellation` class for booking cancellations with refund calculations.
+   * Implement `WaitingList` for overbooked flights.
+   * Create `LoyaltyProgram` for frequent flyers with discount calculations.
+
+---
+
+3. **Test Cases:**
+
+   * Process payments using different methods.
+   * Handle payment failures gracefully.
+   * Demonstrate cancellation and refunds.
+   * Show loyalty program benefits.
+
+**Hint:** Use polymorphism for different payment types. Implement proper error handling and validation. </textarea>
+        </section>
+
+        <!-- Summary -->
+        <section data-markdown>
+            <textarea data-template>
+## Summary
+
+* Object-oriented design enables modular, maintainable systems.
+* Inheritance and polymorphism provide flexibility for different flight types.
+* Composition allows complex objects to be built from simpler ones.
+* Design patterns offer proven solutions to common problems.
+* Proper encapsulation protects data integrity.
+
+---
+
+**Key takeaways:**
+
+* Plan system architecture before implementation.
+* Use appropriate design patterns.
+* Consider extensibility and maintainability.
+* Test thoroughly with various scenarios.
+
+---
+
+**Next:** Explore more design patterns and advanced C++ features. </textarea>
+        </section>
+
+        <!-- Navigation -->
+        <section>
+            <h1>Navigation</h1>
+            <a href="index.html">Back to Course Outline</a>
+            <br>
+            <a href="lecture18.html">Previous: Advanced Data Structures with Polymorphism</a>
+        </section>
+
+    </div>
+</div>
+
+<!-- Scripts -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/math/math.js"></script>
+
+<script>
+    // Initialize Reveal
+    Reveal.initialize({
+        hash: true,
+        plugins: [ RevealMarkdown, RevealHighlight, RevealMath.KaTeX ],
+        katex: { displayMode: true },
+        margin: 0.1,
+        width: 1280,
+        height: 720
+    });
+
+    // Theme switcher
+    const themes = ['white','league','beige','serif','simple','sky','dracula','night','black','solarized','moon','blood'];
+    let idx = 0;
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (themeToggleBtn) {
+        themeToggleBtn.onclick = () => {
+            idx = (idx + 1) % themes.length;
+            document.getElementById('theme-link').href =
+                `https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/${themes[idx]}.css`;
+        };
+    }
+
+    // Font size switcher
+    const fontSizes = ['0.8em','1em','1.5em','2em','2.5em'];
+    const fontLabels = ['Small','Medium','Large','XL','XXL'];
+    let fontIdx = 1; // Medium
+    const fontSizeToggleBtn = document.getElementById('font-size-toggle');
+    if (fontSizeToggleBtn) {
+        fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+        fontSizeToggleBtn.onclick = () => {
+            fontIdx = (fontIdx + 1) % fontSizes.length;
+            document.querySelector('.reveal').style.fontSize = fontSizes[fontIdx];
+            fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+        };
+    }
+</script>
+
+</body>
+</html>
