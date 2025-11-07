@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recursion Deep Dive</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+<link id="theme-link" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/white.min.css">
+<style>
+.reveal{font-size:32px}
+.reveal h1{font-size:2.5em}
+.reveal h2{font-size:2em}
+.reveal h3{font-size:1.5em}
+.reveal pre{font-size:0.55em;width:100%}
+.reveal code{background:#1e1e1e;color:#f8f8f2;padding:2px 6px;border-radius:3px}
+.stack-frame{border:2px solid #4a90e2;padding:15px;margin:10px;border-radius:8px;background:#2a2a2a;transition:all 0.3s}
+.stack-frame.active{background:#4a90e2;border-color:#80b3ff}
+.stack-frame.returning{background:#2ecc71;border-color:#5dde94}
+.viz-controls{margin:20px 0 !important;display:flex !important;gap:10px;justify-content:center;flex-wrap:wrap;visibility:visible !important;opacity:1 !important}
+.viz-btn{padding:10px 20px !important;border:none !important;border-radius:5px;cursor:pointer !important;font-size:18px !important;background:#4a90e2 !important;color:#fff !important;transition:background 0.3s;display:inline-block !important;visibility:visible !important;opacity:1 !important;min-width:100px}
+.viz-btn:hover{background:#357abd !important}
+.viz-btn:disabled{background:#555 !important;cursor:not-allowed !important}
+.viz-container{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.node{fill:#4a90e2;stroke:#fff;stroke-width:2}
+.node.head{fill:#e74c3c}
+.node.active{fill:#2ecc71}
+.link{stroke:#888;stroke-width:2}
+.pointer{stroke:#e74c3c;stroke-width:3;marker-end:url(#arrowhead)}
+input[type="number"]{padding:8px;border-radius:5px;border:1px solid #4a90e2;background:#2a2a2a;color:#fff;font-size:16px;width:80px}
+.quiz-option{display:block;margin:10px 0;padding:15px;background:#2a2a2a;border:2px solid #4a90e2;border-radius:8px;cursor:pointer;transition:all 0.3s}
+.quiz-option:hover{background:#3a3a3a}
+.quiz-option.correct{background:#2ecc71;border-color:#2ecc71}
+.quiz-option.incorrect{background:#e74c3c;border-color:#e74c3c}
+.memo-table{display:grid;gap:5px;margin:20px auto;max-width:600px}
+.memo-cell{border:1px solid #4a90e4;padding:10px;text-align:center;background:#f0f0f0;color:#333;transition:background 0.3s;font-size:16px;font-weight:bold}
+.memo-cell.filled{background:#4a90e2;color:#fff}
+.bucket{display:inline-block;border:2px solid #4a90e2;padding:10px;margin:5px;min-width:60px;min-height:80px;vertical-align:top;border-radius:5px}
+.bucket-item{background:#4a90e2;color:#fff;padding:5px;margin:3px;border-radius:3px;display:inline-block}
+.control-btn{position:fixed;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;background:rgba(255,255,255,0.9);border:1px solid #ccc}
+#theme-toggle{top:10px}
+#font-size-toggle{top:50px}
+</style>
+</head>
+<body>
+
+<button id="theme-toggle" class="control-btn">Change Theme</button>
+<button id="font-size-toggle" class="control-btn">Font Size</button>
+
+<div class="reveal">
+<div class="slides">
+
+<section data-markdown>
+<textarea data-template>
+# Lecture 21: Recursion Deep Dive
+*Advanced recursive algorithms and their applications.*
+
+## Introduction to Recursion
+
+**Recursion:** A function that calls itself to solve smaller instances of the same problem
+
+**Key Components:**
+
+* **Base Case:** Stopping condition to prevent infinite recursion
+* **Recursive Case:** Function calls itself with modified parameters
+* **Call Stack:** Memory structure tracking function calls
+
+---
+
+**Why Recursion Matters:**
+
+* **Divide and Conquer:** Break complex problems into simpler subproblems
+* **Elegant Solutions:** Often more intuitive than iterative approaches
+* **Tree/Graph Problems:** Natural fit for hierarchical data structures
+* **Mathematical Modeling:** Direct implementation of recursive mathematical definitions
+
+---
+
+**Recursion vs Iteration:**
+
+* **Recursion:** Uses call stack, can be memory-intensive
+* **Iteration:** Uses loops, generally more memory-efficient
+* **Trade-offs:** Recursion often clearer, iteration often faster
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Call Stack Visualizer
+
+**Understanding the Call Stack:**
+
+* Each recursive call creates a new stack frame
+* Stack frames contain local variables and return address
+* Stack unwinds as functions return
+* Stack overflow occurs when too many frames are created
+
+---
+
+**Factorial Example - Call Stack:**
+
+```
+factorial(5)
+├── factorial(4)
+│   ├── factorial(3)
+│   │   ├── factorial(2)
+│   │   │   ├── factorial(1)
+│   │   │   │   └── returns 1
+│   │   │   └── returns 2 * 1 = 2
+│   │   └── returns 3 * 2 = 6
+│   └── returns 4 * 6 = 24
+└── returns 5 * 24 = 120
+```
+
+---
+
+**Visualization:** Interactive factorial calculation showing stack frames
+</textarea>
+</section>
+
+<section>
+<h2>Call Stack Visualizer</h2>
+<div style="margin-bottom:15px">
+<label style="font-size:24px">Calculate factorial of: <input type="number" id="factInput" value="5" min="1" max="8"></label>
+</div>
+<div class="viz-controls">
+<button class="viz-btn" onclick="window.runFactViz()">▶ Run</button>
+<button class="viz-btn" onclick="window.stepFactViz()">Step →</button>
+<button class="viz-btn" onclick="window.resetFactViz()">↻ Reset</button>
+</div>
+<div id="stackViz" class="viz-container" style="margin-top:20px"></div>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Factorial Implementation
+
+**Recursive Factorial:**
+
+```cpp
+int factorial(int n) {
+    // Base case: prevents infinite recursion
+    if (n == 0 || n == 1) {
+        return 1;
+    }
+    // Recursive case: calls itself with smaller problem
+    return n * factorial(n - 1);
+}
+```
+
+---
+
+**Execution Trace - factorial(5):**
+
+* factorial(5) → 5 * factorial(4)
+* factorial(4) → 4 * factorial(3)
+* factorial(3) → 3 * factorial(2)
+* factorial(2) → 2 * factorial(1)
+* factorial(1) → returns 1
+* factorial(2) → returns 2 * 1 = 2
+* factorial(3) → returns 3 * 2 = 6
+* factorial(4) → returns 4 * 6 = 24
+* factorial(5) → returns 5 * 24 = 120
+
+---
+
+**Time Complexity:** O(n) - n recursive calls
+**Space Complexity:** O(n) - call stack depth
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Linked List Reversal
+
+**Recursive Linked List Reversal:**
+
+```cpp
+Node* reverseList(Node* head) {
+    // Base case: empty list or single node
+    if (!head || !head->next) {
+        return head;
+    }
+
+    // Recursive case: reverse the rest of the list
+    Node* newHead = reverseList(head->next);
+
+    // Reverse the current node's pointer
+    head->next->next = head;
+    head->next = nullptr;
+
+    return newHead;
+}
+```
+
+---
+
+**Algorithm Steps:**
+
+1. **Base Case:** If list is empty or has one node, return head
+2. **Recursive Call:** Reverse everything after current node
+3. **Pointer Reversal:** Make current node's next point back to current node
+4. **Cleanup:** Set current node's next to null
+5. **Return:** New head of reversed list
+
+---
+
+**Visualization:** Step-by-step reversal of linked list nodes
+
+---
+
+**Time Complexity:** O(n) - visits each node once
+**Space Complexity:** O(n) - recursion depth equals list length
+</textarea>
+</section>
+
+<section>
+<h2>Linked List Reversal</h2>
+<div class="viz-controls">
+<button class="viz-btn" onclick="window.runListViz()">▶ Run</button>
+<button class="viz-btn" onclick="window.stepListViz()">Step →</button>
+<button class="viz-btn" onclick="window.resetListViz()">↻ Reset</button>
+</div>
+<svg id="listViz" width="700" height="200" style="margin:20px auto;display:block"></svg>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Array Permutations
+
+**Recursive Permutation Generation:**
+
+```cpp
+void permute(vector<int>& arr, int l, int r) {
+    // Base case: when left index reaches right
+    if (l == r) {
+        printArray(arr);  // Print current permutation
+        return;
+    }
+
+    // Recursive case: try each element at current position
+    for (int i = l; i <= r; i++) {
+        swap(arr[l], arr[i]);           // Fix element at position l
+        permute(arr, l + 1, r);         // Recurse for remaining elements
+        swap(arr[l], arr[i]);           // Backtrack - restore original order
+    }
+}
+```
+
+---
+
+**Backtracking Concept:**
+
+* **Fix:** Choose an element and place it at current position
+* **Recurse:** Generate permutations of remaining elements
+* **Backtrack:** Undo the choice to try next element
+
+---
+
+**Example - permute([1,2,3], 0, 2):**
+
+```
+Original: [1,2,3]
+├── Swap 0↔0: [1,2,3] → permute([1,2,3], 1, 2)
+│   ├── Swap 1↔1: [1,2,3] → permute([1,2,3], 2, 2) → [1,2,3]
+│   ├── Swap 1↔2: [1,3,2] → permute([1,3,2], 2, 2) → [1,3,2]
+│   └── Backtrack: [1,2,3]
+├── Swap 0↔1: [2,1,3] → permute([2,1,3], 1, 2)
+│   ├── Swap 1↔1: [2,1,3] → permute([2,1,3], 2, 2) → [2,1,3]
+│   ├── Swap 1↔2: [2,3,1] → permute([2,3,1], 2, 2) → [2,3,1]
+│   └── Backtrack: [2,1,3]
+└── Swap 0↔2: [3,2,1] → permute([3,2,1], 1, 2)
+    ├── Swap 1↔1: [3,2,1] → permute([3,2,1], 2, 2) → [3,2,1]
+    ├── Swap 1↔2: [3,1,2] → permute([3,1,2], 2, 2) → [3,1,2]
+    └── Backtrack: [3,2,1]
+```
+
+---
+
+**Time Complexity:** O(n!) - n factorial permutations
+</textarea>
+</section>
+
+<section>
+<h2>Array Permutations</h2>
+<div class="viz-controls">
+<button class="viz-btn" onclick="window.runPermViz()">▶ Run</button>
+<button class="viz-btn" onclick="window.resetPermViz()">↻ Reset</button>
+</div>
+<div id="permViz" class="viz-container" style="font-size:20px"></div>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Longest Common Subsequence
+
+**Memoized Recursive LCS:**
+
+```cpp
+int lcs(string s1, string s2, int m, int n, vector<vector<int>>& memo) {
+    // Base case: empty string
+    if (m == 0 || n == 0) return 0;
+    
+    // Check memoization table
+    if (memo[m][n] != -1) return memo[m][n];
+    
+    // Recursive cases
+    if (s1[m-1] == s2[n-1]) {
+        // Characters match - add 1 and recurse on diagonals
+        memo[m][n] = 1 + lcs(s1, s2, m-1, n-1, memo);
+    } else {
+        // Characters don't match - take max of left or top
+        memo[m][n] = max(lcs(s1, s2, m-1, n, memo),
+                         lcs(s1, s2, m, n-1, memo));
+    }
+    return memo[m][n];
+}
+```
+
+---
+
+**LCS Algorithm:**
+
+* **Base Case:** If either string is empty, LCS length is 0
+* **Match Case:** If characters match, LCS = 1 + LCS of remaining strings
+* **No Match:** LCS = max(LCS without last char of s1, LCS without last char of s2)
+* **Memoization:** Store results to avoid recomputation
+
+---
+
+**Example:** LCS of "ABCD" and "ACBD"
+
+* Common subsequence: "ABD" (length 3)
+* Other possibilities: "ACD" (length 3), "BCD" (length 3)
+
+---
+
+**Visualization:** Step-by-step memoization table filling
+
+---
+
+**Time Complexity:** O(m*n) - each cell computed once
+**Space Complexity:** O(m*n) - memoization table
+</textarea>
+</section>
+
+<section>
+<h2>Longest Common Subsequence</h2>
+<div class="viz-controls">
+<button class="viz-btn" onclick="window.runLCSViz()">▶ Run</button>
+<button class="viz-btn" onclick="window.stepLCSViz()">Step →</button>
+<button class="viz-btn" onclick="window.resetLCSViz()">↻ Reset</button>
+</div>
+<div id="lcsViz" style="font-size:18px"></div>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Bucket Sort
+
+**Bucket Sort Algorithm:**
+
+```cpp
+void bucketSort(vector<float>& arr) {
+    int n = arr.size();
+    vector<vector<float>> buckets(n);
+    
+    // Step 1: Distribute elements into buckets
+    for (float num : arr) {
+        int idx = n * num;  // Assumes elements in [0,1)
+        buckets[idx].push_back(num);
+    }
+    
+    // Step 2: Sort individual buckets
+    for (auto& bucket : buckets) {
+        sort(bucket.begin(), bucket.end());
+    }
+    
+    // Step 3: Concatenate sorted buckets
+    int idx = 0;
+    for (auto& bucket : buckets) {
+        for (float num : bucket) {
+            arr[idx++] = num;
+        }
+    }
+}
+```
+
+---
+
+**Algorithm Steps:**
+
+1. **Create buckets:** Initialize n empty buckets
+2. **Distribute:** Place each element in appropriate bucket based on value
+3. **Sort buckets:** Sort each individual bucket
+4. **Concatenate:** Combine sorted buckets back into original array
+
+---
+
+**Requirements:**
+
+* Elements must be uniformly distributed in a known range
+* Usually requires elements in [0,1) or normalization
+* Works best when input is uniformly distributed
+
+---
+
+**Visualization:** Step-by-step bucket sort demonstration
+
+---
+
+**Time Complexity:** O(n + k) average case, where k = number of buckets
+**Space Complexity:** O(n + k) - additional space for buckets
+</textarea>
+</section>
+
+<section>
+<h2>Bucket Sort Visualization</h2>
+<div class="viz-controls">
+<button class="viz-btn" onclick="window.runBucketViz()">▶ Run</button>
+<button class="viz-btn" onclick="window.stepBucketViz()">Step →</button>
+<button class="viz-btn" onclick="window.resetBucketViz()">↻ Reset</button>
+</div>
+<div id="bucketViz" class="viz-container" style="font-size:18px"></div>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Quiz: Recursion Basics
+
+**What happens if a recursive function lacks a base case?**
+
+* Returns null
+* Infinite recursion/stack overflow
+* Compiles with error
+* Works normally
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Quiz: Recursion Basics - Answer
+
+**What happens if a recursive function lacks a base case?**
+
+**Answer: Infinite recursion/stack overflow**
+
+Without a base case, the function calls itself forever until the stack overflows. This is why every recursive function must have a proper base case to terminate the recursion.
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Quiz: Complexity Analysis
+
+**What is the time complexity of factorial(n)?**
+
+* O(1)
+* O(log n)
+* O(n)
+* O(n²)
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Quiz: Complexity Analysis - Answer
+
+**What is the time complexity of factorial(n)?**
+
+**Answer: O(n)**
+
+The function makes n recursive calls, each doing constant work. For factorial(5), there are 5 calls: factorial(5) → factorial(4) → factorial(3) → factorial(2) → factorial(1).
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Quiz: Algorithm Application
+
+**Which data structure is essential for recursion?**
+
+* Array
+* Linked List
+* Stack
+* Queue
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Quiz: Algorithm Application - Answer
+
+**Which data structure is essential for recursion?**
+
+**Answer: Stack**
+
+Recursion uses the call stack to manage function calls and local variables. Each recursive call creates a new stack frame, and the stack unwinds as functions return.
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Summary & Best Practices
+
+**Recursion Trade-offs:**
+
+* **Elegant & intuitive** for tree/graph problems
+* **Higher memory overhead** (call stack)
+* **Risk of stack overflow** for deep recursion
+
+---
+
+**Debugging Tips:**
+
+* Print function parameters at entry/exit
+* Verify base case correctness
+* Trace small examples manually
+
+---
+
+**Practice Problems:**
+
+* Tower of Hanoi
+* Recursive Binary Search
+* Merge Sort
+
+---
+
+**Key Takeaways:**
+
+* **Base Case:** Essential to prevent infinite recursion
+* **Recursive Case:** Must progress toward base case
+* **Call Stack:** Understand memory implications
+* **Memoization:** Optimize repeated subproblems
+
+---
+
+**When to Use Recursion:**
+
+* Problems with natural recursive structure
+* Tree/graph traversals
+* Divide and conquer algorithms
+* Mathematical definitions (factorial, Fibonacci)
+</textarea>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/markdown/markdown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({hash:true,plugins:[RevealMarkdown,RevealHighlight],transition:'slide'});
+
+// Global state objects
+window.factState = {stack:[], step:0, n:5, interval:null};
+window.listState = {step:0, nodes:[1,2,3,4], interval:null};
+window.permState = {perms:[], step:0};
+window.lcsState = {s1:'ABCD', s2:'ACBD', memo:[], step:0, interval:null};
+window.bucketState = {arr:[], buckets:[], step:0, interval:null};
+
+// Factorial Visualization
+window.resetFactViz = function() {
+  if (window.factState.interval) clearInterval(window.factState.interval);
+  window.factState = {
+    stack:[], 
+    step:0, 
+    n:parseInt(document.getElementById('factInput').value) || 5,
+    interval: null
+  };
+  renderFactStack();
+};
+
+window.runFactViz = function() {
+  window.resetFactViz();
+  window.factState.interval = setInterval(() => {
+    if (!window.stepFactViz()) {
+      clearInterval(window.factState.interval);
+      window.factState.interval = null;
+    }
+  }, 800);
+};
+
+window.stepFactViz = function() {
+  const {n, step, stack} = window.factState;
+  
+  // Phase 1: Build the stack (going down)
+  if (step < n) {
+    window.factState.stack.push({val: n - step, status: 'active', result: null});
+    window.factState.step++;
+    renderFactStack();
+    return true;
+  } 
+  // Phase 2: Unwind the stack (coming back up)
+  else if (step >= n && stack.length > 0) {
+    // Start from the bottom (base case)
+    const baseIdx = stack.length - 1;
+    
+    // Set result for current frame
+    for (let i = baseIdx; i >= 0; i--) {
+      if (stack[i].result === null) {
+        stack[i].status = 'returning';
+        if (stack[i].val <= 1) {
+          stack[i].result = 1;
+        } else {
+          // Check if next frame has result
+          if (i < baseIdx && stack[i + 1].result !== null) {
+            stack[i].result = stack[i].val * stack[i + 1].result;
+          } else {
+            // Wait for next frame
+            break;
+          }
+        }
+        window.factState.step++;
+        renderFactStack();
+        return true;
+      }
+    }
+    
+    // All frames processed
+    return false;
+  }
+  
+  return false;
+};
+
+function renderFactStack() {
+  const div = document.getElementById('stackViz');
+  if (!div) return;
+  if (window.factState.stack.length === 0) {
+    div.innerHTML = '<p style="color:#888">Click "Run" or "Step" to begin</p>';
+    return;
+  }
+  div.innerHTML = window.factState.stack.map(f =>
+    `<div class="stack-frame ${f.status}">
+      factorial(${f.val})${f.result !== null ? ' → ' + f.result : ''}
+    </div>`
+  ).reverse().join('');
+}
+
+// Linked List Visualization
+window.resetListViz = function() {
+  if (window.listState.interval) clearInterval(window.listState.interval);
+  window.listState = {
+    step: 0, 
+    nodes: [
+      {val: 1, next: 1},
+      {val: 2, next: 2},
+      {val: 3, next: 3},
+      {val: 4, next: null}
+    ],
+    phase: 'forward', // 'forward' or 'reverse'
+    currentIdx: -1,
+    interval: null
+  };
+  renderList();
+};
+
+window.runListViz = function() {
+  window.resetListViz();
+  window.listState.interval = setInterval(() => {
+    if (!window.stepListViz()) {
+      clearInterval(window.listState.interval);
+      window.listState.interval = null;
+    }
+  }, 1200);
+};
+
+window.stepListViz = function() {
+  const state = window.listState;
+  
+  if (state.phase === 'forward') {
+    // Moving forward to the end
+    if (state.step < state.nodes.length) {
+      state.currentIdx = state.step;
+      state.step++;
+      renderList();
+      return true;
+    } else {
+      // Switch to reverse phase, start from end
+      state.phase = 'reverse';
+      state.currentIdx = state.nodes.length - 1;
+      state.step = 0;
+      renderList();
+      return true;
+    }
+  } else if (state.phase === 'reverse') {
+    // Reversing pointers from end to start
+    if (state.step < state.nodes.length - 1) {
+      const reverseIdx = state.nodes.length - 1 - state.step;
+      // Node at reverseIdx should now point to reverseIdx - 1
+      if (reverseIdx > 0) {
+        state.nodes[reverseIdx].next = reverseIdx - 1;
+      }
+      state.currentIdx = reverseIdx - 1;
+      state.step++;
+      renderList();
+      return true;
+    } else {
+      // Set first node to point to null
+      state.nodes[0].next = null;
+      state.currentIdx = -1;
+      renderList();
+      return false;
+    }
+  }
+  
+  return false;
+};
+
+function renderList() {
+  const svg = document.getElementById('listViz');
+  if (!svg) return;
+  
+  svg.innerHTML = '<defs><marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#e74c3c"/></marker><marker id="arrowhead-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#4a90e2"/></marker></defs>';
+  
+  const {nodes, currentIdx, phase} = window.listState;
+  
+  // First draw all arrows
+  nodes.forEach((node, i) => {
+    if (node.next !== null && node.next >= 0 && node.next < nodes.length) {
+      const x1 = 100 + i * 150;
+      const targetIdx = node.next;
+      const x2 = 100 + targetIdx * 150;
+      
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      
+      if (targetIdx > i) {
+        // Forward arrow (original direction)
+        line.setAttribute('x1', x1 + 32);
+        line.setAttribute('y1', 100);
+        line.setAttribute('x2', x2 - 32);
+        line.setAttribute('y2', 100);
+        line.setAttribute('stroke', '#888');
+        line.setAttribute('marker-end', 'url(#arrowhead)');
+      } else {
+        // Backward arrow (reversed)
+        line.setAttribute('x1', x1 - 32);
+        line.setAttribute('y1', 140);
+        line.setAttribute('x2', x2 + 32);
+        line.setAttribute('y2', 140);
+        line.setAttribute('stroke', '#4a90e2');
+        line.setAttribute('marker-end', 'url(#arrowhead-blue)');
+        line.setAttribute('stroke-width', '3');
+      }
+      
+      svg.appendChild(line);
+    }
+  });
+  
+  // Then draw nodes on top
+  nodes.forEach((node, i) => {
+    const x = 100 + i * 150;
+    
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', x);
+    circle.setAttribute('cy', 100);
+    circle.setAttribute('r', 30);
+    circle.classList.add('node');
+    if (i === currentIdx) circle.classList.add('active');
+    
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', x);
+    text.setAttribute('y', 105);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('fill', '#fff');
+    text.setAttribute('font-weight', 'bold');
+    text.textContent = node.val;
+    
+    svg.appendChild(circle);
+    svg.appendChild(text);
+  });
+  
+  // Add status text
+  const statusText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  statusText.setAttribute('x', 350);
+  statusText.setAttribute('y', 30);
+  statusText.setAttribute('text-anchor', 'middle');
+  statusText.setAttribute('fill', '#4a90e2');
+  statusText.setAttribute('font-size', '18');
+  statusText.setAttribute('font-weight', 'bold');
+  statusText.textContent = phase === 'forward' ? 'Recursing forward...' : 'Reversing pointers...';
+  svg.appendChild(statusText);
+}
+
+// Permutation Visualization
+window.resetPermViz = function() {
+  window.permState = {perms: [], step: 0};
+  const div = document.getElementById('permViz');
+  if (div) div.innerHTML = '<p style="color:#888">Click "Run" to generate permutations of [1, 2, 3]</p>';
+};
+
+window.runPermViz = function() {
+  const arr = [1, 2, 3];
+  const result = [];
+  
+  function perm(a, l, r) {
+    if (l === r) {
+      result.push([...a]);
+      return;
+    }
+    for (let i = l; i <= r; i++) {
+      [a[l], a[i]] = [a[i], a[l]];
+      perm(a, l + 1, r);
+      [a[l], a[i]] = [a[i], a[l]];
+    }
+  }
+  
+  perm(arr, 0, 2);
+  window.permState.perms = result;
+  
+  const div = document.getElementById('permViz');
+  if (div) {
+    div.innerHTML = '<p><strong>All Permutations:</strong></p><p>' + 
+      result.map(p => '[' + p.join(', ') + ']').join(' • ') + 
+      '</p><p>Total: ' + result.length + ' permutations</p>';
+  }
+};
+
+// LCS Visualization
+window.resetLCSViz = function() {
+  if (window.lcsState.interval) clearInterval(window.lcsState.interval);
+  const m = window.lcsState.s1.length;
+  const n = window.lcsState.s2.length;
+  window.lcsState.memo = Array(m + 1).fill(0).map(() => Array(n + 1).fill(-1));
+  window.lcsState.step = 0;
+  window.lcsState.interval = null;
+  
+  for (let i = 0; i <= m; i++) window.lcsState.memo[i][0] = 0;
+  for (let j = 0; j <= n; j++) window.lcsState.memo[0][j] = 0;
+  
+  renderLCS();
+};
+
+window.runLCSViz = function() {
+  window.resetLCSViz();
+  window.lcsState.interval = setInterval(() => {
+    if (!window.stepLCSViz()) {
+      clearInterval(window.lcsState.interval);
+      window.lcsState.interval = null;
+    }
+  }, 600);
+};
+
+window.stepLCSViz = function() {
+  const {s1, s2, memo} = window.lcsState;
+  const m = s1.length;
+  const n = s2.length;
+  
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (memo[i][j] === -1) {
+        memo[i][j] = s1[i - 1] === s2[j - 1] ? 
+          memo[i - 1][j - 1] + 1 : 
+          Math.max(memo[i - 1][j], memo[i][j - 1]);
+        renderLCS();
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
+function renderLCS() {
+  const {s1, s2, memo} = window.lcsState;
+  const div = document.getElementById('lcsViz');
+  if (!div) return;
+  
+  let html = '<p>Strings: "' + s1 + '" and "' + s2 + '"</p>';
+  html += '<div class="memo-table" style="grid-template-columns:repeat(' + (s2.length + 2) + ',1fr)">';
+  html += '<div class="memo-cell"></div><div class="memo-cell"></div>';
+  for (let c of s2) html += `<div class="memo-cell">${c}</div>`;
+  html += '<div class="memo-cell"></div>';
+  
+  for (let i = 0; i < memo.length; i++) {
+    if (i > 0) html += `<div class="memo-cell">${s1[i - 1]}</div>`;
+    for (let j = 0; j < memo[i].length; j++) {
+      const val = memo[i][j];
+      html += `<div class="memo-cell ${val !== -1 ? 'filled' : ''}">${val === -1 ? '' : val}</div>`;
+    }
+  }
+  html += '</div>';
+  div.innerHTML = html;
+}
+
+// Bucket Sort Visualization
+window.resetBucketViz = function() {
+  if (window.bucketState.interval) clearInterval(window.bucketState.interval);
+  window.bucketState = {
+    arr: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94, 0.21, 0.12, 0.23, 0.68],
+    buckets: [],
+    step: 0,
+    interval: null
+  };
+  renderBucket();
+};
+
+window.runBucketViz = function() {
+  window.resetBucketViz();
+  window.bucketState.interval = setInterval(() => {
+    if (!window.stepBucketViz()) {
+      clearInterval(window.bucketState.interval);
+      window.bucketState.interval = null;
+    }
+  }, 1000);
+};
+
+window.stepBucketViz = function() {
+  const {arr, step} = window.bucketState;
+  
+  if (step === 0) {
+    window.bucketState.buckets = Array(10).fill(0).map(() => []);
+    window.bucketState.step++;
+    renderBucket();
+    return true;
+  } else if (step <= arr.length) {
+    const num = arr[step - 1];
+    const idx = Math.floor(10 * num);
+    window.bucketState.buckets[idx].push(num);
+    window.bucketState.step++;
+    renderBucket();
+    return true;
+  } else if (step === arr.length + 1) {
+    window.bucketState.buckets.forEach(b => b.sort((a, c) => a - c));
+    window.bucketState.step++;
+    renderBucket();
+    return true;
+  }
+  return false;
+};
+
+function renderBucket() {
+  const {arr, buckets, step} = window.bucketState;
+  const div = document.getElementById('bucketViz');
+  if (!div) return;
+  
+  let html = '<p><strong>Original:</strong> [' + arr.map(n => n.toFixed(2)).join(', ') + ']</p>';
+  
+  if (buckets.length) {
+    html += '<div>';
+    buckets.forEach((b, i) => {
+      html += `<div class="bucket"><div style="font-size:12px;font-weight:bold">B${i}</div>`;
+      b.forEach(n => html += `<div class="bucket-item">${n.toFixed(2)}</div>`);
+      html += '</div>';
+    });
+    html += '</div>';
+    
+    if (step > arr.length + 1) {
+      const sorted = buckets.flat();
+      html += `<p><strong>Sorted:</strong> [${sorted.map(n => n.toFixed(2)).join(', ')}]</p>`;
+    }
+  }
+  div.innerHTML = html;
+}
+
+// Quiz functionality removed - answers are now static in markdown
+
+// Theme switcher
+const themes = ['black','white','league','beige','serif','simple','sky','night','solarized','moon'];
+let idx = 0;
+const themeToggleBtn = document.getElementById('theme-toggle');
+if (themeToggleBtn) {
+  themeToggleBtn.onclick = () => {
+    idx = (idx + 1) % themes.length;
+    document.getElementById('theme-link').href =
+      `https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/${themes[idx]}.min.css`;
+  };
+}
+
+// Font size switcher
+const fontSizes = ['0.8em','1em','1.5em','2em','2.5em'];
+const fontLabels = ['Small','Medium','Large','XL','XXL'];
+let fontIdx = 1; // Medium
+const fontSizeToggleBtn = document.getElementById('font-size-toggle');
+if (fontSizeToggleBtn) {
+  fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+  fontSizeToggleBtn.onclick = () => {
+    fontIdx = (fontIdx + 1) % fontSizes.length;
+    document.querySelector('.reveal').style.fontSize = fontSizes[fontIdx];
+    fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+  };
+}
+
+// Initialize everything when document is ready
+setTimeout(() => {
+  window.resetFactViz();
+  window.resetListViz();
+  window.resetPermViz();
+  window.resetLCSViz();
+  window.resetBucketViz();
+}, 500);
+</script>
+</body>
+</html>
