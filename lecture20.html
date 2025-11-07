@@ -1,481 +1,995 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecture 20: Google C++ Style Guide</title>
-    <!-- External CSS Libraries -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <!-- Your Custom Stylesheet -->
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recursion Deep Dive</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+<link id="theme-link" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/white.min.css">
+<style>
+.reveal{font-size:32px}
+.reveal h1{font-size:2.5em}
+.reveal h2{font-size:2em}
+.reveal h3{font-size:1.5em}
+.reveal pre{font-size:0.55em;width:100%}
+.reveal code{background:#1e1e1e;color:#f8f8f2;padding:2px 6px;border-radius:3px}
+.stack-frame{border:2px solid #4a90e2;padding:15px;margin:10px;border-radius:8px;background:#2a2a2a;transition:all 0.3s}
+.stack-frame.active{background:#4a90e2;border-color:#80b3ff}
+.stack-frame.returning{background:#2ecc71;border-color:#5dde94}
+.viz-controls{margin:20px 0 !important;display:flex !important;gap:10px;justify-content:center;flex-wrap:wrap;visibility:visible !important;opacity:1 !important}
+.viz-btn{padding:10px 20px !important;border:none !important;border-radius:5px;cursor:pointer !important;font-size:18px !important;background:#4a90e2 !important;color:#fff !important;transition:background 0.3s;display:inline-block !important;visibility:visible !important;opacity:1 !important;min-width:100px}
+.viz-btn:hover{background:#357abd !important}
+.viz-btn:disabled{background:#555 !important;cursor:not-allowed !important}
+.viz-container{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.node{fill:#4a90e2;stroke:#fff;stroke-width:2}
+.node.head{fill:#e74c3c}
+.node.active{fill:#2ecc71}
+.link{stroke:#888;stroke-width:2}
+.pointer{stroke:#e74c3c;stroke-width:3;marker-end:url(#arrowhead)}
+input[type="number"]{padding:8px;border-radius:5px;border:1px solid #4a90e2;background:#2a2a2a;color:#fff;font-size:16px;width:80px}
+.quiz-option{display:block;margin:10px 0;padding:15px;background:#2a2a2a;border:2px solid #4a90e2;border-radius:8px;cursor:pointer;transition:all 0.3s}
+.quiz-option:hover{background:#3a3a3a}
+.quiz-option.correct{background:#2ecc71;border-color:#2ecc71}
+.quiz-option.incorrect{background:#e74c3c;border-color:#e74c3c}
+.memo-table{display:grid;gap:5px;margin:20px auto;max-width:600px}
+.memo-cell{border:1px solid #4a90e4;padding:10px;text-align:center;background:#f0f0f0;color:#333;transition:background 0.3s;font-size:16px;font-weight:bold}
+.memo-cell.filled{background:#4a90e2;color:#fff}
+.bucket{display:inline-block;border:2px solid #4a90e2;padding:10px;margin:5px;min-width:60px;min-height:80px;vertical-align:top;border-radius:5px}
+.bucket-item{background:#4a90e2;color:#fff;padding:5px;margin:3px;border-radius:3px;display:inline-block}
+.control-btn{position:fixed;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;background:rgba(255,255,255,0.9);border:1px solid #ccc}
+#theme-toggle{top:10px}
+#font-size-toggle{top:50px}
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-4">Lecture 20: Google C++ Style Guide</h1>
-        <p class="intro-text">Mastering code quality and maintainability with Google's C++ coding standards.</p>
-        <p class="intro-text"><strong>Instructor: <a href="https://drdebmath.github.io">Dr. Debasish Pattanayak</a></strong></p>
-        <button id="darkModeToggle" class="btn btn-secondary mb-4"><i class="fas fa-moon"></i></button>
-        <button id="fullscreenBtn" class="btn btn-info mb-4"><i class="fas fa-expand"></i></button>
 
-        <div class="slide">
-            <h2 id="slide-intro-style-guide" class="mt-4">Introduction to Google C++ Style Guide</h2>
-            <div class="slide-summary" data-slide-number="1 / 12">
-                <h3>What is the Google C++ Style Guide?</h3>
-                <p>The Google C++ Style Guide provides detailed rules for writing C++ code that is manageable, readable, and maintainable at scale.</p>
-                <ul>
-                    <li><strong>Goals:</strong> Manage complexity, optimize for readers, ensure consistency</li>
-                    <li><strong>Scope:</strong> Style and readability conventions</li>
-                    <li><strong>Application:</strong> All Google open-source C++ projects</li>
-                </ul>
-            </div>
-            <div class="slide-details">
-                <p>The Google C++ Style Guide is a comprehensive document that outlines the dos and don'ts of writing C++ code. It exists to manage the complexity inherent in C++ while allowing developers to use language features productively.</p>
-                <h3>Background</h3>
-                <p>C++ is powerful but complex. The guide helps teams write code that is:</p>
-                <ul>
-                    <li><strong>Readable:</strong> Easy to understand and maintain</li>
-                    <li><strong>Efficient:</strong> Performs well and scales</li>
-                    <li><strong>Consistent:</strong> Follows uniform conventions</li>
-                    <li><strong>Safe:</strong> Avoids common pitfalls and bugs</li>
-                </ul>
-                <p>The guide emphasizes that "style" encompasses far more than just source file formatting—it's about making code manageable while allowing productive use of C++ features.</p>
-            </div>
-        </div>
+<button id="theme-toggle" class="control-btn">Change Theme</button>
+<button id="font-size-toggle" class="control-btn">Font Size</button>
 
-        <div class="slide">
-            <h2 id="slide-goals-principles" class="mt-4">Goals and Guiding Principles</h2>
-            <div class="slide-summary" data-slide-number="2 / 12">
-                <h3>Core Goals of the Style Guide</h3>
-                <ul>
-                    <li><strong>Style rules must pull their weight</strong> - Benefits justify the cost</li>
-                    <li><strong>Optimize for the reader, not the writer</strong> - Most code is read, not written</li>
-                    <li><strong>Be consistent</strong> - With existing code and broader C++ community</li>
-                    <li><strong>Avoid surprises and dangers</strong> - Prevent error-prone constructs</li>
-                    <li><strong>Mindful of scale</strong> - Google has 100M+ lines of C++ code</li>
-                </ul>
-            </div>
-            <div class="slide-details">
-                <h3>Style Rules Should Pull Their Weight</h3>
-                <p>The benefit of a style rule must be large enough to justify enforcing it across thousands of engineers. Rules exist because the alternatives are worse—not because they represent some philosophical ideal.</p>
+<div class="reveal">
+<div class="slides">
 
-                <h3>Optimize for the Reader, Not the Writer</h3>
-                <p>Codebases endure far longer than the initial implementation. Most time is spent reading and understanding code, so readability optimizations are crucial.</p>
+<section data-markdown>
+<textarea data-template>
+# Lecture 21: Recursion Deep Dive
+*Advanced recursive algorithms and their applications.*
 
-                <h3>Be Consistent with Existing Code</h3>
-                <p>Using one style consistently lets engineers focus on important issues. Consistency also enables tool automation.</p>
+## Introduction to Recursion
 
-                <h3>Avoid Surprising or Dangerous Constructs</h3>
-                <p>C++ has features that appear safe but have subtle dangers. The guide prohibits such constructs, and waivers require strong justification.</p>
+**Recursion:** A function that calls itself to solve smaller instances of the same problem
 
-                <h3>Be Mindful of Scale</h3>
-                <p>With millions of lines of code and thousands of engineers, even small mistakes can become costly. Rules that seem unnecessary in small projects are justified at scale.</p>
-            </div>
-        </div>
+**Key Components:**
 
-        <div class="slide">
-            <h2 id="slide-cpp-version" class="mt-4">C++ Version and Extensions</h2>
-            <div class="slide-summary" data-slide-number="3 / 12">
-                <h3>C++ Version Guidelines</h3>
-                <ul>
-                    <li><strong>Target C++20</strong> - Don't use C++23 features yet</li>
-                    <li><strong>No non-standard extensions</strong> - Platform-specific code ok only in system code</li>
-                    <li><strong>Consider portability</strong> - C++17/20 features may not be universally supported</li>
-                </ul>
-            </div>
-            <div class="slide-details">
-                <p>The C++ version targeted by the guide advances aggressively over time. Currently, code should target C++20 and avoid C++23 features.</p>
+* **Base Case:** Stopping condition to prevent infinite recursion
+* **Recursive Case:** Function calls itself with modified parameters
+* **Call Stack:** Memory structure tracking function calls
 
-                <h3>C++ Version Progression</h3>
-                <p>The guide's target C++ version advances over time. Currently:</p>
-                <ul>
-                    <li><strong>Target:</strong> C++20</li>
-                    <li><strong>Avoid:</strong> C++23 features</li>
-                    <li><strong>Future:</strong> Version will advance as ecosystem support matures</li>
-                </ul>
+---
 
-                <h3>Non-Standard Extensions</h3>
-                <p>Do not use non-standard extensions. Examples to avoid:</p>
-                <ul>
-                    <li>GCC's <code>__attribute__</code></li>
-                    <li>Microsoft's <code>__declspec</code></li>
-                    <li>Compiler intrinsics like <code>__builtin_prefetch</code></li>
-                    <li>Inline assembly</li>
-                    <li>Variable-length arrays (<code>alloca()</code>, VLAs)</li>
-                </ul>
+**Why Recursion Matters:**
 
-                <p>Portability wrappers using extensions are allowed, but only through designated project-wide headers.</p>
-            </div>
-        </div>
+* **Divide and Conquer:** Break complex problems into simpler subproblems
+* **Elegant Solutions:** Often more intuitive than iterative approaches
+* **Tree/Graph Problems:** Natural fit for hierarchical data structures
+* **Mathematical Modeling:** Direct implementation of recursive mathematical definitions
 
-        <div class="slide">
-            <h2 id="slide-header-files" class="mt-4">Header Files</h2>
-            <div class="slide-summary" data-slide-number="4 / 12">
-                <h3>Header File Best Practices</h3>
-                <ul>
-                    <li><strong>Self-contained headers</strong> - Compile on their own</li>
-                    <li><strong>#define guards</strong> - Prevent multiple inclusion</li>
-                    <li><strong>Include what you use</strong> - Direct includes only</li>
-                    <li><strong>Avoid forward declarations</strong> when possible</li>
-                    <li><strong>Order includes</strong> - Related, C, C++, libraries, project</li>
-                </ul>
-            </div>
-            <div class="slide-details">
-                <p>Correct use of header files dramatically impacts code readability, size, and performance.</p>
+---
 
-                <h3>Self-Contained Headers</h3>
-                <p>All header files should be self-contained and end in <code>.h</code>.</p>
-                <ul>
-                    <li>Use header guards: <code>#ifndef PROJECT_PATH_FILE_H_</code></li>
-                    <li>Include all necessary headers</li>
-                    <li>Avoid <code>.inc</code> files except for unusual cases</li>
-                </ul>
+**Recursion vs Iteration:**
 
-                <h3>Include What You Use</h3>
-                <p>Include headers directly for symbols you use, not through transitive includes.</p>
+* **Recursion:** Uses call stack, can be memory-intensive
+* **Iteration:** Uses loops, generally more memory-efficient
+* **Trade-offs:** Recursion often clearer, iteration often faster
+</textarea>
+</section>
 
-                <h3>Include Order</h3>
-                <ol>
-                    <li>Related header (e.g., <code>foo.h</code> in <code>foo.cc</code>)</li>
-                    <li>C system headers</li>
-                    <li>C++ standard library</li>
-                    <li>Other libraries</li>
-                    <li>Your project's headers</li>
-                </ol>
+<section data-markdown>
+<textarea data-template>
+## Call Stack Visualizer
 
-                <h3>Forward Declarations</h3>
-                <p>Avoid forward declarations where possible. They save compile time but create dependencies and risks.</p>
+**Understanding the Call Stack:**
 
-                <div class="code-block">
-                    <pre><code><span class="cpp-comment">// Avoid - forward declaration</span>
-<span class="cpp-keyword">class</span> <span class="cpp-type">B</span>;
-<span class="cpp-keyword">void</span> <span class="cpp-function">FuncInB</span>();
-<span class="cpp-namespace">ABSL_DECLARE_FLAG</span>(flag_in_b);</code></pre>
-                </div>
-            </div>
-        </div>
+* Each recursive call creates a new stack frame
+* Stack frames contain local variables and return address
+* Stack unwinds as functions return
+* Stack overflow occurs when too many frames are created
 
-        <div class="slide">
-            <h2 id="slide-scoping" class="mt-4">Scoping</h2>
-            <div class="slide-summary" data-slide-number="5 / 12">
-                <h3>Scoping Guidelines</h3>
-                <ul>
-                    <li><strong>Namespaces</strong> - Place code in namespaces, unique project-based names</li>
-                    <li><strong>Internal linkage</strong> - Use unnamed namespaces or static for file-local code</li>
-                    <li><strong>Nonmember functions in namespaces</strong> - Avoid global functions</li>
-                    <li><strong>Local variables</strong> - Narrowest scope possible, initialize at declaration</li>
-                    <li><strong>Static/global variables</strong> - Avoid unless trivially destructible</li>
-                </ul>
-            </div>
-            <div class="slide-details">
-                <h3>Namespaces</h3>
-                <p>Place code in namespaces to avoid global scope pollution. Use unique, project-based names.</p>
-                <div class="code-block">
-                    <pre><code><span class="cpp-keyword">namespace</span> <span class="cpp-namespace">myproject</span> {
+---
 
-<span class="cpp-keyword">void</span> <span class="cpp-function">MyFunction</span>() {
-  <span class="cpp-comment">// Code here</span>
+**Factorial Example - Call Stack:**
+
+```
+factorial(5)
+├── factorial(4)
+│   ├── factorial(3)
+│   │   ├── factorial(2)
+│   │   │   ├── factorial(1)
+│   │   │   │   └── returns 1
+│   │   │   └── returns 2 * 1 = 2
+│   │   └── returns 3 * 2 = 6
+│   └── returns 4 * 6 = 24
+└── returns 5 * 24 = 120
+```
+
+---
+
+**Visualization:** Interactive factorial calculation showing stack frames
+</textarea>
+</section>
+
+<section>
+<h2>Call Stack Visualizer</h2>
+<div style="margin-bottom:15px">
+<label style="font-size:24px">Calculate factorial of: <input type="number" id="factInput" value="5" min="1" max="8"></label>
+</div>
+<div class="viz-controls">
+<button class="viz-btn" onclick="window.runFactViz()">▶ Run</button>
+<button class="viz-btn" onclick="window.stepFactViz()">Step →</button>
+<button class="viz-btn" onclick="window.resetFactViz()">↻ Reset</button>
+</div>
+<div id="stackViz" class="viz-container" style="margin-top:20px"></div>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Factorial Implementation
+
+**Recursive Factorial:**
+
+```cpp
+int factorial(int n) {
+    // Base case: prevents infinite recursion
+    if (n == 0 || n == 1) {
+        return 1;
+    }
+    // Recursive case: calls itself with smaller problem
+    return n * factorial(n - 1);
+}
+```
+
+---
+
+**Execution Trace - factorial(5):**
+
+* factorial(5) → 5 * factorial(4)
+* factorial(4) → 4 * factorial(3)
+* factorial(3) → 3 * factorial(2)
+* factorial(2) → 2 * factorial(1)
+* factorial(1) → returns 1
+* factorial(2) → returns 2 * 1 = 2
+* factorial(3) → returns 3 * 2 = 6
+* factorial(4) → returns 4 * 6 = 24
+* factorial(5) → returns 5 * 24 = 120
+
+---
+
+**Time Complexity:** O(n) - n recursive calls
+**Space Complexity:** O(n) - call stack depth
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Linked List Reversal
+
+**Recursive Linked List Reversal:**
+
+```cpp
+Node* reverseList(Node* head) {
+    // Base case: empty list or single node
+    if (!head || !head->next) {
+        return head;
+    }
+
+    // Recursive case: reverse the rest of the list
+    Node* newHead = reverseList(head->next);
+
+    // Reverse the current node's pointer
+    head->next->next = head;
+    head->next = nullptr;
+
+    return newHead;
+}
+```
+
+---
+
+**Algorithm Steps:**
+
+1. **Base Case:** If list is empty or has one node, return head
+2. **Recursive Call:** Reverse everything after current node
+3. **Pointer Reversal:** Make current node's next point back to current node
+4. **Cleanup:** Set current node's next to null
+5. **Return:** New head of reversed list
+
+---
+
+**Visualization:** Step-by-step reversal of linked list nodes
+
+---
+
+**Time Complexity:** O(n) - visits each node once
+**Space Complexity:** O(n) - recursion depth equals list length
+</textarea>
+</section>
+
+<section>
+<h2>Linked List Reversal</h2>
+<div class="viz-controls">
+<button class="viz-btn" onclick="window.runListViz()">▶ Run</button>
+<button class="viz-btn" onclick="window.stepListViz()">Step →</button>
+<button class="viz-btn" onclick="window.resetListViz()">↻ Reset</button>
+</div>
+<svg id="listViz" width="700" height="200" style="margin:20px auto;display:block"></svg>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Array Permutations
+
+**Recursive Permutation Generation:**
+
+```cpp
+void permute(vector<int>& arr, int l, int r) {
+    // Base case: when left index reaches right
+    if (l == r) {
+        printArray(arr);  // Print current permutation
+        return;
+    }
+
+    // Recursive case: try each element at current position
+    for (int i = l; i <= r; i++) {
+        swap(arr[l], arr[i]);           // Fix element at position l
+        permute(arr, l + 1, r);         // Recurse for remaining elements
+        swap(arr[l], arr[i]);           // Backtrack - restore original order
+    }
+}
+```
+
+---
+
+**Backtracking Concept:**
+
+* **Fix:** Choose an element and place it at current position
+* **Recurse:** Generate permutations of remaining elements
+* **Backtrack:** Undo the choice to try next element
+
+---
+
+**Example - permute([1,2,3], 0, 2):**
+
+```
+Original: [1,2,3]
+├── Swap 0↔0: [1,2,3] → permute([1,2,3], 1, 2)
+│   ├── Swap 1↔1: [1,2,3] → permute([1,2,3], 2, 2) → [1,2,3]
+│   ├── Swap 1↔2: [1,3,2] → permute([1,3,2], 2, 2) → [1,3,2]
+│   └── Backtrack: [1,2,3]
+├── Swap 0↔1: [2,1,3] → permute([2,1,3], 1, 2)
+│   ├── Swap 1↔1: [2,1,3] → permute([2,1,3], 2, 2) → [2,1,3]
+│   ├── Swap 1↔2: [2,3,1] → permute([2,3,1], 2, 2) → [2,3,1]
+│   └── Backtrack: [2,1,3]
+└── Swap 0↔2: [3,2,1] → permute([3,2,1], 1, 2)
+    ├── Swap 1↔1: [3,2,1] → permute([3,2,1], 2, 2) → [3,2,1]
+    ├── Swap 1↔2: [3,1,2] → permute([3,1,2], 2, 2) → [3,1,2]
+    └── Backtrack: [3,2,1]
+```
+
+---
+
+**Time Complexity:** O(n!) - n factorial permutations
+</textarea>
+</section>
+
+<section>
+<h2>Array Permutations</h2>
+<div class="viz-controls">
+<button class="viz-btn" onclick="window.runPermViz()">▶ Run</button>
+<button class="viz-btn" onclick="window.resetPermViz()">↻ Reset</button>
+</div>
+<div id="permViz" class="viz-container" style="font-size:20px"></div>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Longest Common Subsequence
+
+**Memoized Recursive LCS:**
+
+```cpp
+int lcs(string s1, string s2, int m, int n, vector<vector<int>>& memo) {
+    // Base case: empty string
+    if (m == 0 || n == 0) return 0;
+    
+    // Check memoization table
+    if (memo[m][n] != -1) return memo[m][n];
+    
+    // Recursive cases
+    if (s1[m-1] == s2[n-1]) {
+        // Characters match - add 1 and recurse on diagonals
+        memo[m][n] = 1 + lcs(s1, s2, m-1, n-1, memo);
+    } else {
+        // Characters don't match - take max of left or top
+        memo[m][n] = max(lcs(s1, s2, m-1, n, memo),
+                         lcs(s1, s2, m, n-1, memo));
+    }
+    return memo[m][n];
+}
+```
+
+---
+
+**LCS Algorithm:**
+
+* **Base Case:** If either string is empty, LCS length is 0
+* **Match Case:** If characters match, LCS = 1 + LCS of remaining strings
+* **No Match:** LCS = max(LCS without last char of s1, LCS without last char of s2)
+* **Memoization:** Store results to avoid recomputation
+
+---
+
+**Example:** LCS of "ABCD" and "ACBD"
+
+* Common subsequence: "ABD" (length 3)
+* Other possibilities: "ACD" (length 3), "BCD" (length 3)
+
+---
+
+**Visualization:** Step-by-step memoization table filling
+
+---
+
+**Time Complexity:** O(m*n) - each cell computed once
+**Space Complexity:** O(m*n) - memoization table
+</textarea>
+</section>
+
+<section>
+<h2>Longest Common Subsequence</h2>
+<div class="viz-controls">
+<button class="viz-btn" onclick="window.runLCSViz()">▶ Run</button>
+<button class="viz-btn" onclick="window.stepLCSViz()">Step →</button>
+<button class="viz-btn" onclick="window.resetLCSViz()">↻ Reset</button>
+</div>
+<div id="lcsViz" style="font-size:18px"></div>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Bucket Sort
+
+**Bucket Sort Algorithm:**
+
+```cpp
+void bucketSort(vector<float>& arr) {
+    int n = arr.size();
+    vector<vector<float>> buckets(n);
+    
+    // Step 1: Distribute elements into buckets
+    for (float num : arr) {
+        int idx = n * num;  // Assumes elements in [0,1)
+        buckets[idx].push_back(num);
+    }
+    
+    // Step 2: Sort individual buckets
+    for (auto& bucket : buckets) {
+        sort(bucket.begin(), bucket.end());
+    }
+    
+    // Step 3: Concatenate sorted buckets
+    int idx = 0;
+    for (auto& bucket : buckets) {
+        for (float num : bucket) {
+            arr[idx++] = num;
+        }
+    }
+}
+```
+
+---
+
+**Algorithm Steps:**
+
+1. **Create buckets:** Initialize n empty buckets
+2. **Distribute:** Place each element in appropriate bucket based on value
+3. **Sort buckets:** Sort each individual bucket
+4. **Concatenate:** Combine sorted buckets back into original array
+
+---
+
+**Requirements:**
+
+* Elements must be uniformly distributed in a known range
+* Usually requires elements in [0,1) or normalization
+* Works best when input is uniformly distributed
+
+---
+
+**Visualization:** Step-by-step bucket sort demonstration
+
+---
+
+**Time Complexity:** O(n + k) average case, where k = number of buckets
+**Space Complexity:** O(n + k) - additional space for buckets
+</textarea>
+</section>
+
+<section>
+<h2>Bucket Sort Visualization</h2>
+<div class="viz-controls">
+<button class="viz-btn" onclick="window.runBucketViz()">▶ Run</button>
+<button class="viz-btn" onclick="window.stepBucketViz()">Step →</button>
+<button class="viz-btn" onclick="window.resetBucketViz()">↻ Reset</button>
+</div>
+<div id="bucketViz" class="viz-container" style="font-size:18px"></div>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Quiz: Recursion Basics
+
+**What happens if a recursive function lacks a base case?**
+
+* Returns null
+* Infinite recursion/stack overflow
+* Compiles with error
+* Works normally
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Quiz: Recursion Basics - Answer
+
+**What happens if a recursive function lacks a base case?**
+
+**Answer: Infinite recursion/stack overflow**
+
+Without a base case, the function calls itself forever until the stack overflows. This is why every recursive function must have a proper base case to terminate the recursion.
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Quiz: Complexity Analysis
+
+**What is the time complexity of factorial(n)?**
+
+* O(1)
+* O(log n)
+* O(n)
+* O(n²)
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Quiz: Complexity Analysis - Answer
+
+**What is the time complexity of factorial(n)?**
+
+**Answer: O(n)**
+
+The function makes n recursive calls, each doing constant work. For factorial(5), there are 5 calls: factorial(5) → factorial(4) → factorial(3) → factorial(2) → factorial(1).
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Quiz: Algorithm Application
+
+**Which data structure is essential for recursion?**
+
+* Array
+* Linked List
+* Stack
+* Queue
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Quiz: Algorithm Application - Answer
+
+**Which data structure is essential for recursion?**
+
+**Answer: Stack**
+
+Recursion uses the call stack to manage function calls and local variables. Each recursive call creates a new stack frame, and the stack unwinds as functions return.
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Summary & Best Practices
+
+**Recursion Trade-offs:**
+
+* **Elegant & intuitive** for tree/graph problems
+* **Higher memory overhead** (call stack)
+* **Risk of stack overflow** for deep recursion
+
+---
+
+**Debugging Tips:**
+
+* Print function parameters at entry/exit
+* Verify base case correctness
+* Trace small examples manually
+
+---
+
+**Practice Problems:**
+
+* Tower of Hanoi
+* Recursive Binary Search
+* Merge Sort
+
+---
+
+**Key Takeaways:**
+
+* **Base Case:** Essential to prevent infinite recursion
+* **Recursive Case:** Must progress toward base case
+* **Call Stack:** Understand memory implications
+* **Memoization:** Optimize repeated subproblems
+
+---
+
+**When to Use Recursion:**
+
+* Problems with natural recursive structure
+* Tree/graph traversals
+* Divide and conquer algorithms
+* Mathematical definitions (factorial, Fibonacci)
+</textarea>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/markdown/markdown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({hash:true,plugins:[RevealMarkdown,RevealHighlight],transition:'slide'});
+
+// Global state objects
+window.factState = {stack:[], step:0, n:5, interval:null};
+window.listState = {step:0, nodes:[1,2,3,4], interval:null};
+window.permState = {perms:[], step:0};
+window.lcsState = {s1:'ABCD', s2:'ACBD', memo:[], step:0, interval:null};
+window.bucketState = {arr:[], buckets:[], step:0, interval:null};
+
+// Factorial Visualization
+window.resetFactViz = function() {
+  if (window.factState.interval) clearInterval(window.factState.interval);
+  window.factState = {
+    stack:[], 
+    step:0, 
+    n:parseInt(document.getElementById('factInput').value) || 5,
+    interval: null
+  };
+  renderFactStack();
+};
+
+window.runFactViz = function() {
+  window.resetFactViz();
+  window.factState.interval = setInterval(() => {
+    if (!window.stepFactViz()) {
+      clearInterval(window.factState.interval);
+      window.factState.interval = null;
+    }
+  }, 800);
+};
+
+window.stepFactViz = function() {
+  const {n, step, stack} = window.factState;
+  
+  // Phase 1: Build the stack (going down)
+  if (step < n) {
+    window.factState.stack.push({val: n - step, status: 'active', result: null});
+    window.factState.step++;
+    renderFactStack();
+    return true;
+  } 
+  // Phase 2: Unwind the stack (coming back up)
+  else if (step >= n && stack.length > 0) {
+    // Start from the bottom (base case)
+    const baseIdx = stack.length - 1;
+    
+    // Set result for current frame
+    for (let i = baseIdx; i >= 0; i--) {
+      if (stack[i].result === null) {
+        stack[i].status = 'returning';
+        if (stack[i].val <= 1) {
+          stack[i].result = 1;
+        } else {
+          // Check if next frame has result
+          if (i < baseIdx && stack[i + 1].result !== null) {
+            stack[i].result = stack[i].val * stack[i + 1].result;
+          } else {
+            // Wait for next frame
+            break;
+          }
+        }
+        window.factState.step++;
+        renderFactStack();
+        return true;
+      }
+    }
+    
+    // All frames processed
+    return false;
+  }
+  
+  return false;
+};
+
+function renderFactStack() {
+  const div = document.getElementById('stackViz');
+  if (!div) return;
+  if (window.factState.stack.length === 0) {
+    div.innerHTML = '<p style="color:#888">Click "Run" or "Step" to begin</p>';
+    return;
+  }
+  div.innerHTML = window.factState.stack.map(f =>
+    `<div class="stack-frame ${f.status}">
+      factorial(${f.val})${f.result !== null ? ' → ' + f.result : ''}
+    </div>`
+  ).reverse().join('');
 }
 
-}  <span class="cpp-comment">// namespace myproject</span></code></pre>
-                </div>
+// Linked List Visualization
+window.resetListViz = function() {
+  if (window.listState.interval) clearInterval(window.listState.interval);
+  window.listState = {
+    step: 0, 
+    nodes: [
+      {val: 1, next: 1},
+      {val: 2, next: 2},
+      {val: 3, next: 3},
+      {val: 4, next: null}
+    ],
+    phase: 'forward', // 'forward' or 'reverse'
+    currentIdx: -1,
+    interval: null
+  };
+  renderList();
+};
 
-                <h3>Internal Linkage</h3>
-                <p>Use unnamed namespaces or static declarations for code not referenced outside the file.</p>
-                <div class="code-block">
-                    <pre><code><span class="cpp-keyword">namespace</span> {
-<span class="cpp-keyword">const</span> <span class="cpp-keyword">int</span> <span class="cpp-variable">kInternalConstant</span> <span class="cpp-operator">=</span> <span class="cpp-number">42</span>;
-}  <span class="cpp-comment">// namespace</span></code></pre>
-                </div>
+window.runListViz = function() {
+  window.resetListViz();
+  window.listState.interval = setInterval(() => {
+    if (!window.stepListViz()) {
+      clearInterval(window.listState.interval);
+      window.listState.interval = null;
+    }
+  }, 1200);
+};
 
-                <h3>Local Variables</h3>
-                <p>Declare variables in the narrowest possible scope and initialize them at declaration.</p>
-                <div class="code-block">
-                    <pre><code><span class="cpp-comment">// Good</span>
-<span class="cpp-keyword">int</span> <span class="cpp-variable">i</span> <span class="cpp-operator">=</span> <span class="cpp-function">f</span>();  <span class="cpp-comment">// Declaration with initialization</span>
-<span class="cpp-variable">f</span>(<span class="cpp-variable">i</span>);         <span class="cpp-comment">// Use immediately after</span>
+window.stepListViz = function() {
+  const state = window.listState;
+  
+  if (state.phase === 'forward') {
+    // Moving forward to the end
+    if (state.step < state.nodes.length) {
+      state.currentIdx = state.step;
+      state.step++;
+      renderList();
+      return true;
+    } else {
+      // Switch to reverse phase, start from end
+      state.phase = 'reverse';
+      state.currentIdx = state.nodes.length - 1;
+      state.step = 0;
+      renderList();
+      return true;
+    }
+  } else if (state.phase === 'reverse') {
+    // Reversing pointers from end to start
+    if (state.step < state.nodes.length - 1) {
+      const reverseIdx = state.nodes.length - 1 - state.step;
+      // Node at reverseIdx should now point to reverseIdx - 1
+      if (reverseIdx > 0) {
+        state.nodes[reverseIdx].next = reverseIdx - 1;
+      }
+      state.currentIdx = reverseIdx - 1;
+      state.step++;
+      renderList();
+      return true;
+    } else {
+      // Set first node to point to null
+      state.nodes[0].next = null;
+      state.currentIdx = -1;
+      renderList();
+      return false;
+    }
+  }
+  
+  return false;
+};
 
-<span class="cpp-comment">// Bad</span>
-<span class="cpp-keyword">int</span> <span class="cpp-variable">j</span>;       <span class="cpp-comment">// Declaration separate from initialization</span>
-<span class="cpp-variable">j</span> <span class="cpp-operator">=</span> <span class="cpp-function">g</span>();  <span class="cpp-comment">// Initialization later</span></code></pre>
-                </div>
+function renderList() {
+  const svg = document.getElementById('listViz');
+  if (!svg) return;
+  
+  svg.innerHTML = '<defs><marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#e74c3c"/></marker><marker id="arrowhead-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#4a90e2"/></marker></defs>';
+  
+  const {nodes, currentIdx, phase} = window.listState;
+  
+  // First draw all arrows
+  nodes.forEach((node, i) => {
+    if (node.next !== null && node.next >= 0 && node.next < nodes.length) {
+      const x1 = 100 + i * 150;
+      const targetIdx = node.next;
+      const x2 = 100 + targetIdx * 150;
+      
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      
+      if (targetIdx > i) {
+        // Forward arrow (original direction)
+        line.setAttribute('x1', x1 + 32);
+        line.setAttribute('y1', 100);
+        line.setAttribute('x2', x2 - 32);
+        line.setAttribute('y2', 100);
+        line.setAttribute('stroke', '#888');
+        line.setAttribute('marker-end', 'url(#arrowhead)');
+      } else {
+        // Backward arrow (reversed)
+        line.setAttribute('x1', x1 - 32);
+        line.setAttribute('y1', 140);
+        line.setAttribute('x2', x2 + 32);
+        line.setAttribute('y2', 140);
+        line.setAttribute('stroke', '#4a90e2');
+        line.setAttribute('marker-end', 'url(#arrowhead-blue)');
+        line.setAttribute('stroke-width', '3');
+      }
+      
+      svg.appendChild(line);
+    }
+  });
+  
+  // Then draw nodes on top
+  nodes.forEach((node, i) => {
+    const x = 100 + i * 150;
+    
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', x);
+    circle.setAttribute('cy', 100);
+    circle.setAttribute('r', 30);
+    circle.classList.add('node');
+    if (i === currentIdx) circle.classList.add('active');
+    
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', x);
+    text.setAttribute('y', 105);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('fill', '#fff');
+    text.setAttribute('font-weight', 'bold');
+    text.textContent = node.val;
+    
+    svg.appendChild(circle);
+    svg.appendChild(text);
+  });
+  
+  // Add status text
+  const statusText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  statusText.setAttribute('x', 350);
+  statusText.setAttribute('y', 30);
+  statusText.setAttribute('text-anchor', 'middle');
+  statusText.setAttribute('fill', '#4a90e2');
+  statusText.setAttribute('font-size', '18');
+  statusText.setAttribute('font-weight', 'bold');
+  statusText.textContent = phase === 'forward' ? 'Recursing forward...' : 'Reversing pointers...';
+  svg.appendChild(statusText);
+}
 
-                <h3>Static and Global Variables</h3>
-                <p>Objects with static storage duration are forbidden unless trivially destructible. Prefer <code>constexpr</code> for constants.</p>
-            </div>
-        </div>
+// Permutation Visualization
+window.resetPermViz = function() {
+  window.permState = {perms: [], step: 0};
+  const div = document.getElementById('permViz');
+  if (div) div.innerHTML = '<p style="color:#888">Click "Run" to generate permutations of [1, 2, 3]</p>';
+};
 
-        <div class="slide">
-            <h2 id="slide-classes" class="mt-4">Classes</h2>
-            <div class="slide-summary" data-slide-number="6 / 12">
-                <h3>Class Design Guidelines</h3>
-                <ul>
-                    <li><strong>Work in constructors</strong> - Avoid virtual calls, ensure no-fail initialization</li>
-                    <li><strong>Implicit conversions</strong> - Use explicit for constructors and operators</li>
-                    <li><strong>Copyable/movable types</strong> - Make APIs clear about copy/move semantics</li>
-                    <li><strong>Structs vs classes</strong> - Structs for passive data, classes for functionality</li>
-                    <li><strong>Access control</strong> - Make data members private</li>
-                    <li><strong>Declaration order</strong> - Types, constants, factory functions, constructors, methods</li>
-                </ul>
-            </div>
-            <div class="slide-details">
-                <h3>Doing Work in Constructors</h3>
-                <p>Constructors should avoid virtual function calls and initialization that can fail without a way to signal errors.</p>
+window.runPermViz = function() {
+  const arr = [1, 2, 3];
+  const result = [];
+  
+  function perm(a, l, r) {
+    if (l === r) {
+      result.push([...a]);
+      return;
+    }
+    for (let i = l; i <= r; i++) {
+      [a[l], a[i]] = [a[i], a[l]];
+      perm(a, l + 1, r);
+      [a[l], a[i]] = [a[i], a[l]];
+    }
+  }
+  
+  perm(arr, 0, 2);
+  window.permState.perms = result;
+  
+  const div = document.getElementById('permViz');
+  if (div) {
+    div.innerHTML = '<p><strong>All Permutations:</strong></p><p>' + 
+      result.map(p => '[' + p.join(', ') + ']').join(' • ') + 
+      '</p><p>Total: ' + result.length + ' permutations</p>';
+  }
+};
 
-                <h3>Implicit Conversions</h3>
-                <p>Don't define implicit conversions. Use the <code>explicit</code> keyword for conversion operators and single-argument constructors.</p>
-                <div class="code-block">
-                    <pre><code><span class="cpp-keyword">class</span> <span class="cpp-type">MyClass</span> {
- <span class="cpp-keyword">public</span>:
-  <span class="cpp-keyword">explicit</span> <span class="cpp-function">MyClass</span>(<span class="cpp-keyword">int</span> <span class="cpp-variable">x</span>);  <span class="cpp-comment">// Explicit constructor</span>
-  <span class="cpp-keyword">explicit</span> <span class="cpp-keyword">operator</span> <span class="cpp-type">bool</span>() <span class="cpp-keyword">const</span>;  <span class="cpp-comment">// Explicit conversion</span>
-};</code></pre>
-                </div>
+// LCS Visualization
+window.resetLCSViz = function() {
+  if (window.lcsState.interval) clearInterval(window.lcsState.interval);
+  const m = window.lcsState.s1.length;
+  const n = window.lcsState.s2.length;
+  window.lcsState.memo = Array(m + 1).fill(0).map(() => Array(n + 1).fill(-1));
+  window.lcsState.step = 0;
+  window.lcsState.interval = null;
+  
+  for (let i = 0; i <= m; i++) window.lcsState.memo[i][0] = 0;
+  for (let j = 0; j <= n; j++) window.lcsState.memo[0][j] = 0;
+  
+  renderLCS();
+};
 
-                <h3>Copyable and Movable Types</h3>
-                <p>A class's public API must make clear whether it's copyable, move-only, or neither. Support copying/moving if meaningful.</p>
+window.runLCSViz = function() {
+  window.resetLCSViz();
+  window.lcsState.interval = setInterval(() => {
+    if (!window.stepLCSViz()) {
+      clearInterval(window.lcsState.interval);
+      window.lcsState.interval = null;
+    }
+  }, 600);
+};
 
-                <h3>Structs vs. Classes</h3>
-                <p>Use <code>struct</code> only for passive objects that carry data; everything else is a <code>class</code>.</p>
+window.stepLCSViz = function() {
+  const {s1, s2, memo} = window.lcsState;
+  const m = s1.length;
+  const n = s2.length;
+  
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (memo[i][j] === -1) {
+        memo[i][j] = s1[i - 1] === s2[j - 1] ? 
+          memo[i - 1][j - 1] + 1 : 
+          Math.max(memo[i - 1][j], memo[i][j - 1]);
+        renderLCS();
+        return true;
+      }
+    }
+  }
+  return false;
+};
 
-                <h3>Inheritance</h3>
-                <p>Composition is often more appropriate than inheritance. When using inheritance, make it public and prefer to avoid multiple implementation inheritance.</p>
+function renderLCS() {
+  const {s1, s2, memo} = window.lcsState;
+  const div = document.getElementById('lcsViz');
+  if (!div) return;
+  
+  let html = '<p>Strings: "' + s1 + '" and "' + s2 + '"</p>';
+  html += '<div class="memo-table" style="grid-template-columns:repeat(' + (s2.length + 2) + ',1fr)">';
+  html += '<div class="memo-cell"></div><div class="memo-cell"></div>';
+  for (let c of s2) html += `<div class="memo-cell">${c}</div>`;
+  html += '<div class="memo-cell"></div>';
+  
+  for (let i = 0; i < memo.length; i++) {
+    if (i > 0) html += `<div class="memo-cell">${s1[i - 1]}</div>`;
+    for (let j = 0; j < memo[i].length; j++) {
+      const val = memo[i][j];
+      html += `<div class="memo-cell ${val !== -1 ? 'filled' : ''}">${val === -1 ? '' : val}</div>`;
+    }
+  }
+  html += '</div>';
+  div.innerHTML = html;
+}
 
-                <h3>Operator Overloading</h3>
-                <p>Overload operators judiciously. Do not use user-defined literals. Define operators only on your own types.</p>
-            </div>
-        </div>
+// Bucket Sort Visualization
+window.resetBucketViz = function() {
+  if (window.bucketState.interval) clearInterval(window.bucketState.interval);
+  window.bucketState = {
+    arr: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94, 0.21, 0.12, 0.23, 0.68],
+    buckets: [],
+    step: 0,
+    interval: null
+  };
+  renderBucket();
+};
 
-        <div class="slide">
-            <h2 id="slide-functions" class="mt-4">Functions</h2>
-            <div class="slide-summary" data-slide-number="7 / 12">
-                <h3>Function Guidelines</h3>
-                <ul>
-                    <li><strong>Inputs and outputs</strong> - Return values over output parameters</li>
-                    <li><strong>Write short functions</strong> - < 40 lines when possible</li>
-                    <li><strong>Function overloading</strong> - Reader should understand which overload is called</li>
-                    <li><strong>Default arguments</strong> - OK if default always has same value</li>
-                    <li><strong>Trailing return types</strong> - Use where ordinary syntax is impractical</li>
-                </ul>
-            </div>
-            <div class="slide-details">
-                <h3>Inputs and Outputs</h3>
-                <p>Prefer using return values over output parameters. They improve readability and often provide the same or better performance.</p>
+window.runBucketViz = function() {
+  window.resetBucketViz();
+  window.bucketState.interval = setInterval(() => {
+    if (!window.stepBucketViz()) {
+      clearInterval(window.bucketState.interval);
+      window.bucketState.interval = null;
+    }
+  }, 1000);
+};
 
-                <h3>Write Short Functions</h3>
-                <p>Prefer small and focused functions. If a function exceeds about 40 lines, consider breaking it up.</p>
+window.stepBucketViz = function() {
+  const {arr, step} = window.bucketState;
+  
+  if (step === 0) {
+    window.bucketState.buckets = Array(10).fill(0).map(() => []);
+    window.bucketState.step++;
+    renderBucket();
+    return true;
+  } else if (step <= arr.length) {
+    const num = arr[step - 1];
+    const idx = Math.floor(10 * num);
+    window.bucketState.buckets[idx].push(num);
+    window.bucketState.step++;
+    renderBucket();
+    return true;
+  } else if (step === arr.length + 1) {
+    window.bucketState.buckets.forEach(b => b.sort((a, c) => a - c));
+    window.bucketState.step++;
+    renderBucket();
+    return true;
+  }
+  return false;
+};
 
-                <h3>Function Overloading</h3>
-                <p>Use overloaded functions only if a reader can get a good idea of what's happening without knowing which overload is called.</p>
+function renderBucket() {
+  const {arr, buckets, step} = window.bucketState;
+  const div = document.getElementById('bucketViz');
+  if (!div) return;
+  
+  let html = '<p><strong>Original:</strong> [' + arr.map(n => n.toFixed(2)).join(', ') + ']</p>';
+  
+  if (buckets.length) {
+    html += '<div>';
+    buckets.forEach((b, i) => {
+      html += `<div class="bucket"><div style="font-size:12px;font-weight:bold">B${i}</div>`;
+      b.forEach(n => html += `<div class="bucket-item">${n.toFixed(2)}</div>`);
+      html += '</div>';
+    });
+    html += '</div>';
+    
+    if (step > arr.length + 1) {
+      const sorted = buckets.flat();
+      html += `<p><strong>Sorted:</strong> [${sorted.map(n => n.toFixed(2)).join(', ')}]</p>`;
+    }
+  }
+  div.innerHTML = html;
+}
 
-                <h3>Default Arguments</h3>
-                <p>Default arguments are allowed on non-virtual functions when the default is guaranteed to always have the same value.</p>
+// Quiz functionality removed - answers are now static in markdown
 
-                <h3>Trailing Return Type Syntax</h3>
-                <p>Use trailing return types only where the ordinary syntax (leading return types) is impractical or much less readable.</p>
-                <div class="code-block">
-                    <pre><code><span class="cpp-comment">// Prefer ordinary syntax</span>
-<span class="cpp-keyword">int</span> <span class="cpp-function">func</span>(<span class="cpp-keyword">int</span> <span class="cpp-variable">x</span>);
+// Theme switcher
+const themes = ['black','white','league','beige','serif','simple','sky','night','solarized','moon'];
+let idx = 0;
+const themeToggleBtn = document.getElementById('theme-toggle');
+if (themeToggleBtn) {
+  themeToggleBtn.onclick = () => {
+    idx = (idx + 1) % themes.length;
+    document.getElementById('theme-link').href =
+      `https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/${themes[idx]}.min.css`;
+  };
+}
 
-<span class="cpp-comment">// Use trailing when needed</span>
-<span class="cpp-keyword">auto</span> <span class="cpp-function">func</span>(<span class="cpp-keyword">int</span> <span class="cpp-variable">x</span>) <span class="cpp-operator">-></span> <span class="cpp-keyword">int</span>;</code></pre>
-                </div>
-            </div>
-        </div>
+// Font size switcher
+const fontSizes = ['0.8em','1em','1.5em','2em','2.5em'];
+const fontLabels = ['Small','Medium','Large','XL','XXL'];
+let fontIdx = 1; // Medium
+const fontSizeToggleBtn = document.getElementById('font-size-toggle');
+if (fontSizeToggleBtn) {
+  fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+  fontSizeToggleBtn.onclick = () => {
+    fontIdx = (fontIdx + 1) % fontSizes.length;
+    document.querySelector('.reveal').style.fontSize = fontSizes[fontIdx];
+    fontSizeToggleBtn.textContent = 'Font: ' + fontLabels[fontIdx];
+  };
+}
 
-        <div class="slide">
-            <h2 id="slide-google-magic" class="mt-4">Google-Specific Magic</h2>
-            <div class="slide-summary" data-slide-number="8 / 12">
-                <h3>Google-Specific Conventions</h3>
-                <ul>
-                    <li><strong>Ownership and smart pointers</strong> - Single, fixed owners; prefer std::unique_ptr</li>
-                    <li><strong>cpplint</strong> - Use cpplint.py to detect style errors</li>
-                    <li><strong>Exception handling</strong> - Do not use C++ exceptions</li>
-                    <li><strong>RTTI</strong> - Avoid run-time type information</li>
-                    <li><strong>Casting</strong> - Use C++-style casts, not C casts</li>
-                </ul>
-            </div>
-            <div class="slide-details">
-                <h3>Ownership and Smart Pointers</h3>
-                <p>Prefer to have single, fixed owners for dynamically allocated objects. Prefer smart pointers for explicit ownership transfer.</p>
-                <div class="code-block">
-                    <pre><code><span class="cpp-comment">// Good - clear ownership</span>
-<span class="cpp-keyword">std::unique_ptr</span><<span class="cpp-type">Foo</span>> <span class="cpp-function">FooFactory</span>();
-<span class="cpp-keyword">void</span> <span class="cpp-function">FooConsumer</span>(<span class="cpp-keyword">std::unique_ptr</span><<span class="cpp-type">Foo</span>> <span class="cpp-variable">ptr</span>);</code></pre>
-                </div>
-
-                <h3>cpplint</h3>
-                <p>Use cpplint.py to detect style errors. It has false positives/negatives but is valuable for consistency.</p>
-
-                <h3>Exceptions</h3>
-                <p>Do not use C++ exceptions in Google code. They are allowed in third-party code and system libraries outside your control.</p>
-
-                <h3>RTTI</h3>
-                <p>Avoid using run-time type information (RTTI). Queries like typeid() and dynamic_cast<> are generally prohibited.</p>
-
-                <h3>Casting</h3>
-                <p>Use C++-style casts like static_cast<float>(), not C-style (float)x.</p>
-            </div>
-        </div>
-
-        <div class="slide">
-            <h2 id="slide-other-features" class="mt-4">Other C++ Features</h2>
-            <div class="slide-summary" data-slide-number="9 / 12">
-                <h3>Additional C++ Features</h3>
-                <ul>
-                    <li><strong>Rvalue references</strong> - Special cases only (move constructors)</li>
-                    <li><strong>Friends</strong> - Allowed within reason</li>
-                    <li><strong>noexcept</strong> - Specify when useful and correct</li>
-                    <li><strong>Streams</strong> - Use for appropriate I/O, stick to simple usage</li>
-                    <li><strong>Preincrement/Predecrement</strong> - Use prefix form (++i)</li>
-                </ul>
-            </div>
-            <div class="slide-details">
-                <h3>Rvalue References</h3>
-                <p>Use rvalue references (&&) only in certain special cases: move constructors/assignments, forwarding references with std::forward.</p>
-
-                <h3>Friends</h3>
-                <p>Friends extend but do not break encapsulation. Common use: factory functions.</p>
-
-                <h3>noexcept</h3>
-                <p>Specify noexcept when it accurately reflects the function's exception behavior.</p>
-
-                <h3>Streams</h3>
-                <p>Use streams where appropriate, especially for debug logging. Avoid complex formatting and stateful operations.</p>
-
-                <h3>Use of const</h3>
-                <p>Use const whenever it makes sense in APIs. constexpr is better for true constants.</p>
-
-                <h3>Integer and Floating-Point Types</h3>
-                <p>Of built-in types, only int and double/float are used. Use exact-width types when size guarantees are needed.</p>
-            </div>
-        </div>
-
-        <div class="slide">
-            <h2 id="slide-naming" class="mt-4">Naming</h2>
-            <div class="slide-summary" data-slide-number="10 / 12">
-                <h3>Naming Conventions</h3>
-                <ul>
-                    <li><strong>Type names</strong> - PascalCase (MyClass)</li>
-                    <li><strong>Variable names</strong> - snake_case (my_variable)</li>
-                    <li><strong>Function names</strong> - PascalCase (MyFunction)</li>
-                    <li><strong>Constants</strong> - kName (kConstantName)</li>
-                    <li><strong>Namespaces</strong> - snake_case (my_namespace)</li>
-                </ul>
-            </div>
-            <div class="slide-details">
-                <h3>General Naming Rules</h3>
-                <p>Give things names that describe their purpose clearly. Avoid abbreviations unless they're widely known.</p>
-
-                <h3>When Naming Things</h3>
-                <ul>
-                    <li>Choose descriptive names, not clever ones</li>
-                    <li>Abbreviations: OK if listed in Wikipedia or widely known (e.g., HTML)</li>
-                    <li>Scope affects descriptiveness - globals need more explanation than locals</li>
-                </ul>
-
-                <h3>Type Names</h3>
-                <p>Types (classes, structs, enums) use PascalCase: starts with capital, each word capitalized.</p>
-
-                <h3>Variable Names</h3>
-                <p>Variables and data members use snake_case. Class data members have trailing underscores.</p>
-
-                <h3>Function Names</h3>
-                <p>Functions use PascalCase. Accessors/mutators may use snake_case to match their variable.</p>
-
-                <h3>Constants</h3>
-                <p>Constants start with k and use PascalCase: kConstantName.</p>
-            </div>
-        </div>
-
-        <div class="slide">
-            <h2 id="slide-formatting" class="mt-4">Formatting</h2>
-            <div class="slide-summary" data-slide-number="11 / 12">
-                <h3>Code Formatting</h3>
-                <ul>
-                    <li><strong>Line length</strong> - Maximum 80 characters</li>
-                    <li><strong>Non-ASCII</strong> - Rare, use UTF-8</li>
-                    <li><strong>Spaces vs tabs</strong> - Only spaces, indent 2</li>
-                    <li><strong>Function formatting</strong> - Specific rules for declarations</li>
-                    <li><strong>Bracing</strong> - K&R style with spaces</li>
-                </ul>
-            </div>
-            <div class="slide-details">
-                <h3>Line Length</h3>
-                <p>Each line of text should be at most 80 characters long.</p>
-
-                <h3>Horizontal Whitespace</h3>
-                <ul>
-                    <li>No trailing whitespace</li>
-                    <li>Spaces around operators and after keywords</li>
-                    <li>No spaces inside parentheses</li>
-                </ul>
-
-                <h3>Vertical Whitespace</h3>
-                <p>Use blank lines sparingly. Only where they aid reading overall structure.</p>
-
-                <h3>Function Declarations and Definitions</h3>
-                <div class="code-block">
-                    <pre><code><span class="cpp-keyword">ReturnType</span> <span class="cpp-function">ClassName::FunctionName</span>(<span class="cpp-type">Type</span> <span class="cpp-variable">par_name1</span>, <span class="cpp-type">Type</span> <span class="cpp-variable">par_name2</span>) {
-  <span class="cpp-comment">// Implementation</span>
-}</code></pre>
-                </div>
-
-                <h3>Class Format</h3>
-                <p>Sections: public, protected, private (each indented one space).</p>
-            </div>
-        </div>
-
-        <div class="slide">
-            <h2 id="slide-exceptions-rules" class="mt-4">Exceptions to the Rules</h2>
-            <div class="slide-summary" data-slide-number="12 / 12">
-                <h3>When to Break the Rules</h3>
-                <ul>
-                    <li><strong>Existing code</strong> - Match local conventions when modifying</li>
-                    <li><strong>Windows code</strong> - Some exceptions for Windows-specific code</li>
-                    <li><strong>Common sense</strong> - Rules exist to serve goals, not as ends themselves</li>
-                </ul>
-                <p>Remember: <em>Common sense and good taste should prevail.</em></p>
-            </div>
-            <div class="slide-details">
-                <h3>Existing Non-conformant Code</h3>
-                <p>You may diverge from the rules when dealing with code that doesn't conform to this style guide. Stay consistent with the local conventions in that code.</p>
-
-                <h3>Windows Code</h3>
-                <p>Some rules have exceptions for Windows code:</p>
-                <ul>
-                    <li>Use Hungarian notation (e.g., iNum) for consistency</li>
-                    <li>Exceptions are allowed for ATL/STL integration</li>
-                    <li>Use #pragma once instead of standard guards</li>
-                </ul>
-
-                <h3>Final Words</h3>
-                <p>The style guide serves the goals of managing complexity and ensuring maintainability. When in doubt, follow the rules, but remember that their purpose is to serve code quality—not the other way around.</p>
-
-                <p><strong>Key takeaway:</strong> Write code that is readable, maintainable, and safe. The Google C++ Style Guide helps you achieve these goals.</p>
-            </div>
-        </div>
-    <a href="index.html">Back to Course Outline</a>
-
-    </div>
-
-    <!-- Slide Outline Navigation (now on the left) -->
-    <div class="slide-outline">
-        <button id="outline-toggle" class="outline-toggle-btn" title="Toggle Outline"><i class="fas fa-chevron-left"></i></button>
-        <h4><i class="fas fa-list"></i> Slides</h4>
-        <a href="#slide-intro-style-guide" class="slide-outline-item" data-slide="0">Introduction</a>
-        <a href="#slide-goals-principles" class="slide-outline-item" data-slide="1">Goals & Principles</a>
-        <a href="#slide-cpp-version" class="slide-outline-item" data-slide="2">C++ Version</a>
-        <a href="#slide-header-files" class="slide-outline-item" data-slide="3">Header Files</a>
-        <a href="#slide-scoping" class="slide-outline-item" data-slide="4">Scoping</a>
-        <a href="#slide-classes" class="slide-outline-item" data-slide="5">Classes</a>
-        <a href="#slide-functions" class="slide-outline-item" data-slide="6">Functions</a>
-        <a href="#slide-google-magic" class="slide-outline-item" data-slide="7">Google-Specific</a>
-        <a href="#slide-other-features" class="slide-outline-item" data-slide="8">Other Features</a>
-        <a href="#slide-naming" class="slide-outline-item" data-slide="9">Naming</a>
-        <a href="#slide-formatting" class="slide-outline-item" data-slide="10">Formatting</a>
-        <a href="#slide-exceptions-rules" class="slide-outline-item" data-slide="11">Exceptions</a>
-    </div>
-    <script src="scripts.js" defer></script>
+// Initialize everything when document is ready
+setTimeout(() => {
+  window.resetFactViz();
+  window.resetListViz();
+  window.resetPermViz();
+  window.resetLCSViz();
+  window.resetBucketViz();
+}, 500);
+</script>
 </body>
 </html>
