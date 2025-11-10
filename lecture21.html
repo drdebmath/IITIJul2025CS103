@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Lecture 21: Recursive Matrix Multiplication & Radix Sort</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Reveal.js Core CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link id="theme-link" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/white.min.css">
+    <style>
+    .reveal{font-size:32px}
+    .reveal h1{font-size:2.5em}
+    .reveal h2{font-size:2em}
+    .reveal h3{font-size:1.5em}
+    .reveal pre{font-size:0.55em;width:100%}
+    .reveal code{background:#1e1e1e;color:#f8f8f2;padding:2px 6px;border-radius:3px}
+    .matrix-cell{border:1px solid #4a90e2;padding:8px;width:48px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;background:#fff;color:#111;margin:2px}
+    .matrix-cell.highlight-row{background:#ffe6e6 !important}
+    .matrix-cell.highlight-col{background:#e6ffe6 !important}
+    .matrix-cell.highlight-cell{background:#ffffe6 !important}
+    .matrix-row{display:flex}
+    .viz-controls{margin:20px 0 !important;display:flex !important;gap:10px;justify-content:center;flex-wrap:wrap;visibility:visible !important;opacity:1 !important}
+    .viz-btn{padding:10px 20px !important;border:none !important;border-radius:5px;cursor:pointer !important;font-size:18px !important;background:#4a90e2 !important;color:#fff !important;transition:background 0.3s;display:inline-block !important;visibility:visible !important;opacity:1 !important;min-width:100px}
+    .viz-btn:hover{background:#357abd !important}
+    .memo-table{display:grid;gap:5px;margin:20px auto;max-width:600px}
+    .memo-cell{border:1px solid #4a90e4;padding:10px;text-align:center;background:#f0f0f0;color:#333;transition:background 0.3s;font-size:16px;font-weight:bold}
+    .stat-box{border:2px solid #4a90e2;padding:12px;border-radius:8px;background:#f7fbff;min-width:180px;text-align:center}
+    .inline{display:inline-block;margin:6px}
+    .control-btn{position:fixed;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;background:rgba(255,255,255,0.9);border:1px solid #ccc}
+    #theme-toggle{top:10px}
+    #font-size-toggle{top:50px}
+    .step-highlight{background:#e8f5ff;border-color:#4a90e2}
+    .radix-table{border-collapse:collapse;margin:20px auto;font-size:18px}
+    .radix-table th, .radix-table td{border:1px solid #4a90e2;padding:8px;text-align:center;background:#f0f0f0}
+    .radix-table th{background:#4a90e2;color:white;font-weight:bold}
+    .radix-table .current-column{background:#e8f5ff}
+    </style>
+</head>
+<body>
+
+<button id="theme-toggle" class="control-btn">Change Theme</button>
+<button id="font-size-toggle" class="control-btn">Font Size</button>
+
+<div class="reveal">
+  <div class="slides">
+
+<section data-markdown>
+<textarea data-template>
+# Lecture 21: Recursive Matrix Multiplication & Radix Sort
+*Recursive divide-and-conquer on matrices; radix sort; practical programming notes.*
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Overview
+
+**Topics covered:**
+
+- Recursive divide-and-conquer matrix multiplication (block method)
+- Radix sort (LSD and MSD flavors) and implementation notes
+- Follow-up programming concepts: recursion tree, in-place vs out-of-place, memory trade-offs, tiling/striding for cache
+</textarea>
+</section>
+
+<section>
+  <h2>Recursive Matrix Multiplication (Block Method)</h2>
+  <p>Split two n×n matrices into four n/2×n/2 submatrices and combine results using divide & conquer.</p>
+
+  <div style="display:flex;gap:30px;align-items:flex-start;justify-content:center;margin-top:12px">
+    <div>
+      <div style="text-align:center;margin-bottom:6px"><strong>Input A</strong></div>
+      <div id="matA" style="display:inline-block"></div>
+    </div>
+    <div>
+      <div style="text-align:center;margin-bottom:6px"><strong>Input B</strong></div>
+      <div id="matB" style="display:inline-block"></div>
+    </div>
+    <div>
+      <div style="text-align:center;margin-bottom:6px"><strong>Result C</strong></div>
+      <div id="matC" style="display:inline-block"></div>
+    </div>
+  </div>
+
+  <div class="viz-controls">
+    <button class="viz-btn" onclick="resetMatViz()">Reset</button>
+    <button class="viz-btn" onclick="stepMatViz()">Step →</button>
+    <button class="viz-btn" onclick="runMatViz()">▶ Run</button>
+  </div>
+
+  <p style="max-width:900px;margin:10px auto;color:#333">The visualization shows block splitting, recursive multiplication of subblocks, and accumulation into C. This uses the classical 8 subproduct approach (no Strassen optimizations here).</p>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Block Multiplication — Code (recursive)
+
+```cpp
+// Assumes n is a power of 2. A,B,C are n×n arrays; alpha,beta scalars omitted for clarity.
+void addMatrix(double **X, double **Y, double **R, int n);
+void subMatrix(double **X, double **Y, double **R, int n);
+
+void matMulRecursive(double **A, double **B, double **C, int n) {
+    if (n == 1) { // base case
+        C[0][0] += A[0][0] * B[0][0];
+        return;
+    }
+    int m = n/2;
+    
+    // Allocate temporary matrices for sub-results or use in-place accumulation
+    // For clarity, assuming we have functions to get submatrices
+    
+    // C11 = A11*B11 + A12*B21
+    matMulRecursive(A, B, C, m);  // A11*B11 -> C11
+    matMulRecursive(&A[0][m], &B[m][0], C, m);  // A12*B21 -> C11
+    
+    // C12 = A11*B12 + A12*B22
+    matMulRecursive(A, &B[0][m], &C[0][m], m);  // A11*B12 -> C12
+    matMulRecursive(&A[0][m], &B[m][m], &C[0][m], m);  // A12*B22 -> C12
+    
+    // C21 = A21*B11 + A22*B21
+    matMulRecursive(&A[m][0], B, &C[m][0], m);  // A21*B11 -> C21
+    matMulRecursive(&A[m][m], &B[m][0], &C[m][0], m);  // A22*B21 -> C21
+    
+    // C22 = A21*B12 + A22*B22
+    matMulRecursive(&A[m][0], &B[0][m], &C[m][m], m);  // A21*B12 -> C22
+    matMulRecursive(&A[m][m], &B[m][m], &C[m][m], m);  // A22*B22 -> C22
+}
+```
+
+Notes: implement careful indexing or use pointers to sub-blocks to avoid copying when possible.
+</textarea>
+</section>
+
+
+
+<section>
+  <h2>Radix Sort (LSD example)</h2>
+  <p>Radix sort sorts integers by processing digits (least significant digit first for LSD). It repeatedly uses a stable counting sort on digits.</p>
+
+  <div style="max-width:1200px;margin:10px auto;display:flex;gap:20px;align-items:flex-start">
+    <div style="flex:1;text-align:center">
+      <div style="margin-bottom:8px">Enter a list of non-negative integers (comma separated):</div>
+      <input id="radixInput" type="text" value="170,45,75,90,802,24,2,66" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ccc">
+
+      <div class="viz-controls">
+        <button class="viz-btn" onclick="resetRadix()">Reset</button>
+        <button class="viz-btn" onclick="stepRadix()">Step →</button>
+        <button class="viz-btn" onclick="runRadix()">▶ Run</button>
+      </div>
+    </div>
+
+    <div id="radixViz" style="flex:2;font-size:18px"></div>
+  </div>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Radix Sort — Code (LSD)
+
+```cpp
+int getMax(vector<int>& arr) {
+    int mx = arr[0];
+    for (int v : arr) mx = max(mx, v);
+    return mx;
+}
+
+void countingSortForRadix(vector<int>& arr, int exp) {
+    int n = arr.size();
+    vector<int> output(n);
+    int count[10] = {0};
+
+    for (int i = 0; i < n; i++)
+        count[(arr[i] / exp) % 10]++;
+
+    for (int i = 1; i < 10; i++)
+        count[i] += count[i - 1];
+
+    for (int i = n - 1; i >= 0; i--) {
+        int d = (arr[i] / exp) % 10;
+        output[count[d] - 1] = arr[i];
+        count[d]--;
+    }
+
+    for (int i = 0; i < n; i++)
+        arr[i] = output[i];
+}
+
+void radixSort(vector<int>& arr) {
+    int m = getMax(arr);
+    for (int exp = 1; m / exp > 0; exp *= 10)
+        countingSortForRadix(arr, exp);
+}
+```
+
+Notes: stable counting sort per digit is essential; adapt base (radix) for data characteristics (e.g., base 256 for bytes).
+</textarea>
+</section>
+
+<section>
+  <h2>Radix Sort Visualization</h2>
+  <div id="radixSteps" style="max-width:900px;margin:8px auto;font-size:18px"></div>
+  <p style="max-width:900px;margin:10px auto;color:#333">Visualization shows each digit pass and the stable bucketed order.</p>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Invert Binary Tree
+
+**Problem:** Given the root of a binary tree, invert the tree and return its root.
+
+**Example:**
+
+```
+Input:
+     4
+   /   \
+  2     7
+ / \   / \
+1   3 6   9
+
+Output:
+     4
+   /   \
+  7     2
+ / \   / \
+9   6 3   1
+```
+
+---
+
+**Recursive Solution:**
+
+```cpp
+TreeNode* invertTree(TreeNode* root) {
+    // Base case: empty tree
+    if (!root) return nullptr;
+
+    // Recursive case: invert left and right subtrees
+    TreeNode* left = invertTree(root->left);
+    TreeNode* right = invertTree(root->right);
+
+    // Swap the left and right children
+    root->left = right;
+    root->right = left;
+
+    return root;
+}
+```
+
+---
+
+**Algorithm Steps:**
+
+1. **Base Case:** If node is null, return null
+2. **Recursive Calls:** Invert left and right subtrees
+3. **Swap:** Exchange left and right child pointers
+4. **Return:** Root of inverted tree
+
+---
+
+**Visualization:** Step-by-step tree inversion
+
+---
+
+**Time Complexity:** O(n) - visits each node once
+**Space Complexity:** O(h) - recursion depth equals tree height
+</textarea>
+</section>
+
+<section>
+<h2>Invert Binary Tree</h2>
+<div class="viz-controls">
+<button class="viz-btn" onclick="window.runInvertViz()">▶ Run</button>
+<button class="viz-btn" onclick="window.stepInvertViz()">Step →</button>
+<button class="viz-btn" onclick="window.resetInvertViz()">↻ Reset</button>
+</div>
+<svg id="invertViz" width="600" height="300" style="margin:20px auto;display:block"></svg>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Class Exercise: Chess Game with Polymorphism
+
+**Objective:** Design and implement a simple chess game framework using object-oriented programming principles, specifically demonstrating polymorphism through inheritance and virtual methods.
+
+**Requirements:**
+- Create a base `Piece` class with common attributes (color, position) and virtual methods for movement validation and piece representation.
+- Derive specific piece classes: `Pawn`, `Rook`, `Knight`, `Bishop`, `Queen`, `King`.
+- Each derived class should override the virtual methods to implement piece-specific movement rules.
+- Implement a basic `Board` class to manage pieces and validate moves.
+- Demonstrate polymorphism by storing pieces in a collection of base class pointers and calling virtual methods.
+
+**Key Concepts:**
+- Inheritance: Base `Piece` class with derived classes for each piece type.
+- Polymorphism: Virtual methods for `isValidMove()` and `getSymbol()`.
+- Encapsulation: Private member variables with public accessors.
+
+**Sample Code Outline:**
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+
+enum Color { WHITE, BLACK };
+
+class Piece {
+protected:
+    Color color;
+    int x, y;  // position on board
+public:
+    Piece(Color c, int x, int y) : color(c), x(x), y(y) {}
+    virtual ~Piece() {}
+    virtual bool isValidMove(int newX, int newY, const std::vector<std::vector<Piece*>>& board) const = 0;
+    virtual char getSymbol() const = 0;
+    Color getColor() const { return color; }
+    void setPosition(int newX, int newY) { x = newX; y = newY; }
+    int getX() const { return x; }
+    int getY() const { return y; }
+};
+
+class Pawn : public Piece {
+public:
+    Pawn(Color c, int x, int y) : Piece(c, x, y) {}
+    bool isValidMove(int newX, int newY, const std::vector<std::vector<Piece*>>& board) const override {
+        // Implement pawn movement rules
+        int direction = (color == WHITE) ? 1 : -1;
+        if (newX == x + direction && newY == y && !board[newX][newY]) return true;
+        // Add capture logic, first move, etc.
+        return false;
+    }
+    char getSymbol() const override { return (color == WHITE) ? 'P' : 'p'; }
+};
+
+// Implement other pieces similarly...
+
+class Board {
+private:
+    std::vector<std::vector<Piece*>> board;
+public:
+    Board() {
+        board.resize(8, std::vector<Piece*>(8, nullptr));
+        // Initialize pieces
+    }
+    bool movePiece(int fromX, int fromY, int toX, int toY) {
+        if (!board[fromX][fromY]) return false;
+        if (board[fromX][fromY]->isValidMove(toX, toY, board)) {
+            board[toX][toY] = board[fromX][fromY];
+            board[fromX][fromY] = nullptr;
+            board[toX][toY]->setPosition(toX, toY);
+            return true;
+        }
+        return false;
+    }
+    void printBoard() const {
+        for (int i = 7; i >= 0; i--) {
+            for (int j = 0; j < 8; j++) {
+                if (board[i][j]) std::cout << board[i][j]->getSymbol() << " ";
+                else std::cout << ". ";
+            }
+            std::cout << std::endl;
+        }
+    }
+};
+
+int main() {
+    Board chessBoard;
+    // Initialize and play game
+    return 0;
+}
+```
+
+**Tasks:**
+1. Complete the implementation of all piece classes with proper movement rules.
+2. Add check/checkmate detection.
+3. Implement turn-based gameplay.
+4. Extend with additional features like castling, en passant, promotion.
+
+**Discussion Points:**
+- How does polymorphism simplify adding new piece types?
+- What are the advantages of using virtual methods for movement validation?
+- How would you handle special moves like castling or pawn promotion?
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Programming Concepts that Follow
+
+- Recursion tree visualization and stack depth control
+- In-place vs out-of-place algorithms and memory trade-offs
+- Cache-aware implementations: tiling, blocking for matrix operations
+- Hybrid algorithms: switch to iterative or classical methods at small sizes
+- Parallelization opportunities: divide-and-conquer maps well to parallel tasks
+
+**Practice problems:** implement recursive matrix multiply with pointer-based subblocks; implement Strassen and compare counts; implement LSD radix sort for large base (e.g., base 256) using byte-wise passes.
+</textarea>
+</section>
+
+<section>
+  <h2>Quiz 1</h2>
+  <div style="max-width:800px;margin:12px auto">
+    <p><strong>Q1:</strong> Radix sort is stable: true or false?</p>
+  </div>
+  <div style="max-width:800px;margin:6px auto;text-align:center">
+    <button class="viz-btn" onclick="showAnswer2()">Show Answer</button>
+    <div id="answer2" style="display:none;margin-top:10px;color:#333;text-align:left">
+      <p><strong>Answer:</strong> True</p>
+    </div>
+  </div>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Summary & Takeaways
+
+- Blocked recursive multiplication is a straightforward divide-and-conquer approach; it mirrors standard matrix algebra at block granularity.
+- Radix sort is a non-comparative stable sort that processes digits; it is efficient when keys are integers or can be digitized.
+- Follow-up topics: cache-aware blocking, hybrid thresholds, and parallelizing divide-and-conquer.
+</textarea>
+</section>
+
+<section data-markdown>
+    <textarea data-template>
+## Navigation
+
+* [Back to Course Outline](index.html)
+* [Previous: Lecture 20](lecture20.html)
+* [Next: Lecture 22](lecture22.html)
+    </textarea>
+</section>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/markdown/markdown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({hash:true,plugins:[RevealMarkdown,RevealHighlight],transition:'slide'});
+
+// Matrix visualization state and helpers
+function createMatrixDiv(id, n, initial) {
+  const container = document.getElementById(id);
+  container.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const row = document.createElement('div');
+    row.className = 'matrix-row';
+    row.setAttribute('data-row', i);
+    for (let j = 0; j < n; j++) {
+      const cell = document.createElement('div');
+      cell.className = 'matrix-cell';
+      cell.setAttribute('data-row', i);
+      cell.setAttribute('data-col', j);
+      cell.textContent = initial ? initial[i][j] : '0';
+      row.appendChild(cell);
+    }
+    container.appendChild(row);
+  }
+}
+
+function fillMatrixDiv(id, mat) {
+  const container = document.getElementById(id);
+  const rows = container.querySelectorAll('.matrix-row');
+  for (let i = 0; i < rows.length; i++) {
+    const cells = rows[i].querySelectorAll('.matrix-cell');
+    for (let j = 0; j < cells.length; j++) cells[j].textContent = mat[i][j];
+  }
+}
+
+function clearHighlights() {
+  document.querySelectorAll('.matrix-cell').forEach(cell => {
+    cell.classList.remove('highlight-row', 'highlight-col', 'highlight-cell');
+  });
+}
+
+// Simple example matrices (2x2 to keep visualization compact)
+let A = [[1,2],[3,4]];
+let B = [[5,6],[7,8]];
+let C = [[0,0],[0,0]];
+createMatrixDiv('matA', 2, A);
+createMatrixDiv('matB', 2, B);
+createMatrixDiv('matC', 2, C);
+
+let matState = {phase:0, stack:[], interval:null};
+
+function resetMatViz() {
+  if (matState.interval) { clearInterval(matState.interval); matState.interval = null; }
+  A = [[1,2],[3,4]]; B = [[5,6],[7,8]]; C = [[0,0],[0,0]];
+  createMatrixDiv('matA',2,A); createMatrixDiv('matB',2,B); createMatrixDiv('matC',2,C);
+  clearHighlights();
+  matState = {phase:0,stack:[],interval:null};
+}
+
+function stepMatViz() {
+  clearHighlights();
+  // Implement a few illustrative steps: compute 4 block products (since 2x2 trivial)
+  if (matState.phase === 0) {
+    // compute C11 in one step
+    // highlight row 0 in A, col 0 in B, C[0][0]
+    document.querySelectorAll('#matA .matrix-cell[data-row="0"]').forEach(cell => cell.classList.add('highlight-row'));
+    document.querySelectorAll('#matB .matrix-cell[data-col="0"]').forEach(cell => cell.classList.add('highlight-col'));
+    document.querySelector('#matC .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    C[0][0] = A[0][0]*B[0][0] + A[0][1]*B[1][0];
+    fillMatrixDiv('matC',C);
+    matState.phase++;
+    return true;
+  } else if (matState.phase === 1) {
+    // compute C12
+    // highlight row 0 in A, col 1 in B, C[0][1]
+    document.querySelectorAll('#matA .matrix-cell[data-row="0"]').forEach(cell => cell.classList.add('highlight-row'));
+    document.querySelectorAll('#matB .matrix-cell[data-col="1"]').forEach(cell => cell.classList.add('highlight-col'));
+    document.querySelector('#matC .matrix-cell[data-row="0"][data-col="1"]').classList.add('highlight-cell');
+    C[0][1] = A[0][0]*B[0][1] + A[0][1]*B[1][1];
+    fillMatrixDiv('matC',C);
+    matState.phase++;
+    return true;
+  } else if (matState.phase === 2) {
+    // compute C21
+    // highlight row 1 in A, col 0 in B, C[1][0]
+    document.querySelectorAll('#matA .matrix-cell[data-row="1"]').forEach(cell => cell.classList.add('highlight-row'));
+    document.querySelectorAll('#matB .matrix-cell[data-col="0"]').forEach(cell => cell.classList.add('highlight-col'));
+    document.querySelector('#matC .matrix-cell[data-row="1"][data-col="0"]').classList.add('highlight-cell');
+    C[1][0] = A[1][0]*B[0][0] + A[1][1]*B[1][0];
+    fillMatrixDiv('matC',C);
+    matState.phase++;
+    return true;
+  } else if (matState.phase === 3) {
+    // compute C22
+    // highlight row 1 in A, col 1 in B, C[1][1]
+    document.querySelectorAll('#matA .matrix-cell[data-row="1"]').forEach(cell => cell.classList.add('highlight-row'));
+    document.querySelectorAll('#matB .matrix-cell[data-col="1"]').forEach(cell => cell.classList.add('highlight-col'));
+    document.querySelector('#matC .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    C[1][1] = A[1][0]*B[0][1] + A[1][1]*B[1][1];
+    fillMatrixDiv('matC',C);
+    matState.phase++;
+    return true;
+  }
+  return false;
+}
+
+function runMatViz() {
+  resetMatViz();
+  matState.interval = setInterval(() => { if (!stepMatViz()) { clearInterval(matState.interval); matState.interval=null; } }, 700);
+}
+
+// Strassen state
+let strassenState = {phase:0, P:[], interval:null};
+function resetStrassen() { 
+  if (strassenState.interval) { clearInterval(strassenState.interval); strassenState.interval=null;} 
+  strassenState={phase:0,P:new Array(8).fill(0),interval:null}; 
+  createMatrixDiv('strassenA', 2, A);
+  createMatrixDiv('strassenB', 2, B);
+  createMatrixDiv('strassenC', 2, [[0,0],[0,0]]);
+  updatePValues();
+  clearHighlights();
+}
+function updatePValues() {
+  const p = strassenState.P;
+  document.getElementById('pValues').textContent = `P1: ${p[1]}, P2: ${p[2]}, P3: ${p[3]}, P4: ${p[4]}, P5: ${p[5]}, P6: ${p[6]}, P7: ${p[7]}`;
+}
+function stepStrassen() {
+  clearHighlights();
+  // Use 2x2 blocks example and compute P1..P7 stepwise with simple arithmetic
+  if (strassenState.phase === 0) {
+    // P1 = (A11 + A22)*(B11 + B22)
+    document.querySelector('#strassenA .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenA .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    const sA = A[0][0]+A[1][1]; const sB = B[0][0]+B[1][1];
+    strassenState.P[1] = sA*sB;
+    updatePValues();
+    strassenState.phase++; return true;
+  } else if (strassenState.phase === 1) {
+    // P2 = (A21 + A22)*B11
+    document.querySelector('#strassenA .matrix-cell[data-row="1"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenA .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    const sA = A[1][0]+A[1][1]; strassenState.P[2] = sA*B[0][0]; 
+    updatePValues();
+    strassenState.phase++; return true;
+  } else if (strassenState.phase === 2) {
+    // P3 = A11*(B12 - B22)
+    document.querySelector('#strassenA .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="0"][data-col="1"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    strassenState.P[3] = A[0][0]*(B[0][1]-B[1][1]); 
+    updatePValues();
+    strassenState.phase++; return true;
+  } else if (strassenState.phase === 3) {
+    // P4 = A22*(B21 - B11)
+    document.querySelector('#strassenA .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="1"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    strassenState.P[4] = A[1][1]*(B[1][0]-B[0][0]); 
+    updatePValues();
+    strassenState.phase++; return true;
+  } else if (strassenState.phase === 4) {
+    // P5 = (A11 + A12)*B22
+    document.querySelector('#strassenA .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenA .matrix-cell[data-row="0"][data-col="1"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    strassenState.P[5] = (A[0][0]+A[0][1])*B[1][1]; 
+    updatePValues();
+    strassenState.phase++; return true;
+  } else if (strassenState.phase === 5) {
+    // P6 = (A21 - A11)*(B11 + B12)
+    document.querySelector('#strassenA .matrix-cell[data-row="1"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenA .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="0"][data-col="1"]').classList.add('highlight-cell');
+    strassenState.P[6] = (A[1][0]-A[0][0])*(B[0][0]+B[0][1]); 
+    updatePValues();
+    strassenState.phase++; return true;
+  } else if (strassenState.phase === 6) {
+    // P7 = (A12 - A22)*(B21 + B22)
+    document.querySelector('#strassenA .matrix-cell[data-row="0"][data-col="1"]').classList.add('highlight-cell');
+    document.querySelector('#strassenA .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="1"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    strassenState.P[7] = (A[0][1]-A[1][1])*(B[1][0]+B[1][1]); 
+    updatePValues();
+    strassenState.phase++; return true;
+  } else if (strassenState.phase === 7) {
+    // combine
+    const P = strassenState.P;
+    C[0][0] = P[1] + P[4] - P[5] + P[7];
+    C[0][1] = P[3] + P[5];
+    C[1][0] = P[2] + P[4];
+    C[1][1] = P[1] + P[3] - P[2] + P[6];
+    fillMatrixDiv('strassenC',C);
+    strassenState.phase++; return true;
+  }
+  return false;
+}
+function runStrassen() { resetStrassen(); strassenState.interval = setInterval(() => { if (!stepStrassen()) { clearInterval(strassenState.interval); strassenState.interval=null; } }, 600); }
+
+// Operation counters simulation
+let mulCount=0, addCount=0;
+function resetCosts() { mulCount=0; addCount=0; document.getElementById('mulCount').textContent='0'; document.getElementById('addCount').textContent='0'; }
+function simulateCosts(kind) {
+  resetCosts();
+  function classical(n) {
+    if (n===1) { mulCount+=1; return; }
+    // 8 multiplications at next level
+    for (let i=0;i<8;i++) classical(n/2);
+    // a small number of adds to combine blocks: treat as constant for this sim
+    addCount += 8*(n*n/4); // illustrative
+  }
+  function strassen(n) {
+    if (n===1) { mulCount+=1; return; }
+    for (let i=0;i<7;i++) strassen(n/2);
+    addCount += 18*(n*n/4); // more additions in Strassen (illustrative)
+  }
+  // use n=4 as small example
+  const n=4;
+  if (kind==='classical') classical(n); else strassen(n);
+  document.getElementById('mulCount').textContent = mulCount;
+  document.getElementById('addCount').textContent = addCount;
+}
+
+// Radix sort visualization
+let radixState = {arr:[], exp:1, max:0, step:0, interval:null};
+window.invertState = {
+  tree: {
+    val: 4,
+    left: {
+      val: 2,
+      left: {val: 1, left: null, right: null},
+      right: {val: 3, left: null, right: null}
+    },
+    right: {
+      val: 7,
+      left: {val: 6, left: null, right: null},
+      right: {val: 9, left: null, right: null}
+    }
+  },
+  step: 0,
+  interval: null
+};
+function resetRadix() {
+  const text = document.getElementById('radixInput').value;
+  const arr = text.split(',').map(s=>parseInt(s.trim())).filter(x=>!isNaN(x) && x>=0);
+  radixState.arr = arr; radixState.exp = 1; radixState.max = Math.max(...(arr.length?arr:[0])); radixState.step=0;
+  renderRadix();
+}
+function renderRadix() {
+  const div = document.getElementById('radixViz');
+  if (!radixState.arr.length) { div.innerHTML = '<p style="color:#888">Enter non-empty list of non-negative integers.</p>'; return; }
+  div.innerHTML = '<p>Current exponent (digit place): '+radixState.exp+'</p>' + (radixState.step? '<p>Last pass produced stable buckets.</p>':'' );
+  const table = document.createElement('table');
+  table.className = 'radix-table';
+  const maxDigits = Math.max(...radixState.arr.map(x => x.toString().length));
+  const digitNames = ['Units', 'Tens', 'Hundreds', 'Thousands']; // extend if needed
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+  const currentColIndex = maxDigits - Math.floor(Math.log10(radixState.exp || 1)) - 1;
+  for (let i = maxDigits - 1; i >= 0; i--) {
+    const th = document.createElement('th');
+    th.textContent = digitNames[i] || ('10^' + i);
+    const columnIndex = maxDigits - 1 - i;
+    if (columnIndex === currentColIndex) th.classList.add('current-column');
+    headerRow.appendChild(th);
+  }
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  radixState.arr.forEach(val => {
+    const tr = document.createElement('tr');
+    const digits = val.toString().padStart(maxDigits, '0').split('');
+    digits.forEach((d, idx) => {
+      const td = document.createElement('td');
+      td.textContent = d;
+      if (idx === currentColIndex) td.classList.add('current-column');
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  div.appendChild(table);
+}
+function stepRadix() {
+  if (!radixState.arr.length) { resetRadix(); return; }
+  const arr = radixState.arr;
+  const exp = radixState.exp;
+  const n = arr.length;
+  // counting sort on digit (base 10)
+  let output = new Array(n);
+  let count = new Array(10).fill(0);
+  for (let i=0;i<n;i++) count[Math.floor(arr[i]/exp)%10]++;
+  for (let i=1;i<10;i++) count[i]+=count[i-1];
+  for (let i=n-1;i>=0;i--) {
+    const d = Math.floor(arr[i]/exp)%10;
+    output[count[d]-1] = arr[i]; count[d]--;
+  }
+  radixState.arr = output;
+  radixState.exp *= 10;
+  radixState.step++;
+  renderRadix();
+  return radixState.max / radixState.exp >= 1;
+}
+
+// Invert Binary Tree Visualization
+window.resetInvertViz = function() {
+  if (window.invertState.interval) clearInterval(window.invertState.interval);
+  window.invertState = {
+    tree: {
+      val: 4,
+      left: {
+        val: 2,
+        left: {val: 1, left: null, right: null},
+        right: {val: 3, left: null, right: null}
+      },
+      right: {
+        val: 7,
+        left: {val: 6, left: null, right: null},
+        right: {val: 9, left: null, right: null}
+      }
+    },
+    step: 0,
+    interval: null
+  };
+  renderInvertTree();
+};
+
+window.runInvertViz = function() {
+  window.resetInvertViz();
+  window.invertState.interval = setInterval(() => {
+    if (!window.stepInvertViz()) {
+      clearInterval(window.invertState.interval);
+      window.invertState.interval = null;
+    }
+  }, 1000);
+};
+
+window.stepInvertViz = function() {
+  const {tree, step} = window.invertState;
+
+  // Define the order of nodes to process (post-order: left, right, root)
+  const nodes = [
+    tree.left.left,  // 1
+    tree.left.right, // 3
+    tree.left,       // 2
+    tree.right.left, // 6
+    tree.right.right,// 9
+    tree.right,      // 7
+    tree             // 4
+  ];
+
+  if (step < nodes.length) {
+    const node = nodes[step];
+    if (node) {
+      // Swap left and right children
+      const temp = node.left;
+      node.left = node.right;
+      node.right = temp;
+    }
+    window.invertState.step++;
+    renderInvertTree();
+    return true;
+  }
+
+  return false;
+};
+
+function renderInvertTree() {
+  const svg = document.getElementById('invertViz');
+  if (!svg) return;
+
+  svg.innerHTML = '';
+
+  const {tree} = window.invertState;
+
+  // Function to draw a node
+  function drawNode(node, x, y, level) {
+    if (!node) return;
+
+    // Draw circle
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', x);
+    circle.setAttribute('cy', y);
+    circle.setAttribute('r', 20);
+    circle.setAttribute('fill', '#4a90e2');
+    circle.setAttribute('stroke', '#fff');
+    circle.setAttribute('stroke-width', '2');
+    svg.appendChild(circle);
+
+    // Draw text
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', x);
+    text.setAttribute('y', y + 5);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('fill', '#fff');
+    text.setAttribute('font-weight', 'bold');
+    text.textContent = node.val;
+    svg.appendChild(text);
+
+    // Draw left child
+    if (node.left) {
+      const leftX = x - 80 / (level + 1);
+      const leftY = y + 60;
+
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x);
+      line.setAttribute('y1', y + 20);
+      line.setAttribute('x2', leftX);
+      line.setAttribute('y2', leftY - 20);
+      line.setAttribute('stroke', '#888');
+      line.setAttribute('stroke-width', '2');
+      svg.appendChild(line);
+
+      drawNode(node.left, leftX, leftY, level + 1);
+    }
+
+    // Draw right child
+    if (node.right) {
+      const rightX = x + 80 / (level + 1);
+      const rightY = y + 60;
+
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x);
+      line.setAttribute('y1', y + 20);
+      line.setAttribute('x2', rightX);
+      line.setAttribute('y2', rightY - 20);
+      line.setAttribute('stroke', '#888');
+      line.setAttribute('stroke-width', '2');
+      svg.appendChild(line);
+
+      drawNode(node.right, rightX, rightY, level + 1);
+    }
+  }
+
+  // Start drawing from root
+  drawNode(tree, 300, 50, 0);
+}
+
+// Quiz functions
+function showAnswer1() {
+  const answer = document.getElementById('answer1');
+  answer.style.display = answer.style.display === 'none' ? 'block' : 'none';
+}
+
+function showAnswer2() {
+  const answer = document.getElementById('answer2');
+  answer.style.display = answer.style.display === 'none' ? 'block' : 'none';
+}
+
+// Initialize visualizations on page load
+renderInvertTree();
+resetStrassen();
+resetRadix();
+
+</script>
+</body>
+</html>

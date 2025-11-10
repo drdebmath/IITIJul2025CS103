@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Strassen's Algorithm: Advanced Matrix Multiplication</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Reveal.js Core CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link id="theme-link" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/white.min.css">
+    <style>
+    .reveal{font-size:32px}
+    .reveal h1{font-size:2.5em}
+    .reveal h2{font-size:2em}
+    .reveal h3{font-size:1.5em}
+    .reveal pre{font-size:0.55em;width:100%}
+    .reveal code{background:#1e1e1e;color:#f8f8f2;padding:2px 6px;border-radius:3px}
+    .matrix-cell{border:1px solid #4a90e2;padding:8px;width:48px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;background:#fff;color:#111;margin:2px}
+    .matrix-cell.highlight-row{background:#ffe6e6 !important}
+    .matrix-cell.highlight-col{background:#e6ffe6 !important}
+    .matrix-cell.highlight-cell{background:#ffffe6 !important}
+    .matrix-row{display:flex}
+    .viz-controls{margin:20px 0 !important;display:flex !important;gap:10px;justify-content:center;flex-wrap:wrap;visibility:visible !important;opacity:1 !important}
+    .viz-btn{padding:10px 20px !important;border:none !important;border-radius:5px;cursor:pointer !important;font-size:18px !important;background:#4a90e2 !important;color:#fff !important;transition:background 0.3s;display:inline-block !important;visibility:visible !important;opacity:1 !important;min-width:100px}
+    .viz-btn:hover{background:#357abd !important}
+    .stat-box{border:2px solid #4a90e2;padding:12px;border-radius:8px;background:#f7fbff;min-width:180px;text-align:center}
+    .inline{display:inline-block;margin:6px}
+    .control-btn{position:fixed;right:10px;z-index:999;cursor:pointer;padding:8px 12px;font-size:1rem;border-radius:6px;background:rgba(255,255,255,0.9);border:1px solid #ccc}
+    #theme-toggle{top:10px}
+    #font-size-toggle{top:50px}
+    .step-highlight{background:#e8f5ff;border-color:#4a90e2}
+    </style>
+</head>
+<body>
+
+<button id="theme-toggle" class="control-btn">Change Theme</button>
+<button id="font-size-toggle" class="control-btn">Font Size</button>
+
+<div class="reveal">
+  <div class="slides">
+
+<section data-markdown>
+<textarea data-template>
+# Strassen's Algorithm: Advanced Matrix Multiplication
+*Reducing multiplications from 8 to 7 using linear combinations; asymptotic improvement; practical considerations.*
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Overview
+
+**Topics covered:**
+
+- Strassen’s 7-step multiplication (algorithmic steps)
+- Difference between multiplication cost and addition cost (practical counting)
+- Complexity analysis and when to use Strassen
+- Implementation considerations and optimizations
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Strassen's Algorithm: Introduction
+
+**Overview:**
+- Classical matrix multiplication: 8 recursive multiplications for n×n matrices
+- Strassen's innovation: Reduce to 7 multiplications using linear combinations
+- Trade-off: Fewer multiplications but more additions/subtractions
+
+**Key Idea:**
+Instead of computing all 8 products directly, compute 7 products from sums/differences of submatrices, then combine them to get the result blocks.
+
+**Complexity:**
+- Time: O(n^log₂7) ≈ O(n^2.807) vs O(n^3) for naive
+- Practical: Only faster for large matrices due to constants
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Strassen's 7 Products
+
+**Given 4×4 matrices split into 2×2 blocks:**
+- A: [A11 A12; A21 A22]
+- B: [B11 B12; B21 B22]
+- Result C: [C11 C12; C21 C22]
+
+**The 7 Products:**
+1. P1 = (A11 + A22) × (B11 + B22)
+2. P2 = (A21 + A22) × B11
+3. P3 = A11 × (B12 - B22)
+4. P4 = A22 × (B21 - B11)
+5. P5 = (A11 + A12) × B22
+6. P6 = (A21 - A11) × (B11 + B12)
+7. P7 = (A12 - A22) × (B21 + B22)
+
+**Note:** Each Pi is computed recursively using the same Strassen method.
+</textarea>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Strassen's Combination Formulas
+
+**Using the 7 products, compute result blocks:**
+
+C11 = P1 + P4 - P5 + P7  
+C12 = P3 + P5  
+C21 = P2 + P4  
+C22 = P1 + P3 - P2 + P6  
+
+**Why this works:**
+- The formulas are derived algebraically to satisfy the matrix multiplication equations
+- Each combination uses exactly the right linear combinations to cancel out unwanted terms
+
+**Advantage:**
+- Reduces multiplication count from 8 to 7 at each recursive level
+- Total multiplications: 7^log₂n instead of 8^log₂n
+</textarea>
+</section>
+
+<section>
+  <h2>Strassen's Algorithm Visualization</h2>
+  <p>Interactive demonstration of Strassen's 7 products and combination for 2×2 matrices.</p>
+
+  <div style="display:flex;gap:30px;align-items:flex-start;justify-content:center;margin-top:12px">
+    <div>
+      <div style="text-align:center;margin-bottom:6px"><strong>Input A</strong></div>
+      <div id="strassenA" style="display:inline-block"></div>
+    </div>
+    <div>
+      <div style="text-align:center;margin-bottom:6px"><strong>Input B</strong></div>
+      <div id="strassenB" style="display:inline-block"></div>
+    </div>
+    <div>
+      <div style="text-align:center;margin-bottom:6px"><strong>Result C</strong></div>
+      <div id="strassenC" style="display:inline-block"></div>
+    </div>
+  </div>
+
+  <div style="max-width:900px;margin:20px auto;text-align:center">
+    <div id="strassenP" style="display:inline-block;margin:10px;padding:10px;border:2px solid #4a90e2;border-radius:8px;background:#f7fbff">
+      <strong>Strassen Products P1-P7:</strong><br>
+      <span id="pValues">P1: ?, P2: ?, P3: ?, P4: ?, P5: ?, P6: ?, P7: ?</span>
+    </div>
+  </div>
+
+  <div class="viz-controls">
+    <button class="viz-btn" onclick="resetStrassen()">Reset</button>
+    <button class="viz-btn" onclick="stepStrassen()">Step →</button>
+    <button class="viz-btn" onclick="runStrassen()">▶ Run</button>
+  </div>
+
+  <p style="max-width:900px;margin:10px auto;color:#333">Step through computing each product and the final combination. Notice how linear combinations reduce the multiplication count.</p>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Multiplication Cost vs Addition Cost (Practical View)
+
+**Motivation:** In many hardware and practical implementations multiplication is significantly more expensive than addition. For clarity in performance-sensitive code, count operations separately.
+
+**Operation counters shown:**
+- Multiplication count (muls)
+- Addition/subtraction count (adds)
+
+Example: classical block multiplication performs 8 recursive multiplications and several additions to sum partial results; Strassen performs 7 multiplications but more additions/subtractions.
+</textarea>
+</section>
+
+<section>
+  <h2>Operation Counter</h2>
+  <div style="display:flex;gap:20px;align-items:center;justify-content:center;margin-top:12px">
+    <div class="stat-box">
+      <div>Multiplications</div>
+      <div id="mulCount" style="font-size:28px;margin-top:6px">0</div>
+    </div>
+    <div class="stat-box">
+      <div>Additions/Subtractions</div>
+      <div id="addCount" style="font-size:28px;margin-top:6px">0</div>
+    </div>
+  </div>
+
+  <div class="viz-controls">
+    <button class="viz-btn" onclick="simulateCosts('classical')">Simulate Classical</button>
+    <button class="viz-btn" onclick="simulateCosts('strassen')">Simulate Strassen</button>
+    <button class="viz-btn" onclick="resetCosts()">Reset</button>
+  </div>
+
+  <p style="max-width:900px;margin:10px auto;color:#333">Use the simulations to observe trade-offs: Strassen reduces multiplication count but increases additions; whether this helps depends on hardware and constant factors.</p>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Strassen's Algorithm — Code (recursive)
+
+```cpp
+// Assumes n is a power of 2. A,B,C are n×n arrays.
+void addMatrix(double **X, double **Y, double **R, int n);
+void subMatrix(double **X, double **Y, double **R, int n);
+
+void strassenMultiply(double **A, double **B, double **C, int n) {
+    if (n == 1) {
+        C[0][0] = A[0][0] * B[0][0];
+        return;
+    }
+    int m = n/2;
+    
+    // Allocate temporary matrices for submatrices and products
+    // For clarity, assuming helper functions to create and manage submatrices
+    
+    // Compute the 7 products recursively
+    // P1 = (A11 + A22) * (B11 + B22)
+    double **temp1 = new double*[m]; // A11 + A22
+    for(int i=0;i<m;i++) temp1[i]=new double[m];
+    addMatrix(A, &A[m][m], temp1, m); // A11 + A22
+    
+    double **temp2 = new double*[m]; // B11 + B22
+    for(int i=0;i<m;i++) temp2[i]=new double[m];
+    addMatrix(B, &B[m][m], temp2, m); // B11 + B22
+    
+    double **P1 = new double*[m];
+    for(int i=0;i<m;i++) P1[i]=new double[m];
+    strassenMultiply(temp1, temp2, P1, m);
+    
+    // Similarly for P2 to P7...
+    // (Implementation would continue for all 7 products)
+    
+    // Combine into C blocks
+    // C11 = P1 + P4 - P5 + P7
+    // etc.
+    
+    // Clean up allocated memory
+}
+```
+
+**Notes:** 
+- Requires careful memory management for temporary matrices
+- Base case switch to classical method for small n (e.g., n ≤ 64)
+- Cache-friendly implementations use blocking and tiling
+</textarea>
+</section>
+
+<section>
+  <h2>Quiz 1</h2>
+  <div style="max-width:800px;margin:12px auto">
+    <p><strong>Q1:</strong> Strassen reduces the number of recursive multiplications from 8 to ___?</p>
+  </div>
+  <div style="max-width:800px;margin:6px auto;text-align:center">
+    <button class="viz-btn" onclick="showAnswer1()">Show Answer</button>
+    <div id="answer1" style="display:none;margin-top:10px;color:#333;text-align:left">
+      <p><strong>Answer:</strong> 7</p>
+    </div>
+  </div>
+</section>
+
+<section data-markdown>
+<textarea data-template>
+## Summary & Takeaways
+
+- Strassen uses 7 specific block products and linear combinations to reduce multiplications at the cost of extra additions; choose it only when beneficial.
+- Count multiplications and additions separately when assessing practical performance.
+- Asymptotic improvement: O(n^2.807) vs O(n^3), but constants make it practical only for large matrices.
+- Implementation challenges: memory overhead, cache efficiency, threshold for switching to classical method.
+</textarea>
+</section>
+
+<section data-markdown>
+    <textarea data-template>
+## Navigation
+
+* [Back to Lecture 21](lecture21.html)
+* [Back to Course Outline](index.html)
+    </textarea>
+</section>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/markdown/markdown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({hash:true,plugins:[RevealMarkdown,RevealHighlight],transition:'slide'});
+
+// Matrix visualization state and helpers
+function createMatrixDiv(id, n, initial) {
+  const container = document.getElementById(id);
+  container.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const row = document.createElement('div');
+    row.className = 'matrix-row';
+    row.setAttribute('data-row', i);
+    for (let j = 0; j < n; j++) {
+      const cell = document.createElement('div');
+      cell.className = 'matrix-cell';
+      cell.setAttribute('data-row', i);
+      cell.setAttribute('data-col', j);
+      cell.textContent = initial ? initial[i][j] : '0';
+      row.appendChild(cell);
+    }
+    container.appendChild(row);
+  }
+}
+
+function fillMatrixDiv(id, mat) {
+  const container = document.getElementById(id);
+  const rows = container.querySelectorAll('.matrix-row');
+  for (let i = 0; i < rows.length; i++) {
+    const cells = rows[i].querySelectorAll('.matrix-cell');
+    for (let j = 0; j < cells.length; j++) cells[j].textContent = mat[i][j];
+  }
+}
+
+function clearHighlights() {
+  document.querySelectorAll('.matrix-cell').forEach(cell => {
+    cell.classList.remove('highlight-row', 'highlight-col', 'highlight-cell');
+  });
+}
+
+// Simple example matrices (2x2 to keep visualization compact)
+let A = [[1,2],[3,4]];
+let B = [[5,6],[7,8]];
+let C = [[0,0],[0,0]];
+createMatrixDiv('strassenA', 2, A);
+createMatrixDiv('strassenB', 2, B);
+createMatrixDiv('strassenC', 2, C);
+
+let strassenState = {phase:0, P:[], interval:null};
+function resetStrassen() { 
+  if (strassenState.interval) { clearInterval(strassenState.interval); strassenState.interval=null;} 
+  strassenState={phase:0,P:new Array(8).fill(0),interval:null}; 
+  createMatrixDiv('strassenA', 2, A);
+  createMatrixDiv('strassenB', 2, B);
+  createMatrixDiv('strassenC', 2, [[0,0],[0,0]]);
+  updatePValues();
+  clearHighlights();
+}
+function updatePValues() {
+  const p = strassenState.P;
+  document.getElementById('pValues').textContent = `P1: ${p[1]}, P2: ${p[2]}, P3: ${p[3]}, P4: ${p[4]}, P5: ${p[5]}, P6: ${p[6]}, P7: ${p[7]}`;
+}
+function stepStrassen() {
+  clearHighlights();
+  // Use 2x2 blocks example and compute P1..P7 stepwise with simple arithmetic
+  if (strassenState.phase === 0) {
+    // P1 = (A11 + A22)*(B11 + B22)
+    document.querySelector('#strassenA .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenA .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    const sA = A[0][0]+A[1][1]; const sB = B[0][0]+B[1][1];
+    strassenState.P[1] = sA*sB;
+    updatePValues();
+    strassenState.phase++; return true;
+  } else if (strassenState.phase === 1) {
+    // P2 = (A21 + A22)*B11
+    document.querySelector('#strassenA .matrix-cell[data-row="1"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenA .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    const sA = A[1][0]+A[1][1]; strassenState.P[2] = sA*B[0][0]; 
+    updatePValues();
+    strassenState.phase++; return true;
+  } else if (strassenState.phase === 2) {
+    // P3 = A11*(B12 - B22)
+    document.querySelector('#strassenA .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="0"][data-col="1"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    strassenState.P[3] = A[0][0]*(B[0][1]-B[1][1]); 
+    updatePValues();
+    strassenState.phase++; return true;
+  } else if (strassenState.phase === 3) {
+    // P4 = A22*(B21 - B11)
+    document.querySelector('#strassenA .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="1"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    strassenState.P[4] = A[1][1]*(B[1][0]-B[0][0]); 
+    updatePValues();
+    strassenState.phase++; return true;
+  } else if (strassenState.phase === 4) {
+    // P5 = (A11 + A12)*B22
+    document.querySelector('#strassenA .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenA .matrix-cell[data-row="0"][data-col="1"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    strassenState.P[5] = (A[0][0]+A[0][1])*B[1][1]; 
+    updatePValues();
+    strassenState.phase++; return true;
+  } else if (strassenState.phase === 5) {
+    // P6 = (A21 - A11)*(B11 + B12)
+    document.querySelector('#strassenA .matrix-cell[data-row="1"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenA .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="0"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="0"][data-col="1"]').classList.add('highlight-cell');
+    strassenState.P[6] = (A[1][0]-A[0][0])*(B[0][0]+B[0][1]); 
+    updatePValues();
+    strassenState.phase++; return true;
+  } else if (strassenState.phase === 6) {
+    // P7 = (A12 - A22)*(B21 + B22)
+    document.querySelector('#strassenA .matrix-cell[data-row="0"][data-col="1"]').classList.add('highlight-cell');
+    document.querySelector('#strassenA .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="1"][data-col="0"]').classList.add('highlight-cell');
+    document.querySelector('#strassenB .matrix-cell[data-row="1"][data-col="1"]').classList.add('highlight-cell');
+    strassenState.P[7] = (A[0][1]-A[1][1])*(B[1][0]+B[1][1]); 
+    updatePValues();
+    strassenState.phase++; return true;
+  } else if (strassenState.phase === 7) {
+    // combine
+    const P = strassenState.P;
+    C[0][0] = P[1] + P[4] - P[5] + P[7];
+    C[0][1] = P[3] + P[5];
+    C[1][0] = P[2] + P[4];
+    C[1][1] = P[1] + P[3] - P[2] + P[6];
+    fillMatrixDiv('strassenC',C);
+    strassenState.phase++; return true;
+  }
+  return false;
+}
+function runStrassen() { resetStrassen(); strassenState.interval = setInterval(() => { if (!stepStrassen()) { clearInterval(strassenState.interval); strassenState.interval=null; } }, 600); }
+
+// Operation counters simulation
+let mulCount=0, addCount=0;
+function resetCosts() { mulCount=0; addCount=0; document.getElementById('mulCount').textContent='0'; document.getElementById('addCount').textContent='0'; }
+function simulateCosts(kind) {
+  resetCosts();
+  function classical(n) {
+    if (n===1) { mulCount+=1; return; }
+    // 8 multiplications at next level
+    for (let i=0;i<8;i++) classical(n/2);
+    // a small number of adds to combine blocks: treat as constant for this sim
+    addCount += 8*(n*n/4); // illustrative
+  }
+  function strassen(n) {
+    if (n===1) { mulCount+=1; return; }
+    for (let i=0;i<7;i++) strassen(n/2);
+    addCount += 18*(n*n/4); // more additions in Strassen (illustrative)
+  }
+  // use n=4 as small example
+  const n=4;
+  if (kind==='classical') classical(n); else strassen(n);
+  document.getElementById('mulCount').textContent = mulCount;
+  document.getElementById('addCount').textContent = addCount;
+}
+
+// Quiz functions
+function showAnswer1() {
+  const answer = document.getElementById('answer1');
+  answer.style.display = answer.style.display === 'none' ? 'block' : 'none';
+}
+
+// Initialize visualizations on page load
+resetStrassen();
+
+</script>
+</body>
+</html>

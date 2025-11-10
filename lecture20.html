@@ -425,6 +425,8 @@ void bucketSort(vector<float>& arr) {
 <div id="bucketViz" class="viz-container" style="font-size:18px"></div>
 </section>
 
+
+
 <section data-markdown>
 <textarea data-template>
 ## Quiz: Recursion Basics
@@ -556,6 +558,7 @@ Recursion uses the call stack to manage function calls and local variables. Each
 
 * [Back to Course Outline](index.html)
 * [Previous: OOP in Practice](lecture19.html)
+* [Next: Recursive Matrix Multiplication & Radix Sort](lecture21.html)
     </textarea>
 </section>
 
@@ -574,6 +577,23 @@ window.listState = {step:0, nodes:[1,2,3,4], interval:null};
 window.permState = {perms:[], step:0};
 window.lcsState = {s1:'ABCD', s2:'ACBD', memo:[], step:0, interval:null};
 window.bucketState = {arr:[], buckets:[], step:0, interval:null};
+window.invertState = {
+  tree: {
+    val: 4,
+    left: {
+      val: 2,
+      left: {val: 1, left: null, right: null},
+      right: {val: 3, left: null, right: null}
+    },
+    right: {
+      val: 7,
+      left: {val: 6, left: null, right: null},
+      right: {val: 9, left: null, right: null}
+    }
+  },
+  step: 0,
+  interval: null
+};
 
 // Factorial Visualization
 window.resetFactViz = function() {
@@ -997,6 +1017,140 @@ if (fontSizeToggleBtn) {
   };
 }
 
+// Invert Binary Tree Visualization
+window.resetInvertViz = function() {
+  if (window.invertState.interval) clearInterval(window.invertState.interval);
+  window.invertState = {
+    tree: {
+      val: 4,
+      left: {
+        val: 2,
+        left: {val: 1, left: null, right: null},
+        right: {val: 3, left: null, right: null}
+      },
+      right: {
+        val: 7,
+        left: {val: 6, left: null, right: null},
+        right: {val: 9, left: null, right: null}
+      }
+    },
+    step: 0,
+    interval: null
+  };
+  renderInvertTree();
+};
+
+window.runInvertViz = function() {
+  window.resetInvertViz();
+  window.invertState.interval = setInterval(() => {
+    if (!window.stepInvertViz()) {
+      clearInterval(window.invertState.interval);
+      window.invertState.interval = null;
+    }
+  }, 1000);
+};
+
+window.stepInvertViz = function() {
+  const {tree, step} = window.invertState;
+  
+  // Define the order of nodes to process (post-order: left, right, root)
+  const nodes = [
+    tree.left.left,  // 1
+    tree.left.right, // 3
+    tree.left,       // 2
+    tree.right.left, // 6
+    tree.right.right,// 9
+    tree.right,      // 7
+    tree             // 4
+  ];
+  
+  if (step < nodes.length) {
+    const node = nodes[step];
+    if (node) {
+      // Swap left and right children
+      const temp = node.left;
+      node.left = node.right;
+      node.right = temp;
+    }
+    window.invertState.step++;
+    renderInvertTree();
+    return true;
+  }
+  
+  return false;
+};
+
+function renderInvertTree() {
+  const svg = document.getElementById('invertViz');
+  if (!svg) return;
+  
+  svg.innerHTML = '';
+  
+  const {tree} = window.invertState;
+  
+  // Function to draw a node
+  function drawNode(node, x, y, level) {
+    if (!node) return;
+    
+    // Draw circle
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', x);
+    circle.setAttribute('cy', y);
+    circle.setAttribute('r', 20);
+    circle.setAttribute('fill', '#4a90e2');
+    circle.setAttribute('stroke', '#fff');
+    circle.setAttribute('stroke-width', '2');
+    svg.appendChild(circle);
+    
+    // Draw text
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', x);
+    text.setAttribute('y', y + 5);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('fill', '#fff');
+    text.setAttribute('font-weight', 'bold');
+    text.textContent = node.val;
+    svg.appendChild(text);
+    
+    // Draw left child
+    if (node.left) {
+      const leftX = x - 80 / (level + 1);
+      const leftY = y + 60;
+      
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x);
+      line.setAttribute('y1', y + 20);
+      line.setAttribute('x2', leftX);
+      line.setAttribute('y2', leftY - 20);
+      line.setAttribute('stroke', '#888');
+      line.setAttribute('stroke-width', '2');
+      svg.appendChild(line);
+      
+      drawNode(node.left, leftX, leftY, level + 1);
+    }
+    
+    // Draw right child
+    if (node.right) {
+      const rightX = x + 80 / (level + 1);
+      const rightY = y + 60;
+      
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x);
+      line.setAttribute('y1', y + 20);
+      line.setAttribute('x2', rightX);
+      line.setAttribute('y2', rightY - 20);
+      line.setAttribute('stroke', '#888');
+      line.setAttribute('stroke-width', '2');
+      svg.appendChild(line);
+      
+      drawNode(node.right, rightX, rightY, level + 1);
+    }
+  }
+  
+  // Start drawing from root
+  drawNode(tree, 300, 50, 0);
+}
+
 // Initialize everything when document is ready
 setTimeout(() => {
   window.resetFactViz();
@@ -1004,6 +1158,7 @@ setTimeout(() => {
   window.resetPermViz();
   window.resetLCSViz();
   window.resetBucketViz();
+  window.resetInvertViz();
 }, 500);
 </script>
 </body>
